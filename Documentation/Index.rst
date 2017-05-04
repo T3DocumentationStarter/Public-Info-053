@@ -71,6 +71,6 @@ a GNU/GPL CMS/Framework available from `www.typo3.org <https://typo3.org/>`__.
 .. toctree::
    :hidden:
 
-    	Manual
-    	Release
-    	Links
+      Manual/Index
+      Release/Index
+      Links
