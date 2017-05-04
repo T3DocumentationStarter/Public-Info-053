@@ -22,7 +22,7 @@
 
 
 ======================
-My Public Info Project
+My QFQ Project 
 ======================
 
 

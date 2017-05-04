@@ -8,3 +8,4 @@ TYPO3 Documentation Starter "Public Info"
 :Published at:    https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/
 :Writing here:    Carsten Rose
 
+Jo, dann start ich mal hier.
