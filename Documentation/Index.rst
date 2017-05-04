@@ -28,45 +28,45 @@ QFQ - Quick Form Query Extension
 :Buildinfo:       `buildinfo <_buildinfo>`_
 
 
-	:Classification:
-   			qfq
+:Classification:
+         qfq
 
-       	:Version:
-       		|release|
+:Version:
+   |release|
 
-	:Language:
-       		en
+:Language:
+         en
 
-       	:Description:
-   	    		The extension offers support to:
+:Description:
+      The extension offers support to:
 
-   	    		 * Create HTML Forms by clicking them together,
-   	    		 * Create reports based an SQL queries. The SQL can be nested and offers support for any kind of tags.
+       * Create HTML Forms by clicking them together,
+       * Create reports based an SQL queries. The SQL can be nested and offers support for any kind of tags.
 
-       	:Keywords:
-   	    		Quick Form Query, Form, Report, SQL, Query, Generator.
+:Keywords:
+      Quick Form Query, Form, Report, SQL, Query, Generator.
 
-       	:Copyright:
-   	    		2017
+:Copyright:
+      2017
 
-       	:Author:
-   				Carsten Rose, Rafael Ostertag
+:Author:
+      Carsten Rose, Rafael Ostertag
 
-       	:Email:
-   		    	carsten.rose@math.uzh.ch, rafael.ostertag@math.uzh.ch
+:Email:
+      carsten.rose@math.uzh.ch, rafael.ostertag@math.uzh.ch
 
-       	:License:
-       		This document is published under the Open Publication License
-       		available from http://www.opencontent.org/openpub/
+:License:
+   This document is published under the Open Publication License
+   available from http://www.opencontent.org/openpub/
 
-	:Rendered:
-       		|today|
+:Rendered:
+         |today|
 
-	The content of this document is related to TYPO3,
-	a GNU/GPL CMS/Framework available from `www.typo3.org <https://typo3.org/>`__.
+The content of this document is related to TYPO3,
+a GNU/GPL CMS/Framework available from `www.typo3.org <https://typo3.org/>`__.
 
 
-	**Table of Contents**
+**Table of Contents**
 
 .. toctree::
    :hidden:

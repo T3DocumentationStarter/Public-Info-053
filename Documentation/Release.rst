@@ -1,3 +1,22 @@
+.. ==================================================
+.. Header hierachy
+.. ==
+..  --
+..   ^^
+..    ''
+..     ;;
+..      ,,
+..
+.. --------------------------------------------------
+.. Best Practice T3 reST  https://docs.typo3.org/typo3cms/drafts/github/xperseguers/RstPrimer/
+.. External Links: `Bootstrap <http://getbootstrap.com/>`_:
+.. Add Images: https://wiki.typo3.org/ReST_Syntax#Images
+..
+.. -*- coding: utf-8 -*- with BOM.
+
+
+.. include:: Includes.txt
+
 .. _release:
 
 Release
