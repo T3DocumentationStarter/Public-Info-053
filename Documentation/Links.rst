@@ -12,13 +12,13 @@ Links
 -----
 
 :TER:
-       	https://typo3.org/extensions/repository/view/qfq
+    	https://typo3.org/extensions/repository/view/<extension key>
 
 :Bug Tracker:
-       	https://git.math.uzh.ch/typo3/qfq
+    	https://forge.typo3.org/projects/extension-<extension key>/issues
 
 :Git Repository:
-       	https://git.math.uzh.ch/typo3/qfq
+    	https://github.com/<username>/<extension key>
 
 :Contact:
-       	carsten.rose@math.uzh.ch
+    	`@<username> <https://twitter.com/your-username>`__
