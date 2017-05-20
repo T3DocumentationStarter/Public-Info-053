@@ -31,6 +31,12 @@ General
 Installation
 ============
 
+The following features are only tested on linux hosts:
+
+* HTML to PDF conversion - command `wkhtmltopdf`.
+* Concatenation of PDF files - command `pdftk`.
+* Mime type detection for uploads - command `file`.
+
 Preparation
 -----------
 
@@ -47,42 +53,55 @@ To normalize UTF8 input, the *php5-intl* resp. *php7.0-intl* package is needed b
 
 * normalizer::normalize()
 
-For the `download`_ function, the program `pdftk` is necessary to concatenate PDF files.
+For the `download`_ function, the programs `pdftk` and `file` are necessary to concatenate PDF files.
 
 Preparation for Ubuntu 14.04::
 
-	sudo apt-get install php5-mysqlnd php5-intl pdftk
+	sudo apt-get install php5-mysqlnd php5-intl
+	sudo apt-get install pdftk file                # for file upload and PDF
 	sudo php5enmod mysqlnd
 	sudo service apache2 restart
 
 Preparation steps for Ubuntu 16.04::
 
 	sudo apt install php7.0-intl
-	sudo apt install pdftk libxrender1        # for PDF and 'HTML to PDF' (wkhtmltopdf)
+	sudo apt install pdftk libxrender1 file        # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf)
 
-.. _wkhtmltopdf:
+.. _wkhtml:
 
 wkhtmltopdf
 ^^^^^^^^^^^
 
-
-`wkhtmltopdf`  `<http://wkhtmltopdf.org/>`_ will be used by QFQ to offer 'website print' and 'HTML to PDF' conversion.
-The converter is not included in QFQ and has to be manually installed.
+`wkhtmltopdf <http://wkhtmltopdf.org/>`_ will be used by QFQ to offer 'website print' and 'HTML to PDF' conversion.
+The program is not included in QFQ and has to be manually installed.
 
 * The Ubuntu package `wkhtmltopdf` needs a running Xserver - this does not work on a headless webserver. Best is to
    install the QT version from the named website above.
 
 In `config-qfq-ini`_ specify the:
 
-* installed `wkhtmltopdf` binary,
-* the site base URL.
+* installed `wkhtmltopdf` binary:
 
-**Important**: To access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check: `wkhtml`
-will access the Typo3 page locally and that IP address is different from the client (=user) IP.
+  * `WKHTMLTOPDF = /.../wkhtmltopdf`
+
+* the site base URL:
+
+  * `BASE_URL_PRINT = http://example.com/`
+
+
+**Important**: To access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check! `wkhtml`
+will access the Typo3 page locally (localhost) and that IP address is different from the client (=user) IP.
 
 Configure via Typo3 Installtool `All configuration > $TYPO3_CONF_VARS['FE']`: ::
 
    [FE][lockIP] = 0
+
+**Warning**: this disables an important anti-'session hijacking' protection. The security level of the whole installation
+will be *lowered*! Again, this is only needed if `wkhtml` needs access to FE_GROUP protected pages & content. As an
+alternative to lower the security level, create a separated page subtree which is only accessible (configured via
+Typosript) from specific IPs **or** if a FE-User is logged in.
+
+If there are problems with converting/downloading FE_GROUP protected pages, check `SHOW_DEBUG_INFO = download` to debug.
 
 HTML to PDF conversion
 ''''''''''''''''''''''
@@ -105,7 +124,7 @@ Typoscript code to implement a print link on every page::
 
 	10 = TEXT
 	10 {
-		wrap = <a href="typo3conf/ext/qfq/qfq/api/print.php?id=...|&type=2"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
+		wrap = <a href="typo3conf/ext/qfq/qfq/api/print.php?id=|&type=2"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
 		data = page:uid
 	}
 
@@ -123,7 +142,8 @@ Setup
 * Copy/rename the file *<Documentroot>/typo3conf/ext/<ext_dir>/config.example.qfq.ini* to
   *<Documentroot>/typo3conf/config.qfq.ini* and configure the necessary values: `config.qfq.ini`_
   The configuration file is outside the extension directory to not loose it during updates.
-* Play the SQL File *<ext_dir>/qfq/sql/formEditor.sql* to fill the database with the *FormEditor* records.
+* When the QFQ Extension is called the first time on the Typo3 Frontend, the file *<ext_dir>/qfq/sql/formEditor.sql* will
+  played and fills the database with the *FormEditor* records. This also happens automatically after each software update of QFQ.
 * Configure Typoscript to include Bootstrap, jQuery, QFQ javascript and CSS files.
 
 ::
@@ -215,11 +235,13 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SQL_LOG                     | SQL_LOG=sql.log                                 | Filename to log SQL commands: relative to <ext_dir> or absolute.           |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SQL_LOG_MODE                | SQL_LOG_MODE=modify                             | *all*: every statement will be logged - this is a lot                      |
-|                             |                                                 | *modify*: log only statements who change data                              |
+| SQL_LOG_MODE                | SQL_LOG_MODE=modify                             | *all*: every statement will be logged - this might a lot.                  |
+|                             |                                                 | *modify*: log only statements who change data.                             |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SHOW_DEBUG_INFO             | SHOW_DEBUG_INFO=auto                            | Possible values: auto|yes|no. For 'auto': If a BE User is logged in,       |
-|                             |                                                 | debug information will be shown on the fronend.                            |
+| SHOW_DEBUG_INFO             | SHOW_DEBUG_INFO=auto                            | FE - Possible values: yes|no|auto|download. For 'auto': If a BE User is    |
+|                             |                                                 | logged in, a debug information will be shown on the FE.                    |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| REDIRECT_ALL_MAIL_TO        | REDIRECT_ALL_MAIL_TO=john@doe.com               | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | CSS_LINK_CLASS_INTERNA    L | CSS_LINK_CLASS_INTERNAL=internal                | CSS class name of links which points to internal tagets                    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
@@ -227,6 +249,8 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | CSS_CLASS_QFQ_CONTAINER     |CSS_CLASS_QFQ_CONTAINER=container                | QFQ with own Bootstrap: 'container'.                                       |
 |                             |                                                 | QFQ already nested in Bootstrap of mainpage: <empty>                       |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| CSS_CLASS_QFQ_FORM          | CSS_CLASS_QFQ_FORM=qfq-color-base               | Wrap around QFQ 'Form'                                                     |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | CSS_CLASS_QFQ_FORM_PILL     |CSS_CLASS_QFQ_FORM_PILL=qfq-color-grey-1         | Wrap around title bar for pills: CSS Class, typically a background color   |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
@@ -270,7 +294,8 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SECURITY_SHOW_MESSAGE       | SECURITY_SHOW_MESSAGE = true                    | If an attack is detected, show a message                                   |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SECURITY_GET_MAX_LENGTH     | SECURITY_GET_MAX_LENGTH = 32                    | Check that there are no GET vars longer than 'x' chars                     |
+| SECURITY_GET_MAX_LENGTH     | SECURITY_GET_MAX_LENGTH = 50                    | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
+|                             |                                                 | `ExceptionMaxLength`_                                                      |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 
 Example: *typo3conf/config.qfq.ini*
@@ -283,57 +308,76 @@ Example: *typo3conf/config.qfq.ini*
 	DB_PASSWORD = 12345678
 	DB_NAME = qfq_db
 	DB_INIT = set names utf8
-	SQL_LOG = sql.log
-	SHOW_DEBUG_INFO = auto
+	; SQL_LOG = sql.log
+	; SQL_LOG_MODE = modify
+	; SHOW_DEBUG_INFO = auto
+	; REDIRECT_ALL_MAIL_TO = john.doe@example.com
 	CSS_LINK_CLASS_INTERNAL = internal
 	CSS_LINK_CLASS_EXT = external
-	;CSS_CLASS_QFQ_CONTAINER =
-	;CSS_CLASS_QFQ_FORM =
+	; CSS_CLASS_QFQ_CONTAINER =
+	; CSS_CLASS_QFQ_FORM =
 	CSS_CLASS_QFQ_FORM_PILL = qfq-color-grey-1
 	CSS_CLASS_QFQ_FORM_BODY = qfq-color-grey-2
-	;DATE_FORMAT= yyyy-mm-dd
-	;FORM_DATA_PATTERN_ERROR =
-	;FORM_DATA_REQUIRED_ERROR =
-	;FORM_DATA_MATCH_ERROR =
-	;FORM_DATA_ERROR =
-	;FORM_BS_COLUMNS = 12
-	;FORM_BS_LABEL_COLUMNS = 3
-	;FORM_BS_INPUT_COLUMNS = 6
-	;FORM_BS_NOTE_COLUMNS = 3
-	BASE_URL_PRINT=http://example.com
+	; DATE_FORMAT= yyyy-mm-dd
+	; TECHNICAL CONTACT = john@doe.com
+	; FORM_DATA_PATTERN_ERROR =
+	; FORM_DATA_REQUIRED_ERROR =
+	; FORM_DATA_MATCH_ERROR =
+	; FORM_DATA_ERROR =
+	; FORM_BS_COLUMNS = 12
+	; FORM_BS_LABEL_COLUMNS = 3
+	; FORM_BS_INPUT_COLUMNS = 6
+	; FORM_BS_NOTE_COLUMNS = 3
+	BASE_URL_PRINT=http://example.com/
 	WKHTMLTOPDF=/usr/bin/wkhtmltopdf
-	;EDIT_FORM_PAGE = form
-	;LDAP_1_RDN='ou=Admin,dc=example,dc=com'
-	;LDAP_1_PASSWORD=mySecurePassword
-	;ESCAPE_TYPE_DEFAULT=s
-	;SECURITY_VARS_HONEYPOT=email,username,password
-	;SECURITY_ATTACK_DELAY=5
-	;SECURITY_SHOW_MESSAGE=true
-	;SECURITY_GET_MAX_LENGTH=32
+	; EDIT_FORM_PAGE = form
+	; LDAP_1_RDN='ou=Admin,dc=example,dc=com'
+	; LDAP_1_PASSWORD=mySecurePassword
+	; ESCAPE_TYPE_DEFAULT=s
+	; SECURITY_VARS_HONEYPOT=email,username,password
+	; SECURITY_ATTACK_DELAY=5
+	; SECURITY_SHOW_MESSAGE=true
+	; SECURITY_GET_MAX_LENGTH=50
+
+..
+
+It's also possible to setup custom variables in `config.qfq.ini`.
+
+E.g. to setup a contact address and reuse the information inside your installation do:
+
+ * `config.qfq.in`::
+
+		ADMINISTRATIVE_CONTACT = john@doe.com
+		ADMINISTRATIVE_ADDRESS = John Doe, Hollywood Blvd. 1, L.A.
+		ADMINISTRATIVE_NAME = John Doe
+
+ * Somewhere in a `Form` or in `Report`::
+
+      {{ADMINISTRATIVE_CONTACT:Y}}, {{ADMINISTRATIVE_ADDRESS:Y}}, {{ADMINISTRATIVE_NAME}}
+
+.. _`ExceptionMaxLength`:
+
+Exception for SECURITY_GET_MAX_LENGTH
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If it is necessary to use a GET variable which exceeds SECURITY_GET_MAX_LENGTH limit, name the variable with '_<num>' at
+the end. E.g. `my_long_variable_130`. Such a variable has an allowed length of 130 chars. Access such a variable as
+usual with the variable name: `{{my_long_variable_130:C:...}}`.
+
 
 .. _local-documentation:
 
 Local Documentation
 -------------------
 
-To render the QFQ reST documentation:
+A HTML rendered version is available under: <your site>/typo3conf/ext/qfq/Documentation/html/Index.html
 
-* Take care to have 'unzip' and 'Python setuptools' installed (necessary to run).
+If you get a 'Page forbidden / not found' there might be some Webserver restrictions. E.g. the Typo3 example of `.htaccess`
+in the Typo3 installation folder will forbid access to any extension documentation (which is a good idea on a productive
+server). For a development server instead, activate the documentation. `.htaccess`: ::
 
-Preparation for Ubuntu 16.04::
-
-	sudo apt install unzip python-setuptools python-pip
-
-* Install the extension "Sphinx Python Documentation Generator and Viewer" (sphinx).
-
-  * Execute the update script (symbol 'two arrows as a circle' behind the extension name)
-  * Choose 'Sphinx 1.4.4' - click on 'Import'.
-
-* In the Exension Manager open the configuration dialog of the extension 'sphinx'. Activate the 'Sphinx 1.4.4' option and save it.
-* On top of the browser window click on the 'question mark' to open the menu, choose 'Sphinx'.
-* Show doumentation 'QFQ Extension'
-
-* If you have problems with the rendering, please check: http://mbless.de/blog/2015/01/26/sphinx-doc-installation-steps.html
+  production:   RewriteRule (?:typo3conf/ext|typo3/sysext|typo3/ext)/[^/]+/(?:Configuration|Resources/Private|Tests?|Documentation|docs?)/ - [F]
+  development:  RewriteRule (?:typo3conf/ext|typo3/sysext|typo3/ext)/[^/]+/(?:Configuration|Resources/Private|Tests?|docs?)/ - [F]
 
 .. _concept:
 
@@ -424,7 +468,11 @@ QFQ Keywords (Bodytext)
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.althead   | If <level>.sql is empty, these token will be rendered                           |
  +-------------------+---------------------------------------------------------------------------------+
- | debugShowBodyText | If ='1' and config.qfq.ini:*showDebugInfo=yes* - shows a tooltip with bodytext  |
+ | debugShowBodyText | If='1' and config.qfq.ini:*SHOW_DEBUG_INFO = yes*, shows a tooltip with bodytext|
+ +-------------------+---------------------------------------------------------------------------------+
+ | sqlLog            | Overwrites config.qfq.ini: `SQL_LOG`_ . Only affects `Report`, not `Form`.      |
+ +-------------------+---------------------------------------------------------------------------------+
+ | sqlLogMode        | Overwrites config.qfq.ini: `SQL_LOG_MODE`_ . Only affects `Report`, not `Form`. |
  +-------------------+---------------------------------------------------------------------------------+
 
 .. _debug:
@@ -432,7 +480,32 @@ QFQ Keywords (Bodytext)
 Debug
 ^^^^^
 
-* config.ini: *SHOW_DEBUG_INFO = yes|no|auto*
+File: `config.qfq.ini`_
+
+.. _SQL_LOG:
+
+* *SQL_LOG*
+
+  * Filename where to log SQL queries and statistical data.
+  * File is relative to the extension directory or absolute (starting with '/').
+  * Content: SQL queries and timestamp, formName/formId, fe_user, success, affected rows, newly created record
+    id's and accessed from IP.
+  * The global setting can be overwritten by defining `sqlLog` inside of a QFQ tt-content record.
+
+
+.. _SQL_LOG_MODE:
+
+* *SQL_LOG_MODE = all|modify|error|none*
+
+  * *all*: logs every SQL statement.
+  * *modify*: logs only statements who might potentially change data.
+  * *error*: logs only queries which generate SQL errors.
+  * *none*: no query logging at all.
+  * The global setting can be overwritten by defining `sqlLogMode` inside of a QFQ tt-content record.
+
+* *SHOW_DEBUG_INFO = [yes|no|auto],[download]*
+
+  If active, displays additional information in the Frontend (FE). This is typically helpful during development.
 
   * *yes*:
 
@@ -452,6 +525,23 @@ Debug
     * *SHOW_DEBUG_INFO = yes*  (BE session exist)
     * *SHOW_DEBUG_INFO = no*   (no BE session)
 
+  * *download*:
+
+    * During a download (especially by using wkhtml), temporary files are not deleted automatically. Also the
+      `wkhtmltopdf` and `pdftk` commandlines will be logged to `SQL_LOG`_. Use this only to debug problems on download.
+
+.. _REDIRECT_ALL_MAIL_TO:
+
+* *REDIRECT_ALL_MAIL_TO=john@doe.com*
+
+  * During the development, it might be helpful to configure a 'catch all' email address, which QFQ uses as the final receiver
+    instead of the original intended one.
+
+  * The setting will:
+
+    * Replace the 'To' with the configured one.
+    * Clear 'CC' and 'Bcc'
+    * Write a note and the original configured receiver at the top of the email body.
 
 .. _variables:
 
@@ -522,7 +612,8 @@ To protect the web application the following `escape` types are available:
 * In `config.qfq.ini`_ a global `ESCAPE_TYPE_DEFAULT` can be defined. The configured escape type applies to all substituted
   variables, who do not contain a *specific* escape type.
 * Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the Form Editor). This overwrites the
-  global definition of `config.qfq.ini`.
+  global definition of `config.qfq.ini`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the settin
+  in `config.qfq.ini`_.
 * To suppress a default escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
 
 Sanitize class
@@ -557,6 +648,7 @@ Sanitize class
 | **all**          | Form | Query | no sanitizing                                                                           |
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
 
+..
 
 Security
 ========
@@ -611,8 +703,11 @@ Honeypot
 
 Every QFQ Form contains 'honeypot'-HTML input elements (HTML: hidden & readonly). Which of them to use is configured in
 `config.qfq.ini`_ (default:   'username', 'password' and 'email'). On every start of QFQ (form, report, save, ...),
-these variables are tested if they are non-empty. If any of the default configured are needed, an explicit variable name
-list have to be unconfigured in `config.qfq.ini`_.
+these variables are tested if they are non-empty. In such a case a probably malicous bot has send the request and the
+request will not be processed.
+
+If any of the default configured variable names are needed (which will never be the case for QFQ), an explicit variable name
+list have to be configured in `config.qfq.ini`_.
 
 **QFQ security restriction**:
 
@@ -624,7 +719,7 @@ Violation
 On any violation, QFQ will sleep SECURITY_ATTACK_DELAY seconds (`config.qfq.ini`_) and than exit the running PHP process.
 A detected attack leads to a complete white (=empty) page.
 
-If SECURITY_SHOW_MESSAGE = true (`config.qfq.ini`_), at least a message is displayed.
+If SECURITY_SHOW_MESSAGE = true (`config.qfq.ini`_), at least a message is displayed after the delay.
 
 Client Parameter via SIP
 ------------------------
@@ -635,6 +730,8 @@ timestamp) for the user. Assigned variables are stored as a part of the PHP user
 Two users might have the same value of parameter 's', but the content is completely independet.
 
 Variables needed by Typo3 remains on the link and are not 'sip-encoded'.
+
+.. _`SecureDirectFileAccess`:
 
 Secure direct fileaccess
 ------------------------
@@ -647,8 +744,27 @@ E.g. for Apache set a htaccess rule: ::
 			Require all denied
 		</Directory>
 
+**Important**: all QFQ uploads should then save files in or below such a directory.
+
 To offer download of those files, use the reserved columnname '_download':`download`_ or variants.
 
+**Important**: To protect the installation against executing of uploaded malicious script code, disable PHP for the final upload
+directory. E.g. `fileadmin`: ::
+
+		<Directory "/var/www/html/fileadmin>
+			php_admin_flag engine Off
+		</Directory>
+
+This is in general a good security improvement for directories with user supplied content.
+
+File upload
+-----------
+
+By default the mime type of every uploaded file is checked against a whitelist of allowed mime types. The mime type of
+a file can be (easily) faked by an attacker. This check is good to handle regular user file upload for specific file types. To
+prevent attacks against uploading and executing malicous code this won't help.
+
+Intstead prohibit the execution of user contributed files by the webserver config (`SecureDirectFileAccess`_).
 
 Store
 =====
@@ -891,53 +1007,53 @@ Store: *SYSTEM* - Y
  +-------------------------+--------------------------------------------------------------------------+
  | Name                    | Explanation                                                              |
  +=========================+==========================================================================+
- | DB_USER                 | defined in config.ini                                                    |
+ | DB_USER                 | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | DB_SERVER               | defined in config.ini                                                    |
+ | DB_SERVER               | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | DB_NAME                 | defined in config.ini                                                    |
+ | DB_NAME                 | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | DB_INIT                 | defined in config.ini                                                    |
+ | DB_INIT                 | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | SQL_LOG                 | defined in config.ini                                                    |
+ | SQL_LOG                 | defined in config.qfq.ini, see `SQL_LOG`_                                |
  +-------------------------+--------------------------------------------------------------------------+
- | SQL_LOG_MODE            | defined in config.ini                                                    |
+ | SQL_LOG_MODE            | defined in config.qfq.ini, `SQL_LOG_MODE`_                               |
  +-------------------------+--------------------------------------------------------------------------+
- | SHOW_DEBUG_INFO         | defined in config.ini                                                    |
+ | SHOW_DEBUG_INFO         | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | CSS_LINK_CLASS_INTERNAL | defined in config.ini                                                    |
+ | CSS_LINK_CLASS_INTERNAL | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | CSS_LINK_CLASS_EXTERNAL | defined in config.ini                                                    |
+ | CSS_LINK_CLASS_EXTERNAL | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | CSS_CLASS_QFQ_CONTAINER | defined in config.ini                                                    |
+ | CSS_CLASS_QFQ_CONTAINER | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
  | EXT_PATH                | computed during runtime                                                  |
  +-------------------------+--------------------------------------------------------------------------+
  | SITE_PATH               | computed during runtime                                                  |
  +-------------------------+--------------------------------------------------------------------------+
- | DATE_FORMAT             | defined in config.ini                                                    |
+ | DATE_FORMAT             | defined in config.qfq.ini                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | class                   | defined in config.ini (CSS_CLASS_QFQ_FORM) or form definition            |
+ | class                   | defined in config.qfq.ini (CSS_CLASS_QFQ_FORM) or form definition        |
  +-------------------------+--------------------------------------------------------------------------+
- | classPill               | defined in config.ini (CSS_CLASS_QFQ_FORM_PILL) or form definition       |
+ | classPill               | defined in config.qfq.ini (CSS_CLASS_QFQ_FORM_PILL) or form definition   |
  +-------------------------+--------------------------------------------------------------------------+
- | classBody               | defined in config.ini (CSS_CLASS_QFQ_FORM_BODY) or form definition       |
+ | classBody               | defined in config.qfq.ini (CSS_CLASS_QFQ_FORM_BODY) or form definition   |
  +-------------------------+--------------------------------------------------------------------------+
- | data-pattern-error      | defined in config.ini or form definition                                 |
+ | data-pattern-error      | defined in config.qfq.ini or form definition                             |
  +-------------------------+--------------------------------------------------------------------------+
- | data-require-error      | defined in config.ini or form definition                                 |
+ | data-require-error      | defined in config.qfq.ini or form definition                             |
  +-------------------------+--------------------------------------------------------------------------+
- | data-match-error        | defined in config.ini or form definition                                 |
+ | data-match-error        | defined in config.qfq.ini or form definition                             |
  +-------------------------+--------------------------------------------------------------------------+
- | data-error              | defined in config.ini or form definition                                 |
+ | data-error              | defined in config.qfq.ini or form definition                             |
  +-------------------------+--------------------------------------------------------------------------+
- | bsColumns               | defined in config.ini (FORM_BS_COLUMNS) or form definition               |
+ | bsColumns               | defined in config.qfq.ini (FORM_BS_COLUMNS) or form definition           |
  +-------------------------+--------------------------------------------------------------------------+
- | bsLabelColumns          | defined in config.ini (FORM_BS_LABEL_COLUMNS) or form definition         |
+ | bsLabelColumns          | defined in config.qfq.ini (FORM_BS_LABEL_COLUMNS) or form definition     |
  +-------------------------+--------------------------------------------------------------------------+
- | bsInputColumns          | defined in config.ini (FORM_BS_INPUT_COLUMNS) or form definition         |
+ | bsInputColumns          | defined in config.qfq.ini (FORM_BS_INPUT_COLUMNS) or form definition     |
  +-------------------------+--------------------------------------------------------------------------+
- | bsNoteColumns           | defined in config.ini (FORM_BS_NOTE_COLUMNS) or form definition          |
+ | bsNoteColumns           | defined in config.qfq.ini (FORM_BS_NOTE_COLUMNS) or form definition      |
  +-------------------------+--------------------------------------------------------------------------+
  | sqlFinal                | computed during runtime, used for error reporting                        |
  +-------------------------+--------------------------------------------------------------------------+
@@ -2219,20 +2335,43 @@ An upload element is based on a 'file browse'-button and a 'trash'-button (=dele
 The 'file browse'-button is displayed, if there is no file uploaded already.
 The 'trash'-button is displayed, if there is a file uploaded already.
 
-After clicking on the browse brutton , the user can select a file from the local filesystem.
+After clicking on the browse brutton, the user select a file from the local filesystem.
 After choosing the file, the upload starts immediately, shown by a turning wheel. When the server received the whole file
-and accepts the file, the 'file browse'-button dissappears and the filename is shown, followed by a 'trash'-button.
+and accepts (see below) the file, the 'file browse'-button disappears and the filename is shown, followed by a 'trash'-button.
 Either the user is satisfied now or the user can delete the uploaded file (and maybe upload another one).
 
 Until this point, the file is cached on the server but not copied to the `fileDestination`. The user have to save the
-current record, either to finalize the upload or to delete a previous uploaded file.
+current record, either to finalize the upload and/or to delete a previous uploaded file.
 
-The FormElement behaves like a 'native FormElement' (showing controls/text on the form) as well as an 'action FormElement'
-by fireing queries and doing some additional actions during form save. Inside the *Form editor* it's shown as a 'native FormElement'.
+The FormElement behaves like a
+
+* 'native FormElement' (showing controls/text on the form) as well as an
+* 'action FormElement' by fireing queries and doing some additional actions during form save.
+
+Inside the *Form editor* it's shown as a 'native FormElement'.
+During saving the current record, it behaves like an action FormElement
+and will be processed after saving the primary record and before any action FormElements are processed.
 
 * *FormElement.parameter*:
 
-  * *accept*: `image/*,video/*,audio/*,.doc,.docx,.pdf,<mime type>`
+  * *capture=camera*: On a smartphone, after pressing the 'open file' button, the camera will be opened and a
+      choosen picture will be uploaded. Automatically set/overwrite `accept=image/*`.
+
+  * *accept*: `<mime type>,image/*,video/*,audio/*,.doc,.docx,.pdf`
+
+    * List of mime types (also known as 'media types'): http://www.iana.org/assignments/media-types/media-types.xhtml
+    * If none is specified, 'application/pdf' is set. This forces that always (!) one type is specified.
+    * One or more media types might be specified, seperated by ','.
+    * Different browser respect the given definitions in different ways. Typically the 'file choose' dialog offer:
+
+      * the specified mime type (some browers only show 'custom', if more than one mime type is given),
+      * the option 'All files' (the user is always free to **try** to upload other filetypes),
+      * the 'file choose' dialog only offers files of the selected (in the dialog) type.
+
+    * If for a specific filetype is no mime type available, the definition of file extension(s) is possible. This is **less
+      secure**, cause there is no *content* check on the server after the upload.
+
+  * *maxFileSize*: max filesize in Bytes for an uploaded file. Default: 10485760 (=10MB)
 
   * *fileDestination*: Destination where to copy the file. A good practice is to specify a relative `fileDestination` -
     such an installation (filesystem and database) are moveable.
@@ -2253,9 +2392,21 @@ by fireing queries and doing some additional actions during form save. Inside th
     * Using the current record id in the `fileDestination`: Using {{r}} is problematic for a 'new' primary record: that
       one is still '0' at the time of saving. Use `{{id:R0}}` instead.
 
+    * Uploading of malicious code (e.g. PHP files) is hard to detect. The default mime type check can be easily faked
+      by an attacker. Therefore it's recommended to use a `fileDestination`-directory, which is secured against script
+      execution (even if the file has been uploaded, the webserver won't execute it) - see `SecureDirectFileAccess`_.
+
   * *slaveId*, *sqlBefore*, *sqlInsert*, *sqlUpdate*, *sqlDelete*, *sqlUpdate*, *sqlAfter*: Only used in :ref:`Upload advanced mode`.
 
   * *fileReplace=always*: If `fileDestination` exist - replace it by the new one.
+
+Immediately after the upload finished (before the user press save), the file will be checked on the server for it's
+content or file extension (see 'accept').
+
+The maximum size is defined by the minimum of `upload_max_filesize`, `post_max_size`and `memory_limit` (PHP script) in the php.ini.
+
+In case of broken uploads, please also check `max_input_time` in php.ini.
+
 
 Deleting a record and the referenced file
 '''''''''''''''''''''''''''''''''''''''''
@@ -2530,6 +2681,7 @@ Type: sendmail
 * To use values of the submitted form, use the STORE_FORM. E.g. `{{name:F:allbut}}`
 * To use the `id` of a new created or already existing one, use the STORE_RECORD. E.g. `{{id:R}}`
 
+* For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
 
 
 .. _dynamic-update:
@@ -2664,7 +2816,7 @@ Best for debugging is to specify in the tt-content record::
 
   debugShowBodyText = 1
 
-Note: Debug information is only display if it's enabled in  *config.ini* by
+Note: Debug information is only display if it's enabled in  *config.qfq.ini* by
  * *SHOW_DEBUG_INFO=yes* or
  * *SHOW_DEBUG_INFO=auto* and logged in in the same Browser as a Typo3 backend user.
 
@@ -3273,14 +3425,14 @@ Syntax
 
 Debug the bodytext
 ------------------
-The parsed bodytext could be displayed by activating 'showDebugInfo' (:ref:`debug`) and specifying
+The parsed bodytext could be displayed by activating 'SHOW_DEBUG_INFO ' (:ref:`debug`) and specifying
 
 ::
 
     debugShowBodyText = 1
 
 A small symbol with a tooltip will be shown, where the content record will be displayed on the webpage.
-Note: :ref:`debug` information will only be shown with *showDebugInfo=yes* in config.ini .
+Note: :ref:`debug` information will only be shown with *SHOW_DEBUG_INFO = yes* in config.qfq.ini .
 
 Structure
 ---------
@@ -3729,7 +3881,7 @@ Parameter and (element) sources
 
     If there is no `exportFilename` defined and `mode=file`, than the original filename is taken.
 
-    If the mimetype is different from the `exportFilename` extension, then the mimetype extension will be added to
+    If the mime type is different from the `exportFilename` extension, then the mime type extension will be added to
     `exportFilename`. This guarantees that a filemanager will open the file with the correct application.
 
     The user typically expect meaningful and distinct filenames for different download links.
@@ -3742,7 +3894,7 @@ Parameter and (element) sources
   * *mode* = <file | pdf | zip> - This parameter is optional and can be skipped in most situations. Mandatory
     for 'zip'.
 
-      * If `m:file`, the mimetype is derived dynamically from the specified file. In this mode, only one element source
+      * If `m:file`, the mime type is derived dynamically from the specified file. In this mode, only one element source
         is allowed per download link (no concatenation).
 
       * In case of multiple element sources, only `pdf` or `zip` is supported.
@@ -3784,7 +3936,7 @@ Parameter and (element) sources
 
 	Most of the other Link-Class attributes can be used to customize the link as well.
 
-Example: ::
+Example `_link`: ::
 
 	# single `file`. Specifying a popup message window text is not necessary, cause a file directly accessed is fast.
 	SELECT "d:file.pdf|s|t:Download|f:fileadmin/pdf/test.pdf" AS _link
@@ -3793,18 +3945,40 @@ Example: ::
 	SELECT "d:file.pdf|m:pdf|s|t:Download|f:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file
-	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1|f:fileadmin/pdf/test.pdf" AS _link AS _link
+	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1|f:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file
-	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1|f:fileadmin/pdf/test.pdf" AS _link AS _link
+	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1|f:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file, parameter to wkhtml will be SIP encoded
-	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1&_sip=1|U:id=detail2&r=1&_sip=1|f:fileadmin/pdf/test.pdf" AS _link AS _link
+	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1&_sip=1|U:id=detail2&r=1&_sip=1|f:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file, the second page will be in landscape and pagesize A3
-	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1&--orientation=Landscape&--page-size=A3|f:fileadmin/pdf/test.pdf" AS _link AS _link
+	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1&--orientation=Landscape&--page-size=A3|f:fileadmin/pdf/test.pdf" AS _link
 
 ..
+
+Example `_pdf`, `_zip`: ::
+
+	# File 1: id=1&--orientation=Landscape&--page-size=A3
+	# File 2: U:id=form
+	# File 3: f:fileadmin/file.pdf
+	SELECT 't:PDF|a:Creating a new PDF|U:id=1&--orientation=Landscape&--page-size=A3|U:id=form|f:fileadmin/file.pdf' AS _pdf
+
+	# File 1: U:id=1
+	# File 2: u:http://www.example.com
+	# File 3: f:fileadmin/file.pdf
+	SELECT 't:PDF - 3 Files|a:Please be patient|U:id=1|u:http://www.example.com|f:fileadmin/file.pdf' AS _pdf
+
+	# File 1: U:id=1
+	# File 2: U:id=form
+	# File 3: f:fileadmin/file.pdf
+	SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|U:id=1|U:id=form|f:', p.pathFilename) AS _zip
+
+..
+
+Use the `--print-media-type` as wkthml option to access the page with media type 'printer'. Depending on the website
+configuration this switches off navigation and background images.
 
 Export area
 '''''''''''
@@ -4124,6 +4298,8 @@ This will send an email with subject *Latest News* from company@example.com to j
 This will send an email with subject *Latest News* from company@example.com to customer1, customer2 and customer3 by
 using a realname for customer2 and customer3 and suppress generating of OoO answer if any receiver is on vacation.
 Additional the CEO as well as backup will receive the mail via CC and BCC.
+
+For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
 
 
 Column: _img

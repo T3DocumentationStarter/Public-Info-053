@@ -30,7 +30,7 @@ QFQ Extension
 	    		 * Create reports based an SQL queries. The SQL can be nested and offers support for any kind of tags.
 
     	:Keywords:
-	    		Quick Form Query, Form, Report, SQL, Query, Generator.
+		    		Quick Form Query, Form, Report, SQL, Query, Generator, Framework, Secure, Mobile Ready, Responsive.
 
     	:Copyright:
 	    		2017

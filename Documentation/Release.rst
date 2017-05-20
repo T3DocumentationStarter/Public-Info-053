@@ -27,9 +27,16 @@ Version 0.future
 
 Changes
 ^^^^^^^
+* FormElement of type `file` (=Upload) have to new defaults:
+
+  * `access` = `application/pdf`
+  * `maxFileSize` = `10485760` (10MB)
 
 Features
 ^^^^^^^^
+
+Bug Fixes
+^^^^^^^^^
 
 Version 0.17.0
 --------------
