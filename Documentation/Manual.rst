@@ -805,7 +805,7 @@ If the application uploads files, mostly it's not necessary and often a security
 the uploaded files. Best is to create a directory, e.g. `fileadmin/protected` and deny direct access via webbrowser to it.
 E.g. for Apache set a htaccess rule: ::
 
-		<Directory /var/www/html/fileadmin/protected>
+		<Directory "/var/www/html/fileadmin/protected">
 			Require all denied
 		</Directory>
 
@@ -816,7 +816,7 @@ To offer download of those files, use the reserved columnname '_download':`downl
 **Important**: To protect the installation against executing of uploaded malicious script code, disable PHP for the final upload
 directory. E.g. `fileadmin`: ::
 
-		<Directory "/var/www/html/fileadmin>
+		<Directory "/var/www/html/fileadmin">
 			php_admin_flag engine Off
 		</Directory>
 
