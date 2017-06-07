@@ -27,7 +27,19 @@ Version 0.future
 
 Changes
 ^^^^^^^
-* FormElement of type `file` (=Upload) have to new defaults:
+
+Features
+^^^^^^^^
+
+Bug Fixes
+^^^^^^^^^
+
+Version 0.18.0
+--------------
+
+Changes
+^^^^^^^
+*  New defaults to FormElement.type=`file` (=Upload).
 
   * `access` = `application/pdf`
   * `maxFileSize` = `10485760` (10MB)
@@ -35,8 +47,60 @@ Changes
 Features
 ^^^^^^^^
 
+* Make the image shown for ExtraButtonInfo configureable. Manual.rst: added documentation for new config.qfq.ini
+  variables GFX_EXTRA_BUTTON_INFO_INLINE, GFX_EXTRA_BUTTON_INFO_BELOW.
+* Manual.rst: description added for `extraButtonLock` ,`extraButtonPassword`, `extraButtonInfo`. Example on how to reuse
+  custom vars defined in `config.qfq.ini`. Add three more examples to _pdf. How to access local online documentation.
+  Add note about wkhtml only on linux boxes. More wkhtml explanations.
+* #3773 / Button: Info / Unlock / ShowPassword: FE_PARAMETER: extraButtonLock / extraButtonPassword / extraButtopnInfo.
+* #3769 / Allow specific GET variables longer than SECURITY_GET_MAX_LENGTH. config.php: implemented special handling of
+  GET vars, named with '..._<num>'.
+* #3766 / SQL_LOG per tt_content record einstellbar machen. Add `sqlLog` and `sqlLogMode` to QFQ tt-content records.
+  Add mode 'error' and `none` to sqlLogMode. Manual.rst: Added explanations for SQL_LOG, SQL_LOG_MODE, and tt-content
+  pendants sqlLog, sqlLogMode. Update config.qfq.ini to latest attributes.
+* Config.php: Set defaults for config.qfq.ini SQL_LOG and SQL_LOG_MODE
+* Manual.rst:
+* config.qfq.example.ini: Remove DB_NAME_TEST, Add some details about SQL_LOG, add example for TECHNICAL_CONTACT
+* Session.php: Activate cookie_httponly for QFQ cookies.
+* Html2Pdf.php:  recode setting of $this->logFile.
+* config.qfq.ini: new syntax for SHOW_DEBUG_INFO - [yes,no,auto][,download]
+* #3711 / Upload Button opens the camera on a smartphone. New attribute 'capture'.
+* Database.php: Add SQL keyword 'DROP'.
+* #3706 / Check File Upload: a) mime type, b) max file size. Implemented: file upload check for mime type and max file size.
+* New 'pageForward'-Mode: 'url-skip-history'.
+* FormEditor:
+
+  * Most radio FEs changed from HTML standard to Bootstrap Design.
+  * FE 'feIdContainer' will only be shown if there is at least one FE container element.
+  * Use dynamicUpdate to hide/show FE 'forwardPage'.
+  * FE 'subrecordOption' shown only for FE.type==subrecord.
+  * FE 'checkPattern' shown only for FE.checkType=='pattern|min%'.
+  * In form 'FormElement' the FE 'formId' removed - not necessary.
+
+* #3568 / Form: fuer alle Buttons (save, close, new, delete) eine optionale class & text konfigurierbar.
+* #3569 / Input Optional '0' unterdruecken.
+* #3863: New config var 'DB_UPDATE' in config.qfq.ini.
+
 Bug Fixes
 ^^^^^^^^^
+
+* #3770 / Attack Delay: merge processing to one codeplace. Config.php: new function attackDetectedExitNow(). Sip.php:
+  replace local sleep(PENALTY_TIME_BROKEN_SIP) with central function attackDetectedExitNow().
+* #3768 / log to sql.log: ip, formname, feuser
+* Store.php: Fix problem that an empty SQL_LOG will be added to SYSTEM_PATH_EXT. Logger.php: do nothing if there is no
+  file defined.
+* #3751 / download FE_GROUP protected pages failed. Implement additional 'SHOW_DEBUG_INFO = download' to track down
+  problems with 'session forwarding'.
+* Allow spaces in value when selection <radio> and <select> tags.
+* #3812 / extraButtonInfo (extraButtonLock, extraButtonPassword) - Problems in TemplateGroups.
+* #3832 / Dynamic Update und Radio buttons - leerer value ( '' ) kann nicht angewählt werden
+* #3612 / Konflikt typeAheadLdap mit dynamic modesql: inputs with typeahead lacks 'dynamicUpdate' via 'modeSql'.
+* #3853 / New > Save: Reload des Forms mit neuer SIP und neu erstellter recordId.
+* #3854 / Wrong final page: a) New > Save > Close, b) New > Save > Delete, c) New > New
+  formEditor.sql: update table 'Form.forwardMode' to ('client', 'no', 'url', 'url-skip-history').
+* #2337 / Checkbox: checked/unchecked parameters genügen nicht.
+* #2542 / FormElement-Typ 'note' funktioniert nicht mit dynamic update
+* #3863 / DB Update Fails: Expected no record, got 2 rows: SHOW TABLE STATUS WHERE Name='Form'
 
 Version 0.17.0
 --------------
