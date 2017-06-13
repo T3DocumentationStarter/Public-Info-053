@@ -848,7 +848,7 @@ Only variables that are known in a specified store can be substituted.
  +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
  | B   | :ref:`STORE_BEFORE`: Record - the current record loaded in the form before any update  | All columns of the current record from the current table                   |
  +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | P   | Parent record. E.g.: on multi forms the current record of the outer query              | All columns of the MultiSQL Statement from the table for the current row   |
+ | P   | Parent record. E.g.: on multi & copy forms the current record of the outer query,      | All columns of the MultiSQL Statement from the table for the current row   |
  +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
  | D   | Default values column : The *table.column* specified *default value*.                  |                                                                            |
  +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
@@ -2937,6 +2937,89 @@ the following (switch off all non named):
   * open and close field tag: `input`, `/input`,
   * open and close note tag: `note`, `/note`,
   * close row tag: `/row` ,
+
+Copy Form
+^^^^^^^^^
+
+Records (=master) and child records can be duplicated (=copy) by a regular `Form`, extended by `FormElemens` of type 'paste'.
+A 'copy form' works either in:
+
+* 'copy and paste now' mode: the 'select' and 'paste' `Form` is merged in one form, only one master record is possible,
+* 'copy now, paste later' mode: the 'select' `Form` selects master record(s), the 'paste' Form paste's them later.
+
+Concept
+'''''''
+
+A 'select action' (e.g. a `Form` or a button click) creates record(s) in the table `Clipboard`. Each clipboard record contains:
+
+* master record id(s) of the record(s) to duplicate,
+* the 'paste' form id (that `Form` defines, to which table the master records belongs to, as well as rules of how to
+   duplicate any slave records)
+* user identifier (QFQ cookie) to separate clipboard records of different users.
+
+The 'select action' is responsible to delete old clipboard records of the current user, before new clipboard records are
+created.
+
+The 'paste form' iterates over all master record id(s) in the `Clipboard` table. For each master record id, all FormElements
+of type `paste` a fired (incl. the creating slave records).
+
+E.g. if there is a basket with different items and you want to duplicate the whole basket including new items, create a
+form with the following parameter
+
+ * Form
+
+   * Name: `copyBasket`
+   * Table: `Clipboard`
+   * Show Button: only `close` and `save`
+
+ * FormElement 1
+
+   * Name: `idSrc`
+   * Lable: `Source Form`
+   * Class: `native`
+   * Type: `select`
+   * sql1: `{{! SELECT id, title FROM Basket }}`
+
+ * FormElement 2
+
+   * Name: `myNewName`
+   * Class: `native`
+   * Type: `tex`t
+
+ * FormElement 3
+
+   * Name: `clearClipboard`
+   * Class: `action`
+   * Type: `beforeSave`
+   * Parameter:
+
+     * `sqlValidate={{!SELECT f.id FROM Form AS f WHERE f.name LIKE '{{myName:FE:alnumx}}' LIMIT 1}}`
+     * `expectRecords = 0`
+     * `messageFail = There is already a form with this name`
+     * `sqlAfter={{DELETE FROM Clipboard WHERE cookie='{{cookieQfq:C0:alnumx}}' }}`
+
+ * FormElement 4
+
+   * Name: `updateClipboardRecord`
+   * Class: `action`
+   * Type: `afterSave`
+   * Parameter: `sqlAfter={{UPDATE Clipboard SET cookie='{{cookieQfq:C0:alnumx}}', formIdPaste={{formId:S0}} /* PasteForm */  WHERE id={{id:R}} LIMIT 1 }}`
+
+ * FormElement 5
+
+   * Name: `basketId`
+   * Class: `action`
+   * Type: `paste`
+   * sql1: `{{!SELECT {{id:P}} AS id,  '{{myNewName:FE:allbut}}' AS name}}`
+   * Parameter: `recordDestinationTable=Basket`
+
+ * FormElement 6
+
+   * Name: `itemId`
+   * Class: `action`
+   * Type: `paste`
+   * sql1: `{{!SELECT i.id AS id, {{basketId:P}} AS basketId FROM Item AS i WHERE i.basketId={{id:P}} }}`
+   * Parameter: `recordDestinationTable=Item`
 
 
 Best practice

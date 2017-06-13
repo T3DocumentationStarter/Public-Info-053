@@ -34,6 +34,50 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.18.3
+--------------
+
+Changes
+^^^^^^^
+
+Features
+^^^^^^^^
+
+* #3899 / Copy/Paste
+
+  * DatabaseUpdate.php: New table Clipboard, New FE.type='paste', New Form.forwardMode='url-sip' - will be applied for 0.18.3.
+  * Store.php: New member in STORE_CLIENT 'CLIENT_COOKIE_QFQ' - might be used to identify current user.
+  * formEditor.sql: New form 'copyForm'. New table 'Clipboard'
+
+
+Bug Fixes
+^^^^^^^^^
+
+
+Version 0.18.2
+--------------
+
+Changes
+^^^^^^^
+
+* Feature #3891 / Dynamic Update: Multiple Elements in a row - single show/hide - First implementation: Show / Hide via dynamicUpdate for a second element, wrapped in an own 'col-md' div.
+
+Features
+^^^^^^^^
+
+Bug Fixes
+^^^^^^^^^
+
+* Bug #3875 / FormElement 'extra': Fehler bei neuen Records.
+* Bug #3647 / Dynamic Update: Multiple Elements in a row not updated properly.
+* Bug #3890 / upload-FormElement: mode 'hide' without effect
+* Bug #3876 / upload-FormElement: verschwindet bei dynamicUpdate.
+
+Version 0.18.1
+--------------
+
+* Update unit tests
+
 Version 0.18.0
 --------------
 
