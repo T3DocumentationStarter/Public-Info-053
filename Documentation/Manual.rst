@@ -1673,6 +1673,8 @@ E.g. if there are multiple different forms to work on the same table, all of the
 
 The 'extraDeleteForm' parameter might be specified for a 'form' and/or for 'subrecords'
 
+See also: `delete-record`_.
+
 .. _form-mode-readonly:
 
 Global Form mode 'readonly'
@@ -2941,7 +2943,7 @@ the following (switch off all non named):
   * close row tag: `/row` ,
 
 Copy Form
-^^^^^^^^^
+---------
 
 Records (=master) and child records can be duplicated (=copied) by a regular `Form`, extended by `FormElemens` of type 'paste'.
 A 'copy form' works either in:
@@ -2950,7 +2952,7 @@ A 'copy form' works either in:
 * 'copy now, paste later' mode: the 'select' `Form` selects master record(s), the 'paste' Form paste's them later.
 
 Concept
-'''''''
+^^^^^^^
 
 A 'select action' (e.g. a `Form` or a button click) creates record(s) in the table `Clipboard`. Each clipboard record contains:
 
@@ -3025,7 +3027,7 @@ form with the following parameter
 
 
 Table self referencing records
-''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Records might contain references to other recrods in the same table. E.g. native FormElements might assigned to a fieldSet,
 templateGroup or pill, a fieldSet might assigned to other fieldsets or pills and so on. When duplicating a `Form` and the
