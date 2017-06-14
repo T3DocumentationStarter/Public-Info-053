@@ -62,7 +62,7 @@ Preparation for Ubuntu 14.04::
 	sudo php5enmod mysqlnd
 	sudo service apache2 restart
 
-Preparation steps for Ubuntu 16.04::
+Preparation for Ubuntu 16.04::
 
 	sudo apt install php7.0-intl
 	sudo apt install pdftk libxrender1 file        # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf)
@@ -1340,7 +1340,7 @@ Form
   during the installation of new QFQ versions.
 * Every form consist of a) a *Form* record and b) multiple *FormElement* records.
 * A form is assigned to a  *table*. Such a table is called the *primary table* for this form.
-* There are three types of forms which can roughly categorized into:
+* Forms can roughly categorized into:
 
   * *Simple* form: the form acts on one record, stored in one table.
 
@@ -1354,6 +1354,8 @@ Form
 
     * The *FormElements* are defined as a regular *simple* / or *advanced* form, plus a SQL Query, which selects and
       iterates over all records. Those records will be loaded at the same time.
+
+  * *Delete* form: any form can be used as a form to `delete-record`_.
 
 * Form mode: The parameter 'r' (given via URL or via SIP) decide if the form is in mode:
 
@@ -1491,7 +1493,7 @@ showButton
 Display or hide the button `new`, `delete`, `close`, `save`.
 
 * *new*: Creates a new record. If the form needs any special parameter via SIP or Client (=browser), hide this 'new' button - the necessary parameter are not provided.
-* *delete*: This either deletes the current record only, or (if defined via action *FormElement* 'before Delete' ) any specified subrecords.
+* *delete*: This either deletes the current record only, or (if defined via action *FormElement* 'beforeDelete' ) any specified subrecords.
 * *close*: Close the current form. If there are changes, a popup opens and ask to save / close / cancel. The last page from the history will be shown.
 * *save*: Save the form.
 
@@ -2941,7 +2943,7 @@ the following (switch off all non named):
 Copy Form
 ^^^^^^^^^
 
-Records (=master) and child records can be duplicated (=copy) by a regular `Form`, extended by `FormElemens` of type 'paste'.
+Records (=master) and child records can be duplicated (=copied) by a regular `Form`, extended by `FormElemens` of type 'paste'.
 A 'copy form' works either in:
 
 * 'copy and paste now' mode: the 'select' and 'paste' `Form` is merged in one form, only one master record is possible,
@@ -2952,16 +2954,16 @@ Concept
 
 A 'select action' (e.g. a `Form` or a button click) creates record(s) in the table `Clipboard`. Each clipboard record contains:
 
-* master record id(s) of the record(s) to duplicate,
+* the 'id(s)' of the record(s) to duplicate,
 * the 'paste' form id (that `Form` defines, to which table the master records belongs to, as well as rules of how to
-   duplicate any slave records)
-* user identifier (QFQ cookie) to separate clipboard records of different users.
+   duplicate any slave records) and where to copy the new records
+* user identifier (QFQ cookie) to separate clipboard records of different users inside the Clipboard table.
 
-The 'select action' is responsible to delete old clipboard records of the current user, before new clipboard records are
+The 'select action' is also responsible to delete old clipboard records of the current user, before new clipboard records are
 created.
 
 The 'paste form' iterates over all master record id(s) in the `Clipboard` table. For each master record id, all FormElements
-of type `paste` a fired (incl. the creating slave records).
+of type `paste` are fired (incl. the creating of slave records).
 
 E.g. if there is a basket with different items and you want to duplicate the whole basket including new items, create a
 form with the following parameter
@@ -2984,7 +2986,7 @@ form with the following parameter
 
    * Name: `myNewName`
    * Class: `native`
-   * Type: `tex`t
+   * Type: `text`
 
  * FormElement 3
 
@@ -3020,6 +3022,53 @@ form with the following parameter
    * Type: `paste`
    * sql1: `{{!SELECT i.id AS id, {{basketId:P}} AS basketId FROM Item AS i WHERE i.basketId={{id:P}} }}`
    * Parameter: `recordDestinationTable=Item`
+
+
+Table self referencing records
+''''''''''''''''''''''''''''''
+
+Records might contain references to other recrods in the same table. E.g. native FormElements might assigned to a fieldSet,
+templateGroup or pill, a fieldSet might assigned to other fieldsets or pills and so on. When duplicating a `Form` and the
+corresponding `FormElements` all internal references needs to be updated as well.
+
+On each FormElement.type=`paste` record, the column to be updated is defined via:
+
+ * parameter: translateIdColumn = <columnname>
+
+For the 'copyForm' this would be 'feIdContainer'.
+
+The update of the records is started after all records have been copied (of the specific FormElement.type=`paste` record).
+
+.. _delete-record:
+
+Delete Record
+-------------
+
+Deleting record(s) via QFQ might be solved by either:
+
+* using the `delete` button on a form on the top right corner.
+* by letting `report`_ creating a special link (see below). The link contains the record id and:
+
+  * a form name, or
+  * a table name.
+
+Deleting a record just by specifying a table name, will only delete the defined record (no slave records).
+
+* By using a delete button via `report` or in a `subrecord` row, a ajax request is send.
+* By using a delete button on the top right corner of the form, the form will be closed after deleting the record.
+
+Example for report::
+
+   SELECT p.name, CONCAT('form=person&r=', p.id) AS _Paged FROM Person AS p
+   SELECT p.name, CONCAT('table=Person&r=', p.id) AS _Paged FROM Person AS p
+
+To automatically delete slave records, use a form and create `beforeDelete` FormElement(s) on the form:
+
+  * class: action
+  * type: beforeDelete
+  * parameter: sqlAfter={{DELETE FROM <slaveTable> WHERE <slaveTable>.<masteId>={{id:R}} }}
+
+You might also check the form 'form' how the slave records 'FormElement' will be deleted.
 
 
 Best practice

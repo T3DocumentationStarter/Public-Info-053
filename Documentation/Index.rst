@@ -60,3 +60,4 @@ QFQ Extension
     	Manual
     	Release
     	Links
+    	README

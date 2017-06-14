@@ -34,11 +34,22 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-Version 0.18.3
---------------
+Version 0.18.3a
+----------------
 
 Changes
 ^^^^^^^
+
+* Copy / Paste form: take care that there is now Form.id=3. This is now the reserved formId for the 'copyForm'.
+
+      UPDATE `FormElement` SET formId=100 WHERE formId=3
+      UPDATE `Form` SET `id` = '100' WHERE `Form`.`id` = 3;
+
+Bug Fixes
+^^^^^^^^^
+
+Version 0.18.3
+--------------
 
 Features
 ^^^^^^^^
@@ -50,10 +61,6 @@ Features
   * formEditor.sql: New form 'copyForm'. New table 'Clipboard'
 
 
-Bug Fixes
-^^^^^^^^^
-
-
 Version 0.18.2
 --------------
 
@@ -61,9 +68,6 @@ Changes
 ^^^^^^^
 
 * Feature #3891 / Dynamic Update: Multiple Elements in a row - single show/hide - First implementation: Show / Hide via dynamicUpdate for a second element, wrapped in an own 'col-md' div.
-
-Features
-^^^^^^^^
 
 Bug Fixes
 ^^^^^^^^^
