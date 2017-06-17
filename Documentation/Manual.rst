@@ -334,6 +334,8 @@ config.qfq.ini
 |                             |                                                 | time QFQ is called - *not* recommended!                                    |
 |                             |                                                 | 'never': never apply DB Updates.                                           |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...      | Link to the online documentation of QFQ.                                   |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 
 Example: *typo3conf/config.qfq.ini*
 
@@ -402,6 +404,11 @@ Example: *typo3conf/config.qfq.ini*
 	;NEW_BUTTON_TOOLTIP = new
 	;NEW_BUTTON_CLASS = btn btn-default navbar-btn
 	;NEW_BUTTON_GLYPH_ICON = glyphicon-plus
+
+	; auto | always | never
+	;DB_UPDATE=auto
+
+	;DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
 
 ..
 
@@ -1751,8 +1758,6 @@ Type: pill
     * *maxVisiblePill*: `<nr>` - Number of Pill-Buttons shown. Undefined means unlimited. Excess Pill buttons will be
       displayed as a drop-down menu.
 
-.. _class-native:
-
 Type: templateGroup
 ^^^^^^^^^^^^^^^^^^^
 
@@ -1823,95 +1828,104 @@ In the parameter field define: ::
 The `slaveId` needs attention: the placeholder `%d` starts always at 1. The `LIMIT` directive starts at 0 - therefore
 use `%D` instead of `%d`, cause `%D` is always one below `%d` - but can **only** be used on the action element.
 
+.. _class-native:
+
 Class: Native
 -------------
 
 Fields:
 
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-| Name          | Type                        | Description                                                                                       |
-+===============+=============================+===================================================================================================+
-| id            | int                         |                                                                                                   |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-| formId        | int                         |                                                                                                   |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|feIdContainer  | int                         |                                                                                                   |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|enabled        | enum('yes'|'no')            |                                                                                                   |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|dynamicUpdate  | enum('yes'|'no')            | In the browser, *FormElements* with "dynamicUpdate='yes'"  will be updated depending on user      |
-|               |                             | input. :ref:`dynamic-update`                                                                      |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|name           | string                      |                                                                                                   |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|label          | string                      | Label of *FormElement*. Depending on layout model, left or on top of the *FormElement*            |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|mode           | enum('show', 'readonly',    | *Show*: regular user input field. This is the default.                                            |
-|               | 'required',                 | *Required*: User has to specify a value. Typically, an <empty string> represents 'no value'.      |
-|               | 'disabled' )                | *Readonly*: user can't change any data. Data not saved.                                           |
-|               |                             | *Disabled*: *FormElement* is not visible.                                                         |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|modeSql        | `select` statement with     | A value given here overwrites the setting from `mode`. Most usefull with :ref:`dynamic-update`.   |
-|               | a value like in `mode`      | E.g.: {{SELECT IF( '{{otherFunding:FR:alnumx}}'='yes' ,'show', 'hidden' }}                        |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|class          | enum('native', 'action',    | Details below.                                                                                    |
-|               | 'container')                |                                                                                                   |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|type           | enum('checkbox', 'date', 'time', 'datetime',  'dateJQW', 'datetimeJQW', 'extra', 'gridJQW', 'text', 'editor', 'note',           |
-|               | 'password', 'radio', 'select', 'subrecord', 'upload', 'fieldset', 'pill', 'beforeLoad', 'beforeSave',                           |
-|               | 'beforeInsert', 'beforeUpdate', 'beforeDelete', 'afterLoad', 'afterSave', 'afterInsert', 'afterUpdate', 'afterDelete',          |
-|               | 'sendMail')                                                                                                                     |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|encode         | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity.                 |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|checkType      | enum('min|max', 'pattern',  |                                                                                                   |
-|               | 'number', 'email')          |                                                                                                   |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|checkPattern   | 'regexp'                    |If $checkType=='pattern': pattern to match                                                         |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|onChange       | string                      |List of *FormElement*-names of current form, separated by ', ', If one of the named *FormElements* |
-|               |                             | change, reload own data / status / mode                                                           |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|ord            | string                      | Display order of *FormElements* ('order' is a reserved keyword)                                   |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|tabindex       | string                      |HTML tabindex attribute                                                                            |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|size           | string                      |Visible length of input element. Might be ommited, depending on the choosen form layout.           |
-|               |                             |Format: <width>,<height> (in characters)                                                           |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|bsLabelColumns | string                      | Number of bootstrap grid columns for label. By default empty, value inherits from the form.       |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|bsInputColumns | string                      | Number of bootstrap grid columns for input. By default empty, value inherits from the form.       |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|bsNoteColumns  | string                      | Number of bootstrap grid columns for note. By default empty, value inherits from the form.        |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|maxLength      | string                      |Maximum characters for input.                                                                      |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|note           | string                      |Note of *FormElement*. Depending on layout model, right or below of the *FormElement*.             |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|tooltip        | text                        |Display this text as tooltip on mouse over.                                                        |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|placeholder    | string                      |Text, displayed inside the input element in light grey.                                            |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|clientJs       | text                        |Javascript called on 'on change' *FormElement*                                                     |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|value          | text                        |Default value                                                                                      |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|sql1           | text                        |SQL query                                                                                          |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|parameter      | text                        |Might contain misc parameter. Depends on the type of *FormElement*.                                |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|feGroup        | string                      | Comma-separated list of Typo3 FE Group ID. NOT SURE IF THIS WILL BE IMPLEMENTED. Native           |
-|               |                             | *FormElements*, fieldsets and pills can be assigned to feGroups. Group status: show, hidden,      |
-|               |                             | disabled. Group Access: FE-Groups. User will be assigned to FE-Groups and the form definition     |
-|               |                             | reference such FE-groups. Easy way of granting permission.                                        |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|deleted        | string                      | 'yes'|'no'.                                                                                       |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|modified       | timestamp                   |updated automatically through stored procedure                                                     |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
-|created        | datetime                    |set once through QFQ                                                                               |
-+---------------+-----------------------------+---------------------------------------------------------------------------------------------------+
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+| Name                | Type                        | Description                                                                                         |
++=====================+=============================+=====================================================================================================+
+|Container            | int                         | 0 or *FormElement*.id of container element (pill, fieldSet, templateGroup) part the current *Form*  |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Enabled              | enum('yes'|'no')            | Process the current FormElement                                                                     |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Dynamic Update       | enum('yes'|'no')            | In the browser, *FormElements* with "dynamicUpdate='yes'"  will be updated depending on user        |
+|                     |                             | input. :ref:`dynamic-update`                                                                        |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Name                 | string                      |                                                                                                     |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Label                | string                      | Label of *FormElement*. Depending on layout model, left or on top of the *FormElement*              |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Mode                 | enum('show', 'readonly',    | *Show*: regular user input field. This is the default.                                              |
+|                     | 'required',                 | *Required*: User has to specify a value. Typically, an <empty string> represents 'no value'.        |
+|                     | 'disabled' )                | *Readonly*: user can't change any data. Data not saved.                                             |
+|                     |                             | *Disabled*: *FormElement* is not visible.                                                           |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Mode sql             | `SELECT` statement with     | A value given here overwrites the setting from `mode`. Most usefull with :ref:`dynamic-update`.     |
+|                     | a value like in `mode`      | E.g.: {{SELECT IF( '{{otherFunding:FR:alnumx}}'='yes' ,'show', 'hidden' }}                          |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Class                | enum('native', 'action',    | Details below.                                                                                      |
+|                     | 'container')                |                                                                                                     |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Type                 | enum('checkbox', 'date', 'time', 'datetime',  'dateJQW', 'datetimeJQW', 'extra', 'gridJQW', 'text', 'editor', 'note',             |
+|                     | 'password', 'radio', 'select', 'subrecord', 'upload', 'fieldset', 'pill', 'beforeLoad', 'beforeSave',                             |
+|                     | 'beforeInsert', 'beforeUpdate', 'beforeDelete', 'afterLoad', 'afterSave', 'afterInsert', 'afterUpdate', 'afterDelete',            |
+|                     | 'sendMail')                                                                                                                       |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _`field-encode`   |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Check Type           | enum('min|max', 'pattern',  | _`field-checkType`:                                                                                 |
+|                     | 'number', 'email')          |                                                                                                     |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Check Pattern        | 'regexp'                    |If $checkType=='pattern': pattern to match                                                           |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Order                | string                      | Display order of *FormElements* ('order' is a reserved keyword)  _`field-ord`:                      |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|tabindex             | string                      |HTML tabindex attribute   _`field-tabindex`:                                                         |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Size                 | string                      |Visible length of input element. Might be ommited, depending on the choosen form layout.             |
+|                     |                             |Format: <width>,<height> (in characters)   _`field-size`:                                            |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|BS Label Columns     | string                      | Number of bootstrap grid columns for label. By default empty, value inherits from the form.         |
+|                     |                             | _`field-bsLabelColumns`:                                                                            |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|BS Input Columns     | string                      | Number of bootstrap grid columns for input. By default empty, value inherits from the form.         |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|BS Note Columns      | string                      | Number of bootstrap grid columns for note. By default empty, value inherits from the form.          |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Label / Input / Note | enum(...)                   | Switch on/off opening|closing of bootstrap form classes _`field-rowLabelInputNote`:                 |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Maxlength            | string                      |Maximum characters for input. _`field-maxLength`:                                                    |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Note                 | string                      |Note of *FormElement*. Depending on layout model, right or below of the *FormElement*. _`field-note` |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Tooltip              | text                        |Display this text as tooltip on mouse over.  _`field-tooltip`:                                       |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Placeholder          | string                      |Text, displayed inside the input element in light grey. _`field-placeholder`:                        |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|value                | text                        |Default value: See `field-value`_                                                                    |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|sql1                 | text                        |SQL query                                                                                            |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Parameter            | text                        |Might contain misc parameter. See `fe-parameter-attributes`_                                         |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|feGroup              | string                      | Comma-separated list of Typo3 FE Group ID. NOT SURE IF THIS WILL BE IMPLEMENTED. Native             |
+|                     |                             | *FormElements*, fieldsets and pills can be assigned to feGroups. Group status: show, hidden,        |
+|                     |                             | disabled. Group Access: FE-Groups. User will be assigned to FE-Groups and the form definition       |
+|                     |                             | reference such FE-groups. Easy way of granting permission.                                          |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Deleted              | string                      | 'yes'|'no'.                                                                                         |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+
+.. _`field-value`:
+
+FE: Value
+^^^^^^^^^
+
+By default this field is empty: QFQ will fill it with the corresponding existing column value on form load.
+For a customized default value define: ::
+
+   {{SELECT IF('{{column:RE}}'='','custom default',{{column:R}}) }}
+
+
+For non primary records, this is the place to load an existing value. E.g. we're on a 'Person' detail form and would like
+to edit, on the same form, a corresponding person email address (which is in a separate table): ::
+
+  {{SELECT a.email FROM Address AS a WHERE a.pId={{id:R0}} ORDER BY a.id LIMIT 1}}
+
 
 .. _fe-parameter-attributes:
 
@@ -1937,7 +1951,7 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | wrapRow                | string | If specified, skip default wrapping (`<div class='col-md-?>`). Instead the given string is used.         |
 +------------------------+--------+                                                                                                          |
-| wrapInput              | string |                                                                                                          |
+| wrapLabel              | string |                                                                                                          |
 +------------------------+--------+                                                                                                          |
 | wrapInput              | string |                                                                                                          |
 +------------------------+--------+                                                                                                          |
@@ -2396,6 +2410,8 @@ Type: select
   * *emptyHide*: Existence of this item hides the empty entry. This is useful for e.g. Enums, which have an empty
     entry and the empty value should not be an option to be selected.
 
+.. _`subrecord-option`:
+
 Type: subrecord
 ^^^^^^^^^^^^^^^
 
@@ -2764,16 +2780,16 @@ Situation 1: master.xId=slave.id (1:1)
 
     * Without *sqlHonorFormElements*. Parameter: ::
 
-       sqlInsert = INSERT INTO address (`street`, `city`) VALUES ('{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}')
-       sqlUpdate = UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1
-       sqlDelete = DELETE FROM address WHERE id={{slaveId}} AND '{{myStreet:FE:alnumx:s}}'='' AND '{{myCity:FE:alnumx:s}}'='' LIMIT 1
+       sqlInsert = {{INSERT INTO address (`street`, `city`) VALUES ('{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}') }}
+       sqlUpdate = {{UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1 }}
+       sqlDelete = {{DELETE FROM address WHERE id={{slaveId}} AND '{{myStreet:FE:alnumx:s}}'='' AND '{{myCity:FE:alnumx:s}}'='' LIMIT 1 }}
 
     * With *sqlHonorFormElements*. Parameter: ::
 
-       sqlHonorFormElements = myStreet, myCity
-       sqlInsert = INSERT INTO address (`street`, `city`) VALUES ('{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}')
-       sqlUpdate = UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1
-       sqlDelete = DELETE FROM address WHERE id={{slaveId}} LIMIT 1
+       sqlHonorFormElements = myStreet%d, myCity%d
+       sqlInsert = {{INSERT INTO address (`street`, `city`) VALUES ('{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}') }}
+       sqlUpdate = {{UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1 }}
+       sqlDelete = {{DELETE FROM address WHERE id={{slaveId}} LIMIT 1 }}
 
 Situation 2: master.id=slave.xId (1:n)
 
@@ -2787,18 +2803,18 @@ Situation 2: master.id=slave.xId (1:n)
 
     * Without *sqlHonorFormElements*. Parameter: ::
 
-       slaveId = SELECT id FROM address WHERE personId={{id}} ORDER BY id LIMIT 1
-       sqlInsert = INSERT INTO address (`personId`, `street`, `city`) VALUES ({{id}}, '{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}')
-       sqlUpdate = UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1
-       sqlDelete = DELETE FROM address WHERE id={{slaveId}} AND '{{myStreet:FE:alnumx:s}}'='' AND '{{myCity:FE:alnumx:s}}'='' LIMIT 1
+       slaveId = {{SELECT id FROM address WHERE personId={{id}} ORDER BY id LIMIT 1 }}
+       sqlInsert = {{INSERT INTO address (`personId`, `street`, `city`) VALUES ({{id}}, '{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}') }}
+       sqlUpdate = {{UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1 }}
+       sqlDelete = {{DELETE FROM address WHERE id={{slaveId}} AND '{{myStreet:FE:alnumx:s}}'='' AND '{{myCity:FE:alnumx:s}}'='' LIMIT 1 }}
 
     * With *sqlHonorFormElements*. Parameter: ::
 
-       slaveId = SELECT id FROM address WHERE personId={{id}} ORDER BY id LIMIT 1
-       sqlHonorFormElements = myStreet, myCity
-       sqlInsert = INSERT INTO address (`personId`, `street`, `city`) VALUES ({{id}}, '{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}')
-       sqlUpdate = UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1
-       sqlDelete = DELETE FROM address WHERE id={{slaveId}} LIMIT 1
+       slaveId = {{SELECT id FROM address WHERE personId={{id}} ORDER BY id LIMIT 1 }}
+       sqlHonorFormElements = myStreet%d, myCity%d
+       sqlInsert = {{INSERT INTO address (`personId`, `street`, `city`) VALUES ({{id}}, '{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}') }}
+       sqlUpdate = {{UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1 }}
+       sqlDelete = {{DELETE FROM address WHERE id={{slaveId}} LIMIT 1 }}
 
 
 Type: sendmail

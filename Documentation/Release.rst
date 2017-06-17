@@ -34,8 +34,28 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.18.4
+--------------
+
+Bug Fixes
+^^^^^^^^^
+* Bug #3910 / 'submitButtonText' not shown
+
+Version 0.18.3b
+---------------
+
+Features
+^^^^^^^^
+
+* Feature #3906 / Mark required inputs with an asterik
+
+Bug Fixes
+^^^^^^^^^
+
+* Bug #3903 / Copy/Paste form: references inside a record are not updated at all
+
 Version 0.18.3a
-----------------
+---------------
 
 Changes
 ^^^^^^^
