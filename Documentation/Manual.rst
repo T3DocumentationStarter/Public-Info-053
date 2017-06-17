@@ -282,7 +282,8 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+ crendentials is supported.                                                 |
 | LDAP_1_PASSWORD             | LDAP_1_PASSWORD=mySecurePassword                |                                                                            |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| ESCAPE_TYPE_DEFAULT         | ESCAPE_TYPE_DEFAULT=s                           | All variables `{{...}}` get this escape class by default                   |
+| ESCAPE_TYPE_DEFAULT         | ESCAPE_TYPE_DEFAULT=s                           | All variables `{{...}}` get this escape class by default.                  |
+|                             |                                                 | See `variable-escape`_.                                                    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password| If empty: no check. All named variables will rendered as INPUT elements    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
@@ -663,6 +664,8 @@ URL Parameter
 * If a value violates a parameter sanitize class, the value becomes an empty string.
 
 
+.. _`variable-escape`:
+
 Escape
 ^^^^^^
 
@@ -682,9 +685,9 @@ To protect the web application the following `escape` types are available:
 * Escaping is typically necessary for SQL or LDAP queries.
 * Be careful when escaping nested variables. Best is to escape **only** the most outer variable.
 * In `config.qfq.ini`_ a global `ESCAPE_TYPE_DEFAULT` can be defined. The configured escape type applies to all substituted
-  variables, who do not contain a *specific* escape type.
+  variables, who *do not* contain a *specific* escape type.
 * Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the Form Editor). This overwrites the
-  global definition of `config.qfq.ini`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the settin
+  global definition of `config.qfq.ini`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
   in `config.qfq.ini`_.
 * To suppress a default escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
 
@@ -1342,6 +1345,9 @@ After filling the store, access the content via `{{<attributename>:allbut:L:s}}`
 Form
 ====
 
+General
+-------
+
 * Forms will be created by using the *QFQ Form Editor* on the Typo3 frontend (HTML form).
 * The Formeditor itself consist of two predefined QFQ forms: *form* and *formElement* - these forms are often updated
   during the installation of new QFQ versions.
@@ -1391,60 +1397,68 @@ Form
   * With the `Dynamic` option, it's easily possible to use one Typo3 page and display different forms on that specific
     page. This is nice to configure few Typo 3 pages. The disadvantage is that the user might loose the navigation.
 
+
+.. _comment-space-character:
+
+Comment- and space-character
+----------------------------
+
+* Lines will be trimmed - leading and trailing spaces will be removed.
+* If a leading and/or trailing space is needed, escape it: '\ hello world \' > ' hello world '.
+
+* Lines starting with a '#' are treated as a comment and will not be parsed. Suche lines are treated as 'empty lines'.
+* The comment sign can be escaped with '\'.
+
+
+
 .. _form-main:
 
 Definition
 ----------
 
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-| Name                    | Type                                                     | Description                                                                             |
-+=========================+==========================================================+=========================================================================================+
-|id                       | int, autoincrement                                       | created by by MySQL                                                                     |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|name                     | string                                                   | unique and speaking name of the form. Form will be identified by this name              |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|title                    | string                                                   | Title, shown on/above the form.                                                         |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|noteInternal             | textarea                                                 | Internal notes: special functionality, used variables, ...                              |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|tableName                | string                                                   | Primay table of the form                                                                |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|permitNew                | enum('sip', 'logged_in', 'logged_out', 'always', 'never')| Default: sip                                                                            |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|permitEdit               | enum('sip', 'logged_in', 'logged_out', 'always', 'never')| Default: sip                                                                            |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|render                   | enum('plain','table', 'bootstrap')                       | Default bootstrap                                                                       |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|requiredParameter        | string                                                   | Name of required SIP parameter, seperated by comma. '#' as comment delimiter            |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|showButton               | set('new', 'delete', 'close', 'save')                    | Default 'new,delete,close,save'. Shown buttons in the upper right corner of the form.   |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|multiMode                | enum('none','horizontal','vertical')                     | Default 'none'                                                                          |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|multiSql                 | text                                                     | Optional. SQL Query which selects all records to edit.                                  |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|multiDetailForm          | string                                                   | Optional. Form to open, if a record is selected to edit (double click on record line)   |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|multiDetailFormParameter | string                                                   | Optional. Translated Parameter submitted to detailform (like subrecord parameter)       |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|forwardMode              | string: 'client | no | url | url-skip-history'           | After pressing 'save':                                                                  |
-+-------------------------+----------------------------------------------------------+ 'url' / 'url-skip-history': redirects browser to 'forwardPage'.                         |
-|forwardPage              | string                                                   | 'client': the browser decides to stay on the page or to force a redirection             |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|bsLabelColumns           | string                                                   | The bootstrap grid system is based on 12 columns. The sum of *bsLabelColumns*,          |
-+-------------------------+----------------------------------------------------------+ *bsInputColumns* and *bsNoteColumns* should be 12. These values here are the base values|
-|bsInputColumns           | string                                                   | for all *FormElements*. Exceptions per *FormElement* can be specified per *FormElement*.|
-+-------------------------+----------------------------------------------------------+ Default: label=3, input=6, note=3. See :ref:`form-layout`.                              |
-|bsNoteColumns            | string                                                   |                                                                                         |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|parameter                | text                                                     | Misc additional parameters. See :ref:`form-parameter`.                                  |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|deleted                  | string                                                   | 'yes'|'no'.                                                                             |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|modified                 | timestamp                                                | updated automatically through stored procedure                                          |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|created                  | datetime                                                 | set once through QFQ                                                                    |
-+-------------------------+----------------------------------------------------------+-----------------------------------------------------------------------------------------+
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name                    | Description                                                                                                                                        |
++=========================+====================================================================================================================================================+
+|Name                     | Unique and speaking name of the *Form*. Form will be identified by this name. Use only '[a-zA-Z0-9._+-]'. _`form-name`                             |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Title                    | Title, shown on/above the form. _`form-title`                                                                                                      |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Note                     | Personal editor notes. _`form-note`                                                                                                                |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Table                    | Primary table of the form. _`form-tablename`                                                                                                       |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Required Parameter       | Name of required SIP parameter, seperated by comma. '#' as comment delimiter. See `form-requiredParameter`_                                        |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Permit New               | 'sip, logged_in, logged_out, always, never' (Default: sip): See `form-permitNewEdit`_                                                              |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Permit Edit              | 'sip, logged_in, logged_out, always, never' (Default: sip): See `form-permitNewEdit`_                                                              |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Escape Type Default      | See `variable-escape`_.                                                                                                                            |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Show button              | 'new, delete, close, save' (Default: 'new,delete,close,save'): Shown named buttons in the upper right corner of the form.  See `form-showButton`_  |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Forward                  | 'client | no | url | url-skip-history' (Default: client): See `form-forward`_.                                                                     |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Forward Page             | URL or Typo3 page id/alias. See `form-forward`_.                                                                                                   |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Parameter                |  Misc additional parameters. See `form-parameter`_.                                                                                                |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|BS Label Columns         | The bootstrap grid system is based on 12 columns. The sum of *bsLabelColumns*,                                                                     |
++-------------------------+ *bsInputColumns* and *bsNoteColumns* should be 12. These values here are the base values                                                           |
+|BS Input Columns         | for all *FormElements*. Exceptions per *FormElement* can be specified per *FormElement*.                                                           |
++-------------------------+ Default: label=3, input=6, note=3. See `form-layout`_.                                                                                             |
+|BS Note Columns          |                                                                                                                                                    |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|multiMode                | NOT IMPLEMENTED - 'none, horizontal, vertical' (Default 'none')                                                                                    |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|multiSql                 | NOT IMPLEMENTED - Optional. SQL Query which selects all records to edit.                                                                           |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|multiDetailForm          | NOT IMPLEMENTED - Optional. Form to open, if a record is selected to edit (double click on record line)                                            |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|multiDetailFormParameter | NOT IMPLEMENTED - Optional. Translated Parameter submitted to detailform (like subrecord parameter)                                                |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+
+.. _`form-permitNewEdit`:
 
 permitNew & permitEdit
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1475,7 +1489,7 @@ Depending on `r`, the following access permission will be taken:
    'access granted'. The grant will be revoked when the QFQ session is destroyed - this happens when a user loggs out or
    the webbrowser is closed.
 
-* `logged_id` / `logged_out`: for forms which might be displayed without a SIP, but maybe on a protected or even unprotected
+* `logged_in` / `logged_out`: for forms which might be displayed without a SIP, but maybe on a protected or even unprotected
   page. *The option is probably not often used.*
 
 * `always`: such a form is always allowed to be loaded.
@@ -1494,6 +1508,17 @@ Depending on `r`, the following access permission will be taken:
   * `permitEdit=none`: Public accessible forms. It's not possible to update records.
 
 
+.. _`form-requiredParameter`:
+
+Required Parameter
+^^^^^^^^^^^^^^^^^^
+
+Comma separated list of variable names. The form will show an error message, if it was called without the named
+parameters. Especially subforms often requires additional parameters - if such parameters are missing, the record cannot
+saved correctly. The parameters must be given by SIP.
+
+.. _`form-showButton`:
+
 showButton
 ^^^^^^^^^^
 
@@ -1505,6 +1530,40 @@ Display or hide the button `new`, `delete`, `close`, `save`.
 * *save*: Save the form.
 
 * Default: show all buttons.
+
+.. _`form-forward`:
+
+Forward: Save / Close
+^^^^^^^^^^^^^^^^^^^^^
+
+Forward
+'''''''
+
+After the user presses *Save*, *Close*, *Delete* or *New*, different actions are possible where the browser redirects to.
+
+* `client` (default) - the QFQ Javascript logic, inside the browser, decides to stay on the page or to force a redirection 
+  to a previous page.
+  
+  * *Close* closes the current page and goes back to the previous page.
+  * *Save* stays on the current page.
+  
+* `no` - no change, the browser remains on the current side. Close does not close the page. It just triggers a save if 
+   there are modified data.
+* `url` - the browser redirects to the named URL or T3 page. Independent if the user presses `save` or `close`.
+* `url-skip-history` - same as `url`, but the current location won't saved in the browser history.
+
+Only with `Forward` == `url` | `url-skip-history`, the definition of `Forward URL / Page` becomes active.
+
+Forward URL / Page
+''''''''''''''''''
+
+Possible values:
+
+* `http://john-doe.com` - fix URL.
+* `?thanks` - fix URL, inside current Typo3 installation.
+* `{{SELECT ... }}` - dynamically calculated, after all processing is done. This is very usefull, to redirect to different
+  targets, depending on user input or whatever.
+
 
 .. _form-parameter:
 
@@ -1608,18 +1667,6 @@ parameter
   * class = container-fluid
   * classBody = qfq-form-right
 
-.. _comment-space-character:
-
-Comment- and space-character
-''''''''''''''''''''''''''''
-
-* Lines will be trimmed - leading and trailing spaces will be removed.
-* If a leading and/or trailing space is needed, escape it: '\ hello world \' > ' hello world '.
-
-* Lines starting with a '#' are treated as a comment and will not be parsed. Suche lines are treated as 'empty lines'
-* The comment sign can be escaped with '\'
-
-
 submitButtonText
 ''''''''''''''''
 
@@ -1709,9 +1756,9 @@ FormElements
 * Each *form* contains one or more *FormElement*.
 * The *FormElements* are divided in three categories:
 
-  * :ref:`class-container`
-  * :ref:`class-native`
-  * :ref:`class-action`
+  * `class-container`_
+  * `class-native`_
+  * `class-action`_
 
 * Ordering and grouping: Native *FormElements* and Container-Elements (both with feIdContainer=0) will be ordered by 'ord'.
 * Inside of a container, all nested elements will be displayed.
@@ -1719,7 +1766,7 @@ FormElements
 * Additional options to a *FormElement* will be configured via the *FormElement.parameter* field (analog to *Form.parameter*
   for *Forms* ).
 
-  * See also: :ref:`comment-space-character`
+  * See also: `comment-space-character`_
 
 .. _class-container:
 
@@ -1867,34 +1914,34 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _`field-encode`   |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Check Type           | enum('min|max', 'pattern',  | _`field-checkType`:                                                                                 |
+|Check Type           | enum('min|max', 'pattern',  | _`field-checkType`                                                                                  |
 |                     | 'number', 'email')          |                                                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Check Pattern        | 'regexp'                    |If $checkType=='pattern': pattern to match                                                           |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Order                | string                      | Display order of *FormElements* ('order' is a reserved keyword)  _`field-ord`:                      |
+|Order                | string                      | Display order of *FormElements* ('order' is a reserved keyword)  _`field-ord`                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|tabindex             | string                      |HTML tabindex attribute   _`field-tabindex`:                                                         |
+|tabindex             | string                      |HTML tabindex attribute   _`field-tabindex`                                                          |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Size                 | string                      |Visible length of input element. Might be ommited, depending on the choosen form layout.             |
-|                     |                             |Format: <width>,<height> (in characters)   _`field-size`:                                            |
+|                     |                             |Format: <width>,<height> (in characters)   _`field-size`                                             |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |BS Label Columns     | string                      | Number of bootstrap grid columns for label. By default empty, value inherits from the form.         |
-|                     |                             | _`field-bsLabelColumns`:                                                                            |
+|                     |                             | _`field-bsLabelColumns`                                                                             |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |BS Input Columns     | string                      | Number of bootstrap grid columns for input. By default empty, value inherits from the form.         |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |BS Note Columns      | string                      | Number of bootstrap grid columns for note. By default empty, value inherits from the form.          |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Label / Input / Note | enum(...)                   | Switch on/off opening|closing of bootstrap form classes _`field-rowLabelInputNote`:                 |
+|Label / Input / Note | enum(...)                   | Switch on/off opening|closing of bootstrap form classes _`field-rowLabelInputNote`                  |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Maxlength            | string                      |Maximum characters for input. _`field-maxLength`:                                                    |
+|Maxlength            | string                      |Maximum characters for input. _`field-maxLength`                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Note                 | string                      |Note of *FormElement*. Depending on layout model, right or below of the *FormElement*. _`field-note` |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Tooltip              | text                        |Display this text as tooltip on mouse over.  _`field-tooltip`:                                       |
+|Tooltip              | text                        |Display this text as tooltip on mouse over.  _`field-tooltip`                                        |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Placeholder          | string                      |Text, displayed inside the input element in light grey. _`field-placeholder`:                        |
+|Placeholder          | string                      |Text, displayed inside the input element in light grey. _`field-placeholder`                         |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |value                | text                        |Default value: See `field-value`_                                                                    |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
