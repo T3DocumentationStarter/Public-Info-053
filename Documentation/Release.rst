@@ -34,6 +34,25 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+
+Version 0.18.5
+--------------
+
+Features
+^^^^^^^^
+
+* QuickFormQuery.php: added function to check if there are copyForm paste records
+* Manual.rst, formEditor.sql: add several links in Form 'FormEditor' to the online documentation. The FormEditor now
+  contains links to the Online Documentation. Add missing explanations: Required Parameter, Forward.
+
+Bug Fixes
+^^^^^^^^^
+
+* Bug #3912 / templateGroup: max. 5 instances are saved.
+* Manual.rst: Fixed missing '{{' and '%' in examples.
+* Bug #3925 / templateGroup / non primary / delete records: only one at a time
+* Makefile: Artifactory builds fails at chromedriver - temporary remove npm install of chromedriver
+
 Version 0.18.4
 --------------
 

@@ -335,7 +335,8 @@ config.qfq.ini
 |                             |                                                 | time QFQ is called - *not* recommended!                                    |
 |                             |                                                 | 'never': never apply DB Updates.                                           |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...      | Link to the online documentation of QFQ.                                   |
+| DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...      | Link to the online documentation of QFQ. Every QFQ installation also       |
+|                             |                                                 | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 
 Example: *typo3conf/config.qfq.ini*
@@ -409,6 +410,7 @@ Example: *typo3conf/config.qfq.ini*
 	; auto | always | never
 	;DB_UPDATE=auto
 
+   ; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
 	;DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
 
 ..
