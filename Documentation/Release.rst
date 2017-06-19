@@ -35,6 +35,14 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 0.18.6
+--------------
+
+Features
+^^^^^^^^
+
+* Feature #3460 / Report: new column types '_striptags, '_htmlentities', '_+Tag'
+
 Version 0.18.5
 --------------
 
