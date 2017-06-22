@@ -37,6 +37,8 @@ The following features are only tested on linux hosts:
 * Concatenation of PDF files - command `pdftk`.
 * Mime type detection for uploads - command `file`.
 
+.. _`preparation`:
+
 Preparation
 -----------
 
@@ -1247,6 +1249,7 @@ The *FormElement.parameter*=*typeAheadLdap* will trigger LDAP searches on every 
   * Optional: *ldapUseBindCredentials* = 1
 
 All fetched LDAP values will be formatted with:
+
 * *typeAheadLdapValuePrintf*, shown to the user in a drop-down box and
 * *typeAheadLdapIdPrintf*, which represents the final data to save.
 
@@ -4047,6 +4050,8 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Show          |S                                  |S                          |Show 'show' icon as image                                                                                                               |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
+|   |x  |Glyph         |G:<glyphname>                      |G:glyphicon-envelope       |Show <glyphname>. Check: http://getbootstrap.com/components/                                                                            |
++---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Bullet        |B:[<color>]                        |B:green                    |Show bullet with '<color>'. Colors: blue, gray, green, pink, red, yellow. Default Color: green.                                         |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Check         |C:[<color>]                        |C:green                    |Show checked with '<color>'. Colors: blue, gray, green, pink, red, yellow. Default Color: green.                                        |
@@ -4101,48 +4106,48 @@ Render mode
 Link Examples
 ^^^^^^^^^^^^^
 
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SQL-Query                                                              |Result                                                                                                                                  |
-+=======================================================================+========================================================================================================================================+
-|SELECT "m:info@example.com" AS _link                                   |info@example.com as linked text, encrypted with javascript, class=external                                                              |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "m:info@example.com|c:0" AS _link                               |info@example.com as linked text, not encrypted, class=external                                                                          |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "m:info@example.com|P:mail.gif" AS _link                        |info@example.com as linked image mail.gif, encrypted with javascript, class=external                                                    |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "m:info@example.com|P:mail.gif|o:Email" AS _link                |*info@example.com* as linked image mail.gif, encrypted with javascript, class=external, tooltip: "sendmail"                             |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "m:info@example.com|t:mailto:info@example.com|o:Email" AS link  |'mail to *info@example.com*' as linked text, encrypted with javascript, class=external                                                  |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "u:www.example.com" AS _link                                    |www.example as link, class=external                                                                                                     |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "u:http://www.example.com" AS _link                             |*http://www.example* as link, class=external                                                                                            |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "u:www.example.com|q:Please confirm" AS _link                   |www.example as link, class=external, See: `question`_                                                                                   |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "u:www.example.com|c:i" AS _link                                |*http://www.example* as link, class=internal                                                                                            |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "u:www.example.com|c:nicelink" AS _link                         |*http://www.example* as link, class=nicelink                                                                                            |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "p:form_person|c:e" AS _link                                    |<a class="external" href="?form_person">Text</a>                                                                                        |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "p:form_person&note=Text|t:Person" AS _link                     |<a class="internal" href="?form_person&note=Text">Person</a>                                                                            |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "p:form_person|E" AS _link                                      |<a class="internal" href="?form_person"><img alttext="Edit" src="typo3conf/ext/qfq/Resources/Public/icons/edit.gif"></a>                |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "p:form_person|E|g:_blank" AS _link                             |<a target="_blank" class="internal" href="?form_person"><img alttext="Edit" src="typo3conf/ext/qfq/Resources/Public/icons/edit.gif"></a>|
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "p:form_person|C" AS _link                                      |<a class="internal" href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>      |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "p:form_person|C:green" AS _link                                |<a class="internal" href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>      |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "U:form=Person&r=123|x|D" as _link                              |<a href="typo3conf/ext/qfq/qfq/api/delete.php?s=badcaffee1234"><span class="glyphicon glyphicon-trash" ></span>"></a>                   |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "U:form=Person&r=123|x|t:Delete" as _link                       |<a href="typo3conf/ext/qfq/qfq/api/delete.php?s=badcaffee1234">Delete</a>                                                               |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|SELECT "s:1|d:full.pdf|M:pdf|U:id=det1&r=12|U:id=det2|f:cv.pdf|        |<a href="typo3conf/ext/qfq/qfq/api/download.php?s=badcaffee1234">Download</a>                                                           |
-|        t:Download|a:Create complete PDF - please wait" as _link       |                                                                                                                                        |
-+-----------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+|SQL-Query                                                              | Result                                                                                                                                  |
++=======================================================================+=========================================================================================================================================+
+| SELECT "m:info@example.com" AS _link                                  | info@example.com as linked text, encrypted with javascript, class=external                                                              |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "m:info@example.com|c:0" AS _link                              | info@example.com as linked text, not encrypted, class=external                                                                          |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "m:info@example.com|P:mail.gif" AS _link                       | info@example.com as linked image mail.gif, encrypted with javascript, class=external                                                    |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "m:info@example.com|P:mail.gif|o:Email" AS _link               | *info@example.com* as linked image mail.gif, encrypted with javascript, class=external, tooltip: "sendmail"                             |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "m:info@example.com|t:mailto:info@example.com|o:Email" AS link | 'mail to *info@example.com*' as linked text, encrypted with javascript, class=external                                                  |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "u:www.example.com" AS _link                                   | www.example as link, class=external                                                                                                     |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "u:http://www.example.com" AS _link                            | *http://www.example* as link, class=external                                                                                            |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "u:www.example.com|q:Please confirm" AS _link                  | www.example as link, class=external, See: `question`_                                                                                   |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "u:www.example.com|c:i" AS _link                               | *http://www.example* as link, class=internal                                                                                            |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "u:www.example.com|c:nicelink" AS _link                        | *http://www.example* as link, class=nicelink                                                                                            |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "p:form_person|c:e" AS _link                                   | <a class="external" href="?form_person">Text</a>                                                                                        |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "p:form_person&note=Text|t:Person" AS _link                    | <a class="internal" href="?form_person&note=Text">Person</a>                                                                            |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "p:form_person|E" AS _link                                     | <a class="internal" href="?form_person"><img alttext="Edit" src="typo3conf/ext/qfq/Resources/Public/icons/edit.gif"></a>                |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "p:form_person|E|g:_blank" AS _link                            | <a target="_blank" class="internal" href="?form_person"><img alttext="Edit" src="typo3conf/ext/qfq/Resources/Public/icons/edit.gif"></a>|
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "p:form_person|C" AS _link                                     | <a class="internal" href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>      |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "p:form_person|C:green" AS _link                               | <a class="internal" href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>      |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "U:form=Person&r=123|x|D" as _link                             | <a href="typo3conf/ext/qfq/qfq/api/delete.php?s=badcaffee1234"><span class="glyphicon glyphicon-trash" ></span>"></a>                   |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "U:form=Person&r=123|x|t:Delete" as _link                      | <a href="typo3conf/ext/qfq/qfq/api/delete.php?s=badcaffee1234">Delete</a>                                                               |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "s:1|d:full.pdf|M:pdf|U:id=det1&r=12|U:id=det2|f:cv.pdf|       | <a href="typo3conf/ext/qfq/qfq/api/download.php?s=badcaffee1234">Download</a>                                                           |
+|         t:Download|a:Create complete PDF - please wait" as _link      |                                                                                                                                         |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 
 .. _question:
 
@@ -4312,7 +4317,7 @@ Example `_link`: ::
 
 Example `_pdf`, `_zip`: ::
 
-	# File 1: id=1&--orientation=Landscape&--page-size=A3
+	# File 1: U:id=1&--orientation=Landscape&--page-size=A3
 	# File 2: U:id=form
 	# File 3: f:fileadmin/file.pdf
 	SELECT 't:PDF|a:Creating a new PDF|U:id=1&--orientation=Landscape&--page-size=A3|U:id=form|f:fileadmin/file.pdf' AS _pdf
@@ -5230,3 +5235,60 @@ Same as above, but written in the nested notation ::
   }
 
 * Columns starting with a '_' won't be printed but can be accessed as regular columns.
+
+Help
+====
+
+* Does the error happens on every *page* or only on specific one?
+* Does the error happens on every *form* or only on specific one?
+
+Tips:
+
+* On general errors:
+
+	* Always check the Javascript console of your browser, see `javascriptProblem`_.
+	* Always check the Webserver logfiles, see `webserverErrorLog`_.
+
+
+Error Messages
+--------------
+
+Internal Server Error
+'''''''''''''''''''''
+
+The browser shows a red popup with 'Internal Server Error'. The message is generated in the browser. Happens e.g. an AJAX
+request response of QFQ (=Server) is broken. This might happen e.g. if PHP can't start successfully or PHP fails to run
+due to  a missing php module or broken configuration.
+
+
+
+.. _`javascriptProblem`:
+
+Javascript problem
+------------------
+
+Open the 'Webdeveloper Tools' (FF: F12, Chrome/Opera: Right mouse click > Inspect Element) in your browser, switch to
+'console' and reload the page. Inspect the messages.
+
+
+.. _`webserverErrorLog`:
+
+Webserver error log
+-------------------
+
+For apache: /var/log/apache2/error_log
+
+
+Call to undefined function qfq\\mb_internal_encoding()
+''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Check that all required php modules are installed. See `preparation`_.
+
+QFQ specific
+------------
+
+Variable empty: {{...}}
+'''''''''''''''''''''''
+
+Specify the required sanatize class. Remember: for STORE_FORM and STORE_CLIENT the default is `digit`. This means if
+the variable content is a string, this violates the sanatize class and the replaced content will be an empty string!
