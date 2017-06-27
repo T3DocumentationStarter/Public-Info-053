@@ -1489,13 +1489,14 @@ Depending on `r`, the following access permission will be taken:
 +------------+---------------------------------------------------------------------------------------------------+
 
 
-* `sip` is *always* the preferred way. With 'sip' it's not necessary to differ between logged in or not, cause the SIP
-   only  exist and is only valid, if it's created via QFQ/report earlier. This means 'creating' the SIP implies
-   'access granted'. The grant will be revoked when the QFQ session is destroyed - this happens when a user loggs out or
-   the webbrowser is closed.
+* `sip`
 
-* `logged_in` / `logged_out`: for forms which might be displayed without a SIP, but maybe on a protected or even unprotected
-  page. *The option is probably not often used.*
+  * is *always* the preferred way. With 'sip' it's not necessary to differ between logged in or not, cause the SIP
+    only  exist and is only valid, if it's created via QFQ/report earlier. This means 'creating' the SIP implies
+    'access granted'. The grant will be revoked when the QFQ session is destroyed - this happens when a user loggs out or
+    the webbrowser is closed.
+
+* `logged_in` / `logged_out`: for forms which might be displayed without a SIP, but maybe on a protected or even unprotected page. *The option is probably not often used.*
 
 * `always`: such a form is always allowed to be loaded.
 
@@ -2714,28 +2715,20 @@ These type of 'action' *FormElements* will be used to implement data validation 
 
 Types:
 
-  * beforeLoad
-
-    * good to grant access permission.
-
+  * beforeLoad (e.g. good to check access permission)
   * afterLoad
-  * beforeSave
-
-    * good to prohibit creating of duplicate records.
-
-  * afterSave
-
-    * good to create & update additional records.
-
+  * beforeSave (e.g. to prohibit creating of duplicate records)
+  * afterSave (e.g. to to create & update additional records)
   * beforeInsert
   * afterInsert
   * beforeUpdate
   * afterUpdate
-  * beforeDelete
+  * beforeDelete (e.g. to delete slave records)
   * afterDelete
+  * paste (configure copy/paste forms)
 
-sqlValidate
-'''''''''''
+Parameter: sqlValidate
+''''''''''''''''''''''
 
   Perform checks by fireing a SQL query and expecting a predefined number of selected records.
 
@@ -2762,8 +2755,8 @@ sqlValidate
 
 .. _slave-id:
 
-slaveId
-'''''''
+Parameter: slaveId
+''''''''''''''''''
 
 *FormElement.parameter*:
 
@@ -2783,8 +2776,8 @@ Note:
     recent slaveId
   * After an INSERT the `last_insert_id()` becomes the *slaveId*).
 
-sqlBefore / sqlInsert / sqlUpdate / sqlDelete / sqlAfter
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Parameter: sqlBefore / sqlInsert / sqlUpdate / sqlDelete / sqlAfter
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
   * Save values of a form to different record(s), optionally on different table(s).
   * Typically useful on 'afterSave' - be careful when using it earlier, e.g. beforeLoad.
@@ -2900,6 +2893,25 @@ Type: sendmail
 
 * For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
 
+Type: paste
+'''''''''''
+
+See also `copy-form`_.
+
+* *sql1*: e.g. `{{!SELECT {{id:P}} AS id, '{{myNewName:FE:allbut}}' AS name}}` (only one record) or `{{!SELECT i.id AS id, {{basketId:P}} AS basketId FROM Item AS i WHERE i.basketId={{id:P}} }}` (multiple records)
+
+  * Pay attention to '!'.
+  * For every row, a new record is created in `recordDestinationTable`.
+  * Column 'id' is not copied.
+  * The `recordSourceTable` together with columne `id` will identify the source record.
+  * Columns not specified, will be copied 1:1 from source to destination.
+  * Columns specified, will overwrite the source value.
+
+* *FormElement.parameter*:
+
+  * *recordSourceTable* - Optional: table from where the records will be copied. Default: <recordDestinationTable>
+  * *recordDestinationTable* - table where the new records will be copied to.
+  * *translateIdColumn* - columnname to update references of newly created id's.
 
 .. _dynamic-update:
 
@@ -3010,6 +3022,8 @@ the following (switch off all non named):
   * open and close note tag: `note`, `/note`,
   * close row tag: `/row` ,
 
+.. _`copy-form`:
+
 Copy Form
 ---------
 
@@ -3044,7 +3058,7 @@ form with the following parameter
    * Table: `Clipboard`
    * Show Button: only `close` and `save`
 
- * FormElement 1
+ * FormElement 1: Record id of the source record.
 
    * Name: `idSrc`
    * Lable: `Source Form`
@@ -3052,13 +3066,13 @@ form with the following parameter
    * Type: `select`
    * sql1: `{{! SELECT id, title FROM Basket }}`
 
- * FormElement 2
+ * FormElement 2: New name of the copied record.
 
    * Name: `myNewName`
    * Class: `native`
    * Type: `text`
 
- * FormElement 3
+ * FormElement 3: a) Check that there is no name conflict. b)Purge any old clipboard content of the current user.
 
    * Name: `clearClipboard`
    * Class: `action`
@@ -3070,14 +3084,14 @@ form with the following parameter
      * `messageFail = There is already a form with this name`
      * `sqlAfter={{DELETE FROM Clipboard WHERE cookie='{{cookieQfq:C0:alnumx}}' }}`
 
- * FormElement 4
+ * FormElement 4: Update the clipboard source reference, with current {{cookieQfq:C}} identifier.
 
    * Name: `updateClipboardRecord`
    * Class: `action`
    * Type: `afterSave`
    * Parameter: `sqlAfter={{UPDATE Clipboard SET cookie='{{cookieQfq:C0:alnumx}}', formIdPaste={{formId:S0}} /* PasteForm */  WHERE id={{id:R}} LIMIT 1 }}`
 
- * FormElement 5
+ * FormElement 5: Copy basket identifier.
 
    * Name: `basketId`
    * Class: `action`
@@ -3085,7 +3099,7 @@ form with the following parameter
    * sql1: `{{!SELECT {{id:P}} AS id,  '{{myNewName:FE:allbut}}' AS name}}`
    * Parameter: `recordDestinationTable=Basket`
 
- * FormElement 6
+ * FormElement 6: Copy items of basket.
 
    * Name: `itemId`
    * Class: `action`
@@ -4243,8 +4257,7 @@ Parameter and (element) sources
 
     The user typically expect meaningful and distinct filenames for different download links.
 
-* *popupMessage*: `a:<text>` - will be displayed in the popup window during download. If the creating/download is fast,
-      the window might disappear quickly.
+* *popupMessage*: `a:<text>` - will be displayed in the popup window during download. If the creating/download is fast, the window might disappear quickly.
 
 * *mode*: `m:<mode>`
 
@@ -4262,8 +4275,7 @@ Parameter and (element) sources
         * If only one `file` is specifed, the default is `file`.
         * If there is a) a page defined or b) multiple elements, the default is `pdf`.
 
-* *element sources* - for `m:pdf` or `m:zip`, all of the following three element sources might be specified multiple times.
-     Any combination and order of the three options are allowed.
+* *element sources* - for `m:pdf` or `m:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
 
   * *file*: `f:<pathFilename>` - relative or absolute pathFilename offered for a) download (single), or to be concatenated
             in a PDF or ZIP.
@@ -4443,6 +4455,7 @@ references are not found, if they use different colummnnames or tablenames.
 
 Mode: table
 '''''''''''
+
 * `table=<table name>`
 * `r=<record id>`
 
@@ -4450,6 +4463,7 @@ Deletes the record with id '<record id>' from table '<table name>'.
 
 Mode: form
 ''''''''''
+
 * `form=<form name>`
 * `r=<record id>`
 
@@ -5254,7 +5268,7 @@ Error Messages
 --------------
 
 Internal Server Error
-'''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^
 
 The browser shows a red popup with 'Internal Server Error'. The message is generated in the browser. Happens e.g. an AJAX
 request response of QFQ (=Server) is broken. This might happen e.g. if PHP can't start successfully or PHP fails to run
@@ -5280,7 +5294,7 @@ For apache: /var/log/apache2/error_log
 
 
 Call to undefined function qfq\\mb_internal_encoding()
-''''''''''''''''''''''''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Check that all required php modules are installed. See `preparation`_.
 
@@ -5288,7 +5302,7 @@ QFQ specific
 ------------
 
 Variable empty: {{...}}
-'''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Specify the required sanatize class. Remember: for STORE_FORM and STORE_CLIENT the default is `digit`. This means if
 the variable content is a string, this violates the sanatize class and the replaced content will be an empty string!

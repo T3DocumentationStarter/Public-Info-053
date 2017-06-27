@@ -35,6 +35,26 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 0.18.7
+--------------
+
+Changes
+^^^^^^^
+
+* Makefile: 'make bootstrap' udpates all JS Lib packages. Double npm install removed.
+
+Features
+^^^^^^^^
+
+* #3947 / Attack detectect: logout current user (only QFQ, FE User still logged in).
+* #3959 / Class _link: implement 'any' Bootstrap glyphicons. New token 'G:' for '_link'.
+
+Bug Fixes
+^^^^^^^^^
+
+* #3953 / Radio buttons: Auswahl nicht angezeigt, wenn per itemList definiert
+* Feature #3982 / Filename Sanatize: remove spaces. Filename not properbly enclosed by double ticks.
+
 Version 0.18.6
 --------------
 
