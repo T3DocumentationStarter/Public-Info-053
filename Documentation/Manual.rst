@@ -750,7 +750,7 @@ defining the `escape` modifier `m`.
 
 **QFQ notice**:
 
-* Variables passed by the client (=Browser) are untrusted and use the default sanatize class 'digit' (if nothing else is
+* Variables passed by the client (=Browser) are untrusted and use the default sanitize class 'digit' (if nothing else is
   specified). If alpha characters are submitted, the content violates `digit` and becomes therefore empty - there is no
   error message. Best is to always use SIP or digits.
 
@@ -903,7 +903,7 @@ Predefined variable names
 Store: *FORM* - F
 ^^^^^^^^^^^^^^^^^
 
-* Sanatized: *yes*
+* Sanitized: *yes*
 * Represents the values in the form, typically before saving them.
 * Used for:
 
@@ -922,7 +922,7 @@ Store: *FORM* - F
 Store: *SIP* - S
 ^^^^^^^^^^^^^^^^
 
-* Sanatized: *no*
+* Sanitized: *no*
 * Filled automatically by creating links. E.g.:
 
   * in `Report` by using `_page?` or `_link` (with active 's')
@@ -949,7 +949,7 @@ Store: *SIP* - S
 Store: *RECORD* - R
 ^^^^^^^^^^^^^^^^^^^
 
-* Sanatized: *no*
+* Sanitized: *no*
 * Current record loaded in Form.
 * If r=0, all values are empty.
 
@@ -964,7 +964,7 @@ Store: *RECORD* - R
 Store: *BEFORE* - B
 ^^^^^^^^^^^^^^^^^^^
 
-* Sanatized: *no*
+* Sanitized: *no*
 * Current record loaded in Form without any modification.
 * If r=0, all values are empty.
 
@@ -981,7 +981,7 @@ This store is handy to compare new and old values of a form.
 Store: *CLIENT* - C
 ^^^^^^^^^^^^^^^^^^^
 
-* Sanatized: *yes*
+* Sanitized: *yes*
 
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | Name                    | Explanation                                                                                                                              |
@@ -1012,7 +1012,7 @@ Store: *CLIENT* - C
 Store: *TYPO3* (Bodytext) - T
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Sanatized: *no*
+* Sanitized: *no*
 
  +-------------------------+-------------------------------------------------------------------+----------+
  | Name                    | Explanation                                                       | Note     |
@@ -1046,7 +1046,7 @@ Store: *TYPO3* (Bodytext) - T
 Store: *VARS* - V
 ^^^^^^^^^^^^^^^^^
 
-* Sanatized: *no*
+* Sanitized: *no*
 
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | Name                    | Explanation                                                                                                                                |
@@ -1065,7 +1065,7 @@ Store: *VARS* - V
 Store: *LDAP* - L
 ^^^^^^^^^^^^^^^^^
 
-* Sanatized: *yes*
+* Sanitized: *yes*
 * See also :ref:`LDAP`:
 
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1081,7 +1081,7 @@ Store: *LDAP* - L
 Store: *SYSTEM* - Y
 ^^^^^^^^^^^^^^^^^^^
 
-* Sanatized: *no*
+* Sanitized: *no*
 
  +-------------------------+--------------------------------------------------------------------------+
  | Name                    | Explanation                                                              |
@@ -1329,7 +1329,7 @@ accessing STORE_LDAP easily, the keys are implemented case insensitive for this 
 
 The FLS happens *before* the main *FormElement* processing starts. Therefore the fetched LDAP data (specified by *ldapAttributes*),
 are available via `{{<attributename>:L:allbut:s}}` during the regular *FormElement* processing. Take care to specify
-a sanatize class and optional escaping on further processing of those data.
+a sanitize class and optional escaping on further processing of those data.
 
 Important: LDAP access might slow down the *Form* processing on load, update or save! The timeout (default: 3 seconds) have
  to be multiplied by the number of accesses. E.g. a broken LDAP connection and 3 *FormELements* with *FSL*
@@ -2141,7 +2141,7 @@ Note: If there are multiple pills defined on a form, only the first pill will be
 extraButtonLock
 ;;;;;;;;;;;;;;;
 
-* The user has to click on the lock, before it's possible to change the value. This will protect data against unwanted modifcation.
+* The user has to click on the lock, before it's possible to change the value. This will protect data against unwanted modification.
 * After Form load, the value is shown, but not editable.
 * Shows a 'lock' on the right side of an input element of type `text`, `date`, `time` or `datetime`.
 * This option is not available for FormElements with `mode=readonly`.
@@ -2598,7 +2598,7 @@ and will be processed after saving the primary record and before any action Form
 
         fileDestination={{SELECT 'fileadmin/user/pictures/', p.name, '-{{filename}}' FROM Person AS p WHERE p.id={{id:R0}} }}
 
-      * The original filename will be sanatized: only alnum characters are allowed. German 'umlaut' will be replaced by
+      * The original filename will be sanitized: only alnum characters are allowed. German 'umlaut' will be replaced by
         'ae', 'ue', 'oe'. All non valid characters will be replaced by '-'.
 
     * If a file already exist under `fileDestination`, an error message is shown and 'save' is aborted. The user has no
@@ -2935,7 +2935,7 @@ To make a form dynamic:
 
 See #3426 / Dynamic Update: Inputs loose the new content and shows the old value:
 
-* On **all** `dynamic update` *FormElements* an explicit definition of `value`, including a sanatize class, is necessary
+* On **all** `dynamic update` *FormElements* an explicit definition of `value`, including a sanitize class, is necessary
   (except the field is numeric). **A missing definition let's the content overwrite all the time with the old value**.
   A typical definition for `value` looks like::
 
@@ -2948,8 +2948,8 @@ See #3426 / Dynamic Update: Inputs loose the new content and shows the old value
 
     [receiving *FormElement*].parameter: itemList={{ SELECT IF({{carPriceRange:FE:alnumx}}='expensive','Ferrari,Tesla,Jaguar','General Motors,Honda,Seat,Fiat') }}
 
-  Remember to specify a 'sanatize' class - a missing sanatize class means 'digit', every content, which is not numeric,
-  violates the sanatize class and becomes therefore an empty string!
+  Remember to specify a 'sanitize' class - a missing sanitize class means 'digit', every content, which is not numeric,
+  violates the sanitize class and becomes therefore an empty string!
 
 
 Examples
@@ -3680,8 +3680,8 @@ FAQ
 
  * Q: A variable {{<var>}} is shown as empty string, but there should be a value.
 
-   * A: The sanatize rule is violeted and therefore the value has been removed. Set {{<var>:<store>:all}} as a test.
-     Only STORE_CLIENT and STORE_FORM will be sanatized.
+   * A: The sanitize rule is violeted and therefore the value has been removed. Set {{<var>:<store>:all}} as a test.
+     Only STORE_CLIENT and STORE_FORM will be sanitized.
 
 
 Report
@@ -5304,5 +5304,5 @@ QFQ specific
 Variable empty: {{...}}
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Specify the required sanatize class. Remember: for STORE_FORM and STORE_CLIENT the default is `digit`. This means if
-the variable content is a string, this violates the sanatize class and the replaced content will be an empty string!
+Specify the required sanitize class. Remember: for STORE_FORM and STORE_CLIENT the default is `digit`. This means if
+the variable content is a string, this violates the sanitize class and the replaced content will be an empty string!
