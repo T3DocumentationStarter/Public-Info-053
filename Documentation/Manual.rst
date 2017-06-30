@@ -78,7 +78,7 @@ wkhtmltopdf
 The program is not included in QFQ and has to be manually installed.
 
 * The Ubuntu package `wkhtmltopdf` needs a running Xserver - this does not work on a headless webserver. Best is to
-   install the QT version from the named website above.
+  install the QT version from the named website above.
 
 In `config-qfq-ini`_ specify the:
 
@@ -437,7 +437,7 @@ Exception for SECURITY_GET_MAX_LENGTH
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If it is necessary to use a GET variable which exceeds SECURITY_GET_MAX_LENGTH limit, name the variable with '_<num>' at
-the end. E.g. `my_long_variable_130`. Such a variable has an allowed length of 130 chars. Access the a variable as
+the end. E.g. `my_long_variable_130`. Such a variable has an allowed length of 130 chars. Access the variable as
 usual with the variable name: `{{my_long_variable_130:C:...}}`.
 
 
@@ -466,7 +466,7 @@ SIPs
 
 The following is a technical background information. Not needed to just use QFQ.
 
-The SIPs are uniq timestamps, created/registered on the fly for a specific browser session (=user). Every SIP is
+The SIPs (=Server Id Pairs) are uniq timestamps, created/registered on the fly for a specific browser session (=user). Every SIP is
 registered on the server (= stored in a PHP Session) and contains one or more key/value pairs. The key/value pairs never leave
 the server. The SIPs will be used:
 
@@ -622,21 +622,32 @@ File: `config.qfq.ini`_
 
 .. _variables:
 
-Variables
----------
+QFQ Variables
+-------------
 
-Most fields of a form or report specification might contain:
+Most elements of a form or report specification might contain (QFQ) variables. Such a variable is surrounded by
+double curly braces. There are three types of QFQ variables:
 
-* ''constants'' (=strings), this is the standard use case.
-* ''variables'' retrieved from the stores (see below),
-* ''SQL statements'' (limited set of),
-* or any combination of the above.
-
-* A variable (or SQL) statement is surrounded by curly braces:
+* STORE: one or more stores are specified to be searched for the given key (=variable name).
 
   *{{VarName[:<store / prio>[:<sanitize class>[:<escape>]]]}}*
 
-* Example:
+* SQL statements (limited set of),
+
+  *{{SQL Statement}}*
+
+* Fields in a report statement (=Typo3 QFQ page content records), fired previously. See `access-to-upper-column-values`_.
+
+  *{{<line identifier>.<column>}}*
+
+
+All types might be nested with each other. There is no limit of nesting variables.
+
+Very specific: Also, it's possible that the content of a variable is a new variable - this is sometimes used in text
+templates, where the template is retrieved from a record and specific locations in the text will be (automatically by QFQ)
+replaced by values from other sources.
+
+* General examples:
 
   *{{r}}*
 
@@ -646,18 +657,21 @@ Most fields of a form or report specification might contain:
 
   *{{SELECT name FROM person WHERE id=1234}}*
 
-  *{{SELECT name FROM person WHERE id={{r}} }}*
+  *{{SELECT name FROM person WHERE id={{r}} }}* - nested variables.
 
-  *{{SELECT name FROM person WHERE id={{key1:C:alnumx}} }}*
+  *{{SELECT name FROM person WHERE id={{key1:C:alnumx}} }}* - nested variables.
+
+  *{{10.pId}}*
+
+  *{{10.20.pId}}*
 
 * Leading and trailing spaces inside curly braces are removed.
 
   * *{{ SELECT "Hello World"   }}* acts as *{{SELECT "Hello World"}}*
   * *{{ varname   }}* acts as *{{varname}}*
 
-
 * There are several stores, from where to retrieve the value. If a value is not found in one store, the next store is searched,
-  until a value is found or there are no more stores available.
+  until a value is found.
 * If anywhere along the line an empty string is found, this **is** a value: therefore, the search will stop.
 * If no value is found, the value is an <empty string>.
 
@@ -1323,17 +1337,22 @@ Before processing a *FormElement*, an optional configured FSL-action loads **one
 the named attributes in STORE_LDAP. If the LDAP search query selects more than one record, only the first record is processed.
 The attributes names always becomes lowercase (PHP implentation detail on get_ldap_entries()) in the store. To make
 accessing STORE_LDAP easily, the keys are implemented case insensitive for this specific store. FLS is triggered during *Form*-...
+
 * load,
 * dynamic update,
 * save.
 
-The FLS happens *before* the main *FormElement* processing starts. Therefore the fetched LDAP data (specified by *ldapAttributes*),
+The FLS happens *before* the *FormElement* processing starts. Therefore the fetched LDAP data (specified by *ldapAttributes*),
 are available via `{{<attributename>:L:allbut:s}}` during the regular *FormElement* processing. Take care to specify
 a sanitize class and optional escaping on further processing of those data.
 
+Also, the STORE LDAP remains filled, during the whole form processing time. E.g. if the values are needed for a person
+name and email, it's sufficient to fire one FSL on the first FormElement Action element, and use the same values during further FormElement
+Action Elements.
+
 Important: LDAP access might slow down the *Form* processing on load, update or save! The timeout (default: 3 seconds) have
- to be multiplied by the number of accesses. E.g. a broken LDAP connection and 3 *FormELements* with *FSL*
- results to 9 seconds delay on save. Also be prepared not to receive the expected data.
+to be multiplied by the number of accesses. E.g. a broken LDAP connection and 3 *FormElements* with *FSL*
+results to 9 seconds delay on save. Also be prepared not to receive the expected data.
 
 * *FormElement.parameter.fillStoreLdap* - activate the mode *Fill S* - no value is needed, the existence is suffucient.
 * *Form.parameter* or *FormElement.parameter*:
@@ -1554,7 +1573,7 @@ After the user presses *Save*, *Close*, *Delete* or *New*, different actions are
   * *Save* stays on the current page.
   
 * `no` - no change, the browser remains on the current side. Close does not close the page. It just triggers a save if 
-   there are modified data.
+  there are modified data.
 * `url` - the browser redirects to the named URL or T3 page. Independent if the user presses `save` or `close`.
 * `url-skip-history` - same as `url`, but the current location won't saved in the browser history.
 
@@ -2816,10 +2835,10 @@ Situation 1: master.xId=slave.id (1:1)
    * {{slaveId}} != 0 ? 'sqlUpdate' will be fired.
 
  * In case of fireing 'sqlInsert', the 'slave.id' of the new created record are copied to master.xId (the database will
-     be updated automatically).
+   be updated automatically).
 
  * If the automatic update of the master record is not suitable, the action element should have no name or a name
-     which does not exist as a column of the master record. Define  `slaveId={{SELECT id ...}}`
+   which does not exist as a column of the master record. Define  `slaveId={{SELECT id ...}}`
 
  * Two *FormElements*  `myStreet` and `myCity`:
 
@@ -3040,7 +3059,7 @@ A 'select action' (e.g. a `Form` or a button click) creates record(s) in the tab
 
 * the 'id(s)' of the record(s) to duplicate,
 * the 'paste' form id (that `Form` defines, to which table the master records belongs to, as well as rules of how to
-   duplicate any slave records) and where to copy the new records
+  duplicate any slave records) and where to copy the new records
 * user identifier (QFQ cookie) to separate clipboard records of different users inside the Clipboard table.
 
 The 'select action' is also responsible to delete old clipboard records of the current user, before new clipboard records are
@@ -3178,6 +3197,7 @@ Best for debugging is to specify in the tt-content record::
   debugShowBodyText = 1
 
 Note: Debug information is only display if it's enabled in  *config.qfq.ini* by
+
  * *SHOW_DEBUG_INFO=yes* or
  * *SHOW_DEBUG_INFO=auto* and logged in in the same Browser as a Typo3 backend user.
 
@@ -3918,6 +3938,7 @@ Be careful to:
           sql = SELECT 'A query with braces on their own'
    }
 
+.. _`access-to-upper-column-values`:
 
 Access to upper column values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -4278,7 +4299,7 @@ Parameter and (element) sources
 * *element sources* - for `m:pdf` or `m:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
 
   * *file*: `f:<pathFilename>` - relative or absolute pathFilename offered for a) download (single), or to be concatenated
-            in a PDF or ZIP.
+    in a PDF or ZIP.
   * *urlParam*: `U:id=<t3 page>&<key 1>=<value 1>&<key 2>=<value 2>&...&<key n>=<value n>`.
 
     * By default, the options given to wkhtml will *not* be encoded by a SIP!
