@@ -341,6 +341,7 @@ config.qfq.ini
 |                             |                                                 | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 
+
 Example: *typo3conf/config.qfq.ini*
 
 ::
@@ -430,6 +431,19 @@ E.g. to setup a contact address and reuse the information inside your installati
  * Somewhere in a `Form` or in `Report`::
 
       {{ADMINISTRATIVE_CONTACT:Y}}, {{ADMINISTRATIVE_ADDRESS:Y}}, {{ADMINISTRATIVE_NAME}}
+
+..
+
+DB USER privileges
+^^^^^^^^^^^^^^^^^^
+
+The specified DB User needs privileges to the database of at least: SELECT / INSERT / UPDATE / DELETE / SHOW.
+
+To apply automatically QFQ-'DB UPDATE' the following rights are mandatory too: CREATE / ALTER
+
+To get access to the Typo3 installation, 'dbuser' should also have acces to the Typo3 Database with at least SELECT / INSERT / UPDATE / DELETE.
+
+
 
 .. _`ExceptionMaxLength`:
 
@@ -622,70 +636,175 @@ File: `config.qfq.ini`_
 
 .. _variables:
 
-QFQ Variables
--------------
+Variable
+========
 
-Most elements of a form or report specification might contain (QFQ) variables. Such a variable is surrounded by
-double curly braces. There are three types of QFQ variables:
+Most elements of a Form, FormElement or Report might contain (QFQ) variables. Such variables are surrounded by
+double curly braces. Three different types of functionality are provided. Access to:
 
-* STORE: one or more stores are specified to be searched for the given key (=variable name).
+* `store-variables`_
+* `sql-variables`_
+* `column-variables`_
 
-  *{{VarName[:<store / prio>[:<sanitize class>[:<escape>]]]}}*
+Some examples, including nesting::
 
-* SQL statements (limited set of),
+  # Store
+  #---------------------------------------------
+  {{r}}
+  {{index:FS}}
+  {{name:FS:alnumx:s}}
 
-  *{{SQL Statement}}*
+  # SQL
+  #---------------------------------------------
+  {{SELECT name FROM person WHERE id=1234}}
 
-* Fields in a report statement (=Typo3 QFQ page content records), fired previously. See `access-to-upper-column-values`_.
+  # Columns
+  #---------------------------------------------
+  {{10.pId}}
+  {{10.20.pId}}
 
-  *{{<line identifier>.<column>}}*
+  # Nesting
+  #---------------------------------------------
+  {{SELECT name FROM person WHERE id={{r}} }}
+  {{SELECT name FROM person WHERE id={{key1:C:alnumx}} }} # explained below
+  {{SELECT name FROM person WHERE id={{SELECT id FROM pf LIMIT 1}} }} # it's more efficient to use only one query
 
+
+Leading and trailing spaces inside curly braces are removed.
+
+  * *{{ SELECT "Hello World"   }}* becomes *{{SELECT "Hello World"}}*
+  * *{{ varname   }}* becomes *{{varname}}*
+
+Types
+-----
+
+.. _`store-variables`:
+
+Store variables
+^^^^^^^^^^^^^^^
+
+Syntax:  *{{VarName[:<store / prio>[:<sanitize class>[:<escape>]]]}}*
+
+* Example::
+
+  {{pId}}
+  {{pId:FSE}}
+  {{pId:FSE:digit}}
+  {{name:FSE:alnumx:m}}
+
+* Zero or more stores might be specified to be searched for the given VarName.
+* If no store is specified, the by default searched stores are: **FSRVD** (=FORM > SIP > RECORD > VARS > DEFAULT).
+* If the VarName is not found in one store, the next store is searched,  up to the last specified store.
+* If the VarName is not found in any store, nothing is replaced - the string '{{<VarName>}}' remains.
+* If anywhere along the line an empty string is found, this **is** a value: therefore, the search will stop.
+
+See also:
+
+ * `store`_
+ * `variable-escape`_
+ * `sanitize-class`_
+
+
+.. _`sql-variables`:
+
+SQL variables
+^^^^^^^^^^^^^
+
+* The detection of an SQL command is case *insensitive*.
+* Leading  whitespace will be skipped.
+* The following commands are interpreted as SQL commands:
+
+  * SELECT
+  * INSERT, UPDATE, DELETE, REPLACE, TRUNCATE
+  * SHOW, DESCRIBE, EXPLAIN, SET
+
+* A SQL Statement might contain parameters, including additional SQL statements. Inner SQL queries will be executed first.
+* All variables will be substituted one by one from inner to outer.
+* The number of variables inside an input field or a SQL statement is not limited.
+* A resultset of a SQL statement will be imploded over all: concat all columns of a row, concat all rows - there is no glue string.
+
+* Example::
+
+  {{SELECT id, name FROM Person}}
+  {{SELECT id, name, IF({{feUser}}=0,'Yes','No')  FROM Person WHERE id={{r:S}} }}
+  {{SELECT id, city FROM Address AS adr WHERE adr.accId={{SELECT id FROM Account AS acc WHERE acc.name={{feUser}} }} }}
+
+* Special case for `SELECT` input fields and FormElement.type=action `sqlValidate`. To deliver a result array specify an '!' before the SELECT: ::
+
+   {{!SELECT ...}}
+
+
+.. _`column-variables`:
+
+Column variables
+^^^^^^^^^^^^^^^^
+
+Syntax:  *{{<level>.<column>}}*
+
+only used in report to access outer columns. See `access-column-values`_:
+
+* Fields in a report statement. See `access-column-values`_ and `syntax-of-report`_.
+
+
+There might be name conflicts between VarName / SQL keywords and <line identifier>. QFQ checks first for '<line identifier>',
+than for SQL keywords and than for VarNames.
 
 All types might be nested with each other. There is no limit of nesting variables.
 
-Very specific: Also, it's possible that the content of a variable is a new variable - this is sometimes used in text
-templates, where the template is retrieved from a record and specific locations in the text will be (automatically by QFQ)
-replaced by values from other sources.
+Very specific: Also, it's possible that the content of a variable is again (including curly braces) a not already
+substituted variable - this is sometimes used in text templates, where the template is retrieved from a record and
+specific locations in the text will be (automatically by QFQ) replaced by values from other sources.
 
-* General examples:
+.. _`sanitize-class`:
 
-  *{{r}}*
+Sanitize class
+--------------
 
-  *{{index:FS}}*
-
-  *{{name:FS:alnumx:s}}*
-
-  *{{SELECT name FROM person WHERE id=1234}}*
-
-  *{{SELECT name FROM person WHERE id={{r}} }}* - nested variables.
-
-  *{{SELECT name FROM person WHERE id={{key1:C:alnumx}} }}* - nested variables.
-
-  *{{10.pId}}*
-
-  *{{10.20.pId}}*
-
-* Leading and trailing spaces inside curly braces are removed.
-
-  * *{{ SELECT "Hello World"   }}* acts as *{{SELECT "Hello World"}}*
-  * *{{ varname   }}* acts as *{{varname}}*
-
-* There are several stores, from where to retrieve the value. If a value is not found in one store, the next store is searched,
-  until a value is found.
-* If anywhere along the line an empty string is found, this **is** a value: therefore, the search will stop.
-* If no value is found, the value is an <empty string>.
-
-URL Parameter
-^^^^^^^^^^^^^
-
-* URL (=GET) Parameter can be used in *forms* and *reports* as variables.
 * If a value violates a parameter sanitize class, the value becomes an empty string.
+* Per store there is a default if sanitizing applies and if yes, which class.
 
+  * Store *C* (Client=Browser) and store *F* (Form) will be sanitized with 'digit'.
+
+* All `predefined-variable-names`_ have a specific default sanitize class. For these variables, it's not necessary
+  to specify a sanitize class.
+* All other variables (Store: C, F) get by default the sanitize class defined in the corresponding form. If not defined,
+  the default class is 'digit'.
+* A default sanitize class can be overwritten by individual definition: *{{a:C:all}}*
+* If there is a sanitized class specified, it applies to all given stores.
+
+For QFQ variables and FormElements:
+
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| Name             | Form | Query | Pattern                                                                                 |
++==================+======+=======+=========================================================================================+
+| **alnumx**       | Form | Query | [A-Za-z][0-9]@-_.,;: /() ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÑÕãñõÄËÏÖÜŸäëïöüÿç            |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **digit**        | Form | Query | [0-9]                                                                                   |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **numerical**    | Form | Query | [0-9.-+]                                                                                |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **allbut**       | Form | Query | All characters allowed, but not [ ]  { } % & \ #. The used regexp: '^[^\[\]{}%&\\#]+$', |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **all**          | Form | Query | no sanitizing                                                                           |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+
+
+Only in FormElement:
+
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}                                          |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **min|max**      | Form |       | Compares the value against an lower and upper limit (numeric or string).                |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **min|max date** | Form |       | Compares the value against an lower and upper date or datetime.                         |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **pattern**      | Form |       | Compares the value against a regexp.                                                    |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
 
 .. _`variable-escape`:
 
 Escape
-^^^^^^
+------
 
 Variables used in SQL Statements might cause trouble by using: NUL (ASCII 0), \\n, \\r, \\, ', ", and Control-Z.
 
@@ -708,40 +827,6 @@ To protect the web application the following `escape` types are available:
   global definition of `config.qfq.ini`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
   in `config.qfq.ini`_.
 * To suppress a default escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
-
-Sanitize class
-^^^^^^^^^^^^^^
-
-* All values in Store *C* (Client=Browser) and store *F* (Form) will be sanitized:
-* All `predefined-variable-names`_ have a specific default sanitize class. For these variables, it's not necessary
-  to specify a sanitize class.
-* All other variables (Store: C, F) get by default the sanitize class defined in the corresponding form. If not defined
-  the default class is 'digit'.
-* A default sanitize class can be overwritten by individual definition: *{{a:C:all}}*
-
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| Name             | Form | Query | Pattern                                                                                 |
-+==================+======+=======+=========================================================================================+
-| **alnumx**       | Form | Query | [A-Za-z][0-9]@-_.,;: /() ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÑÕãñõÄËÏÖÜŸäëïöüÿç            |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **digit**        | Form | Query | [0-9]                                                                                   |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **numerical**    | Form | Query | [0-9.-+]                                                                                |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}                                          |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **min|max**      | Form |       | Compares the value against an lower and upper limit (numeric or string).                |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **min|max date** | Form |       | Compares the value against an lower and upper date or datetime.                         |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **pattern**      | Form |       | Compares the value against a regexp.                                                    |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **allbut**       | Form | Query | All characters allowed, but not [ ]  { } % & \ #. The used regexp: '^[^\[\]{}%&\\#]+$', |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **all**          | Form | Query | no sanitizing                                                                           |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-
-..
 
 Security
 ========
@@ -857,7 +942,9 @@ By default the mime type of every uploaded file is checked against a whitelist o
 a file can be (easily) faked by an attacker. This check is good to handle regular user file upload for specific file types. To
 prevent attacks against uploading and executing malicous code this won't help.
 
-Intstead prohibit the execution of user contributed files by the webserver config (`SecureDirectFileAccess`_).
+Instead prohibit the execution of user contributed files by the webserver config (`SecureDirectFileAccess`_).
+
+.. _`store`:
 
 Store
 =====
@@ -1051,7 +1138,8 @@ Store: *TYPO3* (Bodytext) - T
  | feUserGroup             | FE groups of logged in Typo3 FE User                              |          |
  +-------------------------+-------------------------------------------------------------------+----------+
 
-* **note**: not available
+* **note**: not available:
+
   * in :ref:`dynamic-update` or
   * by *FormElement* class 'action' with type 'beforeSave', 'afterSave', 'beforeDelete', 'afterDelete'.
 
@@ -1154,35 +1242,6 @@ Store: *SYSTEM* - Y
  +-------------------------+--------------------------------------------------------------------------+
  | sqlCount                | computed during runtime, used for error reporting                        |
  +-------------------------+--------------------------------------------------------------------------+
-
-SQL Statement
--------------
-
-* The detection of an SQL command is case *insensitive*.
-* Leading  whitespace will be skipped.
-* The following commands are interpreted as SQL commands:
-
-  * SELECT
-  * INSERT, UPDATE, DELETE, REPLACE, TRUNCATE
-  * SHOW, DESCRIBE, EXPLAIN, SET
-
-* A SQL Statement might contain parameters, including additional SQL statements. Inner SQL queries will be executed first.
-* All variables will be substituted one by one from inner to outer.
-* Maximum recursion depth: 5 (a recursion depth of 2 is sometimes used for mailing with templates, 3 and more probably confuses too much and is therefore not practicable, but supported until depth of 5)
-* The number of variables inside an input field or a SQL statement is not limited.
-* A resultset of a SQL statement will be imploded over all: concat all columns of a row, concat all rows - there is no glue string.
-
-* Example::
-
-  {{SELECT id, name FROM Person}}
-  {{SELECT id, name, IF({{feUser}}=0,'Yes','No')  FROM Vorlesung WHERE sem_id={{keySemId:Y}} }}
-  {{SELECT id, city FROM Address AS adr WHERE adr.pId={{SELECT id FROM Account AS acc WHERE acc.name={{feUser}} }} }}
-
-* Special case for SELECT input fields. To deliver a result array specify an '!' before the SELECT: ::
-
-   {{!SELECT ...}}
-
-  * This is only possible for the outermost SELECT.
 
 .. _LDAP:
 
@@ -3703,6 +3762,7 @@ FAQ
    * A: The sanitize rule is violeted and therefore the value has been removed. Set {{<var>:<store>:all}} as a test.
      Only STORE_CLIENT and STORE_FORM will be sanitized.
 
+.. _`report`:
 
 Report
 ======
@@ -3759,8 +3819,10 @@ HTML output:
 
 ..
 
-Syntax
-------
+.. _`syntax-of-report`:
+
+Syntax of `report`
+------------------
 
     All **root level queries** will be fired in the order specified by 'level' (Integer value).
 
@@ -3913,24 +3975,26 @@ Be careful to:
 * write nothing else than whitespaces/newline behind an **open brace**
 * the **closing brace** has to be alone on a line. ::
 
-   10.sql = SELECT 'hello world'
+   10.sql = SELECT 'Yearly Report'
 
    20 {
-         sql = SELECT 'a new query'
+         sql = SELECT companyName FORM Company LIMIT 1
          head = <h1>
          tail = </h1>
    }
 
    30 {
-         sql = SELECT 'a third query'
-         head = <h1>
-         tail = </h1>
-         40 {
-               sql = SELECT 'a nested nested query'
+         sql = SELECT depName FROM Department
+         head = <p>
+         tail = </p>
+         5 {
+               sql = SELECT 'detailed information for department'
+               1.sql = SELECT name FROM Person LIMIT 7
+               1.head = Employees:
          }
    }
 
-   30.40.tail = End
+   30.5.tail = More will follow
 
    50
 
@@ -3938,37 +4002,30 @@ Be careful to:
           sql = SELECT 'A query with braces on their own'
    }
 
-.. _`access-to-upper-column-values`:
+.. _`access-column-values`:
 
-Access to upper column values
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Access column values
+^^^^^^^^^^^^^^^^^^^^
 
-Columns of the upper level result can be accessed via variables, eg. {{10.pId}} will be replaced by the value in the pId column.
+Columns of the upper / outer level result can be accessed via variables, eg. {{10.pId}} will be replaced by the value in the pId column.
 
-+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|**Levels**   |A report is divided into levels. Example 1 has 3 levels **10**, **20.25**, **20.25.10**                                                                                                                                      |
-+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|**Qualifier**|A level is divided into qualifiers **20.30.10** has 3 qualifiers **20**, **30**, **10**                                                                                                                                      |
-+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|**Root       |Is a level with one qualifier. E.g.: 10                                                                                                                                                                                      |
-|levels**     |                                                                                                                                                                                                                             |
-+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|**Sub        |Is a level with more than one qualifier. E.g. levels **20.25** and **20.30.10**                                                                                                                                              |
-|levels**     |                                                                                                                                                                                                                             |
-+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|**Child**    |The level **20** has one child **20.25**                                                                                                                                                                                     |
-+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|**Parent**   |The level 20.25 has a parent **20**                                                                                                                                                                                          |
-+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|**Example    |**10** and **20** are root level and will be executed independently. **10** don't have a sub level. **20.25** will be executed as many times as **20** has row numbers. **20.30.10** won't be executed because there isn't   |
-|explanation**|any **20.30** level                                                                                                                                                                                                          |
-+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-------------+------------------------------------------------------------------------------------------------------------------------+
+| Levels      |A report is divided into levels. The Example has levels *10*, *20*, *30*, *30.5*, *30.5.1*, *50*                        |
++-------------+------------------------------------------------------------------------------------------------------------------------+
+| Qualifier   |A level is divided into qualifiers *30.5.1* has 3 qualifiers *30*, *5*, *1*                                             |
++-------------+------------------------------------------------------------------------------------------------------------------------+
+| Root levels |Is a level with one qualifier. E.g.: 10                                                                                 |
++-------------+------------------------------------------------------------------------------------------------------------------------+
+| Sub levels  |Is a level with more than one qualifier. E.g. levels *30.5* or *30.5.1*                                                 |
++-------------+------------------------------------------------------------------------------------------------------------------------+
+| Child       |The level *30* has one child and child child: *30.5* and *30.5.1*                                                       |
++-------------+------------------------------------------------------------------------------------------------------------------------+
+| Example     | *10*, *20*, *30*, *50** are root level and will be completely processed one after each other.                          |
+|             | *30.5* will be executed as many times as *30* has row numbers.                                                         |
+|             | *30.5.1*  will be executed as many times as *30.5* has row numbers.                                                    |
++-------------+------------------------------------------------------------------------------------------------------------------------+
 
-
-Report Example 1:
-
-::
-
+Report Example 1: ::
 
     # Displays current date
     10.sql = SELECT CURDATE()
