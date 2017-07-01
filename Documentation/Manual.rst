@@ -741,18 +741,15 @@ Column variables
 
 Syntax:  *{{<level>.<column>}}*
 
-only used in report to access outer columns. See `access-column-values`_:
+Only used in report to access outer columns. See `access-column-values`_ and `syntax-of-report`_.
 
-* Fields in a report statement. See `access-column-values`_ and `syntax-of-report`_.
-
-
-There might be name conflicts between VarName / SQL keywords and <line identifier>. QFQ checks first for '<line identifier>',
-than for SQL keywords and than for VarNames.
+There might be name conflicts between VarName / SQL keywords and <line identifier>. QFQ checks first for '<level>',
+than for 'SQL keywords' and than for 'VarNames' in stores.
 
 All types might be nested with each other. There is no limit of nesting variables.
 
-Very specific: Also, it's possible that the content of a variable is again (including curly braces) a not already
-substituted variable - this is sometimes used in text templates, where the template is retrieved from a record and
+Very specific: Also, it's possible that the content of a variable is again (including curly braces) a variable - this
+is sometimes used in text templates, where the template is retrieved from a record and
 specific locations in the text will be (automatically by QFQ) replaced by values from other sources.
 
 .. _`sanitize-class`:
@@ -2094,6 +2091,57 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | extraButtonInfo        | string | Text. Show a 'i' on the right side of the input element. See `extraButtonInfo`_                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| autofocus              | string | See `input-option-autofocus`_                                                                            |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| checkBoxMode           | string | See `input-checkbox`_, `input-radio`_, `input-select`_                                                   |
+| checked                | string |                                                                                                          |
+| unchecked              | string |                                                                                                          |
+| label2                 | string |                                                                                                          |
+| itemList               | string |                                                                                                          |
+| emptyHide              | string |                                                                                                          |
+| emptyItemAtStart       | string |                                                                                                          |
+| emptyItemAtEnd         | string |                                                                                                          |
+| buttonClass            | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| dateFormat             | string | yyyy-mm-dd | dd.mm.yyyy                                                                                  |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| showSeconds            | string | 0|1 - Shows the seconds on form load. Default: 0                                                         |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| showZero               | string | 0|1 - Empty timestamp: '0'(default) - nothing shown, '1' - the string '0000-00-00 00:00:00' is displayed |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| retype                 | string | See `input-text`_                                                                                        |
+| retypeLabel            | string |                                                                                                          |
+| retypeNote             | string |                                                                                                          |
+| characterCountWrap     | string |                                                                                                          |
+| hideZero               | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| typeAheadLimit         | string | See `input-typeahead`_                                                                                   |
+| typeAheadMinLength     | string |                                                                                                          |
+| typeAheadSql           | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| editor-plugins         | string | See `input-editor`_                                                                                      |
+| editor-toolbar         | string |                                                                                                          |
+| editor-statusbar       | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| form                   | string | See `subrecord-option`_                                                                                  |
+| page                   | string |                                                                                                          |
+| title                  | string |                                                                                                          |
+| extraDeleteForm        | string |                                                                                                          |
+| detail                 | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| capture                | string | See `input-upload`_                                                                                      |
+| accept                 | string |                                                                                                          |
+| maxFileSize            | string |                                                                                                          |
+| fileDestination        | string |                                                                                                          |
+| slaveId                | string |                                                                                                          |
+| fileReplace            | string |                                                                                                          |
+| sqlBefore              | string |                                                                                                          |
+| sqlInsert              | string |                                                                                                          |
+| sqlUpdate              | string |                                                                                                          |
+| sqlDelete              | string |                                                                                                          |
+| sqlAfter               | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+
 
 Effect matrix
 ^^^^^^^^^^^^^
@@ -2204,6 +2252,8 @@ Native *FormElements*
 '''''''''''''''''''''
 * Like 'input', 'checkbox', ...
 
+.. _`input-option-autofocus`:
+
 autofocus
 ;;;;;;;;;
 
@@ -2247,6 +2297,8 @@ extraButtonInfo
 
   * on the right side of an input element for type `text`, `date`, `time` or `datetime`,
   * below the FormElement for all other types.
+
+.. _`input-checkbox`:
 
 Type: checkbox
 ^^^^^^^^^^^^^^
@@ -2348,6 +2400,8 @@ Type: extra
 * The element is build / computed on form load and saved alongside with the SIP parameter of the current form.
 * Access the value without specifying any store (default store priority is sufficient).
 
+.. _`input-text`:
+
 Type: text
 ^^^^^^^^^^
 
@@ -2366,6 +2420,8 @@ Type: text
     `text1` / `text2` is missing, just display `<current>/</max>`. Customization: `characterCountWrap=<div class=qfq-cc-style>Count: |</div>`
   * Also check the  :ref:`fe-parameter-attributes` *data-...-error* to customize error messages shown by the validator.
   * *hideZero* = 0|1 (optional): `with hideZero=1` a '0' in the value will be replaced by an empty string.
+
+.. _`input-typeahead`:
 
 Type Ahead
 ''''''''''
@@ -2406,6 +2462,8 @@ LDAP
 ;;;;
 
 See :ref:`LDAP_Typeahead`
+
+.. _`input-editor`:
 
 Type: editor
 ^^^^^^^^^^^^
@@ -2453,6 +2511,8 @@ Type: password
 ^^^^^^^^^^^^^^
 
 * Like a `text` element, but every character is shown as an asterisk.
+
+.. _`input-radio`:
 
 Type: radio
 ^^^^^^^^^^^
@@ -2509,6 +2569,8 @@ Type: radio
 
     For existing records the shown value is as expected the value of the record. For new records, it's the value `0`,
     which is typically not one of the ENUM values and therefore nothing is selected.
+
+.. _`input-select`:
 
 Type: select
 ^^^^^^^^^^^^
@@ -2622,6 +2684,8 @@ Type: time
   * *showSeconds*: 0|1 - shows the seconds. Independent if the user specifies seconds, they are displayed '1' or not '0'.
   * *showZero*: 0|1 - For an empty timestamp, With '0' nothing is displayed. With '1' the string '00:00[:00]' is displayed.
 
+.. _`input-upload`:
+
 Type: upload
 ^^^^^^^^^^^^
 
@@ -2647,6 +2711,7 @@ The FormElement behaves like a
 Inside the *Form editor* it's shown as a 'native FormElement'.
 During saving the current record, it behaves like an action FormElement
 and will be processed after saving the primary record and before any action FormElements are processed.
+
 
 * *FormElement.parameter*:
 
