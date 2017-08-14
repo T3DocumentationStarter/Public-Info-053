@@ -34,6 +34,57 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.19.1
+--------------
+
+Features
+^^^^^^^^
+
+ * #4172 /record locking: Bob tries to delete a record and get 'status=error': Client should disable 'delete' button
+ * #4185 / Detect modified record
+ * #4143 / New alert removes old alert(s)
+ * #4173 / Form: User open's a new tab and press close - alert to inform user that he has to close the tab
+ * #1930, #3980 /  Client: Bei Form Submit den Status 'submit_reason=save|save,close' mitsenden
+ * Implemented: New > Close (save) now closes correctly the current page. Addtional, #1930 has been solved implizit.
+
+Bug Fixes
+^^^^^^^^^
+
+ * Bug #4174 / record locking: error message if delete fails due to record locking
+ * Bug: SQL 'CREATE' implemented as a valid command.
+
+Version 0.19.0
+--------------
+
+Changes
+^^^^^^^
+
+* bower.json: change bootstrap version number from micro to minor.
+* Sip.php: Guarantee that uniqid() is unique at least for the current user.
+* Makefile: change installation of phpDocumentor to --alldeps and remove 'phpdoc/'.
+
+Features
+^^^^^^^^
+
+* #3881 / Variables: Ex 'keySemId', New 'periodId' (System Store)
+* AbstractBuildForm.php: if a datetime / timestamp has the string 'CURRENT_TIMESTAMP' it will be replaced by the current date/time.
+* Add new STORE_TYPO3 vars: pageAlias, pageTitle
+* Config.php: cleanup of checking GET variables.
+* #3981 / Record Locking
+* Manual.rst: add documentation for record locking
+* Manual.rst: more details about QFQ variables.
+* plantuml: sequence diagrams for record locking
+
+Bug Fixes
+^^^^^^^^^
+
+* Bug #4158 / Delete Button im Form fehlen die SIP Parameter.
+* Bug #4159 / missing htmlspecialchar_decode() for FE.value supplied content.
+* Bug Makefile: fixed unwanted removing of whole 'doc' by 'maintainer-clean' - doc nowadays contains QFQ related manually created documentation.
+* Bug typeahead.php: An exception catched in typeahead.php has been assigned as array element, instead of a whole array. Fixed.
+
+
+
 
 Version 0.18.7
 --------------

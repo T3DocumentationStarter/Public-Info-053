@@ -337,8 +337,13 @@ config.qfq.ini
 |                             |                                                 | time QFQ is called - *not* recommended!                                    |
 |                             |                                                 | 'never': never apply DB Updates.                                           |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| DIRTY_RECORD_TIMEOUT_SECONDS| DIRTY_RECORD_TIMEOUT_SECONDS = 900              | Timeout for record locking. After this time, a record will be replaced     |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...      | Link to the online documentation of QFQ. Every QFQ installation also       |
 |                             |                                                 | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| VAR_ADD_BY_SQL                | VAR_ADD_BY_SQL = {{!SELECT s.id AS ...        | Specific values read from the database to fill the system store during QFQ |
+|                             |                                                 | load. See `VariablesAddBySql`_ for a usecase.                              |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 
 
@@ -411,12 +416,19 @@ Example: *typo3conf/config.qfq.ini*
 	;NEW_BUTTON_GLYPH_ICON = glyphicon-plus
 
 	; auto | always | never
-	;DB_UPDATE=auto
+	;DB_UPDATE = auto
 
-   ; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
+	;RECORD_LOCK_TIMEOUT_SECONDS = 900
+
+    ; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
 	;DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
 
-..
+    ;VAR_ADD_BY_SQL = {{!SELECT s.id AS _periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1}}
+
+.. _`CustomVariables`:
+
+Custom variables
+^^^^^^^^^^^^^^^^
 
 It's also possible to setup custom variables in `config.qfq.ini`.
 
@@ -432,7 +444,55 @@ E.g. to setup a contact address and reuse the information inside your installati
 
       {{ADMINISTRATIVE_CONTACT:Y}}, {{ADMINISTRATIVE_ADDRESS:Y}}, {{ADMINISTRATIVE_NAME}}
 
-..
+.. _`VariablesAddBySql`:
+
+Variables add by SQL
+^^^^^^^^^^^^^^^^^^^^
+
+A specified SELECT statement in `config.qfq.ini`_ in variable `VAR_ADD_BY_SQL` fill be fired after filling the SYSTEM STORE.
+The query should have 0 (nothing happens) or 1 row. The column names and column values will be added as variables to the SYSTEM_STORE.
+Existing variables will be overwritten. Be carefull not to overwrite needed values.
+ 
+This option is usefull to make generic custom values, saved in the database, accessible to all QFQ Report and Forms.
+Access such variables as usual via `{{<varname>:Y}}`.
+
+.. _`periodId :
+
+periodId
+''''''''
+
+This is
+
+* a usecase, implemented via `VariablesAddBySql`_,
+* a way to access `Period.id` with respect to the current period (the period itself is defined by you).
+
+After a full QFQ installation, three things are prepared:
+
+* a table `Period` (extend / change it to your needs, fill them with your periods),
+* one sample record in table `Period`,
+* in config.qfq.ini the default definition of `VAR_ADD_BY_SQL` will set the variable `periodId` during QFQ load.
+
+Websites, delivering semester data, schoolyears schedules, or any other type or periods, often need an index to the
+*current* period. One way is a) to mark the current period and b) to change the marker every time when the next period
+becomes current.
+The QFQ approach works without a marker and without manual intervention: the whished index will be computed during QFQ load.
+
+In `config.qfq.ini`: ::
+
+	VAR_ADD_BY_SQL = SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1
+
+a variable 'periodId' will automatically computed and filled in STORE SYSTEM. Access it via `{{periodId:Y0}}`.
+To get the name and current period: ::
+
+  SELECT name, ' / ', start FROM Period WHERE id={{periodId:Y0}}
+
+Typically, it's necessary to offer a 'previous' / 'next' link. In this example, the STORE SIP holds the new periodId: ::
+
+  SELECT CONCAT('id={{pageId:T}}&periodId=', {{periodId:SY0}}-1, '|Next') AS _Page, ' ', name, ' ', CONCAT('id={{pageId:T}}&periodId=', {{periodId:SY0}}+1, '|Next') AS _Page FROM Period AS s WHERE s.id={{periodId:SY0}}
+
+Take care for minimum and maximum indexes (do not render the links if out of range).
+
+.. _`DbUserPrivileges`:
 
 DB USER privileges
 ^^^^^^^^^^^^^^^^^^
@@ -1122,6 +1182,10 @@ Store: *TYPO3* (Bodytext) - T
  +-------------------------+-------------------------------------------------------------------+----------+
  | pageId                  | Record id of current Typo3 page                                   | see note |
  +-------------------------+-------------------------------------------------------------------+----------+
+ | pageAlias               | Alias of current Typo3 page                                       | see note |
+ +-------------------------+-------------------------------------------------------------------+----------+
+ | pageTitle               | Title of current Typo3 page                                       | see note |
+ +-------------------------+-------------------------------------------------------------------+----------+
  | pageType                | Current selected page type (typically URL parameter 'type')       | see note |
  +-------------------------+-------------------------------------------------------------------+----------+
  | pageLanguage            | Current selected page language (typically URL parameter 'L')      | see note |
@@ -1478,18 +1542,54 @@ General
     page. This is nice to configure few Typo 3 pages. The disadvantage is that the user might loose the navigation.
 
 
+.. _record_locking:
+
+Record locking
+--------------
+
+Forms and 'record delete'-function support basic record locking. If a user opens a form and start to change content, a
+record lock will be acquired in the background. If the lock is denied (another user already owns a lock on the record) an
+alert is shown.
+By default the record lock mode is 'exclusive' and the default timeout is 15 minutes. Both can be configured per form. The
+initial default timeout can also be configured in `config.qfq.ini`_ (will be copied to the form during creating the form).
+
+If a timeout expires, the lock is deleted. During the next change in a form, the lock is acquired again.
+
+A lock is assgined to a record of a table. Multiple forms, with the same primary table, uses the same lock for a given record.
+
+If a `Form` acts on further records (e.g. via FE action), those records are not protected by this basic record locking.
+
+If a user tries to delete a record and another user already owns a lock on that record, the delete action is denied.
+
+If there are different locking modes in mulitiple forms, the most restricting mode applies for the current lock.
+
+Exclusive
+^^^^^^^^^
+
+An existing lock on a record forbids any write action on that record.
+
+Advisory
+^^^^^^^^
+
+An existing lock on a record informs the user that another user is currently working on that record. Nevertheless,
+writing is allowed.
+
+None
+^^^^
+
+No locking at all.
+
 .. _comment-space-character:
 
 Comment- and space-character
 ----------------------------
 
+The following applies to the fields `Form.parameter` and `FormElement.parameter`:
+
 * Lines will be trimmed - leading and trailing spaces will be removed.
 * If a leading and/or trailing space is needed, escape it: '\ hello world \' > ' hello world '.
-
-* Lines starting with a '#' are treated as a comment and will not be parsed. Suche lines are treated as 'empty lines'.
-* The comment sign can be escaped with '\'.
-
-
+* Lines starting with a '#' are treated as a comment and will not be parsed. Such lines are treated as 'empty lines'.
+* The comment sign can be escaped with '\\'.
 
 .. _form-main:
 
@@ -2716,7 +2816,7 @@ and will be processed after saving the primary record and before any action Form
 * *FormElement.parameter*:
 
   * *capture=camera*: On a smartphone, after pressing the 'open file' button, the camera will be opened and a
-      choosen picture will be uploaded. Automatically set/overwrite `accept=image/*`.
+    choosen picture will be uploaded. Automatically set/overwrite `accept=image/*`.
 
   * *accept*: `<mime type>,image/*,video/*,audio/*,.doc,.docx,.pdf`
 
@@ -2974,10 +3074,12 @@ Situation 1: master.xId=slave.id (1:1)
 
     * With *sqlHonorFormElements*. Parameter: ::
 
-       sqlHonorFormElements = myStreet%d, myCity%d
+       sqlHonorFormElements = myStreet, myCity     # Non Templategroup
        sqlInsert = {{INSERT INTO address (`street`, `city`) VALUES ('{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}') }}
        sqlUpdate = {{UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1 }}
        sqlDelete = {{DELETE FROM address WHERE id={{slaveId}} LIMIT 1 }}
+
+       # For Templategroups: sqlHonorFormElements = myStreet%d, myCity%d
 
 Situation 2: master.id=slave.xId (1:n)
 
@@ -2999,11 +3101,12 @@ Situation 2: master.id=slave.xId (1:n)
     * With *sqlHonorFormElements*. Parameter: ::
 
        slaveId = {{SELECT id FROM address WHERE personId={{id}} ORDER BY id LIMIT 1 }}
-       sqlHonorFormElements = myStreet%d, myCity%d
+       sqlHonorFormElements = myStreet, myCity       # Non Templategroup
        sqlInsert = {{INSERT INTO address (`personId`, `street`, `city`) VALUES ({{id}}, '{{myStreet:FE:alnumx:s}}', '{{myCity:FE:alnumx:s}}') }}
        sqlUpdate = {{UPDATE address SET `street` = '{{myStreet:FE:alnumx:s}}', `city` = '{{myCity:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1 }}
        sqlDelete = {{DELETE FROM address WHERE id={{slaveId}} LIMIT 1 }}
 
+       # For Templategroups: sqlHonorFormElements = myStreet%d, myCity%d
 
 Type: sendmail
 ^^^^^^^^^^^^^^
@@ -3129,7 +3232,7 @@ column on the right side will be rendered.
 
 The used default column (=bootstrap grid) width is *3,6,3* for *label, input, note*.
 
-* The system wide default can be changed via config.qfq.ini :ref:`config-qfq-ini` - the new settings are the default
+* The system wide default can be changed via `config-qfq-ini`_ - the new settings are the default
   settings for all forms.
 * Per *Form* settings can be done in the *Form* parameter field. They overwrite the system wide default.
 * Per *FormElement* settings can be done in the *FormElement* parameter field. They overwrite the *Form* setting.
@@ -3296,6 +3399,29 @@ To automatically delete slave records, use a form and create `beforeDelete` Form
   * parameter: sqlAfter={{DELETE FROM <slaveTable> WHERE <slaveTable>.<masteId>={{id:R}} }}
 
 You might also check the form 'form' how the slave records 'FormElement' will be deleted.
+
+.. _locking-record:
+
+Locking Record / Form
+---------------------
+
+Support for record locking is given with mode:
+
+* *exclusive*: user can't force a write.
+
+  * Including a timeout (default 15 mins: DIRTY_RECORD_TIMEOUT_SECONDS in `config.qfq.ini`_) for maximum lock time.
+
+* *advisory*: user is only warned, but allowed to overwrite.
+* *none*: no bookeeping about locks.
+
+For 'new' records (r=0) there is no locking at all.
+
+The record locking protection is based on the `tablename` and the `record id`. Different `Forms`, with the same primary table,
+will be protected by record locking. On the other side, action-`FormElements` updating non primary table records are not
+protected by 'record locking': the QFQ record locking is *NOT 100%*.
+
+The 'record locking' mode will be specified per `Form`. If there are multiple Forms with different modes, and there is
+already a lock for a `tablename` / `record id` pair, the most restrictive will be applied.
 
 
 Best practice
