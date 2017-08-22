@@ -34,6 +34,62 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.19.5
+--------------
+
+Features
+^^^^^^^^
+
+* #3790 / Multilanguage: German/ English/ ...
+
+Bug Fixes
+^^^^^^^^^
+* #4274 / ItemList: escape ',' ':'
+
+
+Version 0.19.4
+--------------
+
+Features
+^^^^^^^^
+
+* Feature: Form Paste Records - skip columns during copy if they do not exist on the source side.
+
+Bug Fixes
+^^^^^^^^^
+
+* #4266 / FormElement Type=Editor: value not saved - fixed
+* #4253 / Record Lock not deleted, when window closes without save.
+
+Version 0.19.3
+--------------
+
+Changes
+^^^^^^^
+
+* Changing buttons for the dirty Events depending on status
+
+Bug Fixes
+^^^^^^^^^
+
+* #4257 / Dynamic update broken - after changing JSON data structure, update load.php has been missed.
+
+Open
+^^^^
+
+* #4253 / Record Lock not deleted when window closes without save
+
+Version 0.19.2
+--------------
+
+Features
+^^^^^^^^
+
+* #4250 / autocron: sending mails
+* #4248 / FormElement: TypeAhead fuer den Spaltennamen - Implemented
+* #4144 / Close/New: bei acquireLock=false anschliessend keine Nachfrage ob gespeichert werden soll
+* #4120: Removed Timeout from Dirty Alert Message
+
 Version 0.19.1
 --------------
 

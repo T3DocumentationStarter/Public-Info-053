@@ -145,7 +145,7 @@ Setup
   *<Documentroot>/typo3conf/config.qfq.ini* and configure the necessary values: `config.qfq.ini`_
   The configuration file is outside the extension directory to not loose it during updates.
 * When the QFQ Extension is called the first time on the Typo3 Frontend, the file *<ext_dir>/qfq/sql/formEditor.sql* will
-  played and fills the database with the *FormEditor* records. This also happens automatically after each software update of QFQ.
+  played and fills the database with the *Form editor* records. This also happens automatically after each software update of QFQ.
 * Configure Typoscript to include Bootstrap, jQuery, QFQ javascript and CSS files.
 
 ::
@@ -241,7 +241,7 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | REDIRECT_ALL_MAIL_TO        | REDIRECT_ALL_MAIL_TO=john@doe.com               | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_LINK_CLASS_INTERNA    L | CSS_LINK_CLASS_INTERNAL=internal                | CSS class name of links which points to internal tagets                    |
+| CSS_LINK_CLASS_INTERNAL     | CSS_LINK_CLASS_INTERNAL=internal                | CSS class name of links which points to internal tagets                    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | CSS_LINK_CLASS_EXTERNAL     | CSS_LINK_CLASS_EXTERNAL=external                | CSS class name of links which points to internal tagets                    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
@@ -342,10 +342,19 @@ config.qfq.ini
 | DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...      | Link to the online documentation of QFQ. Every QFQ installation also       |
 |                             |                                                 | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| VAR_ADD_BY_SQL                | VAR_ADD_BY_SQL = {{!SELECT s.id AS ...        | Specific values read from the database to fill the system store during QFQ |
+| VAR_ADD_BY_SQL              | VAR_ADD_BY_SQL = {{!SELECT s.id AS ...          | Specific values read from the database to fill the system store during QFQ |
 |                             |                                                 | load. See `VariablesAddBySql`_ for a usecase.                              |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-
+| FORM_LANGUAGE_A_ID          | FORM_LANGUAGE_A__ID = 1                         | In Typo3 configured pageLanguage id. The number after the 'L' parameter.   |
+| FORM_LANGUAGE_B_ID          |                                                 |                                                                            |
+| FORM_LANGUAGE_C_ID          |                                                 |                                                                            |
+| FORM_LANGUAGE_D_ID          |                                                 |                                                                            |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| FORM_LANGUAGE_A_LABEL       | FORM_LANGUAGE_A_LABEL = english                 | Label shown in *Form editor*, on the 'basic' tab.                          |
+| FORM_LANGUAGE_B_LABEL       |                                                 |                                                                            |
+| FORM_LANGUAGE_C_LABEL       |                                                 |                                                                            |
+| FORM_LANGUAGE_D_LABEL       |                                                 |                                                                            |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 
 Example: *typo3conf/config.qfq.ini*
 
@@ -425,6 +434,9 @@ Example: *typo3conf/config.qfq.ini*
 
     ;VAR_ADD_BY_SQL = {{!SELECT s.id AS _periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1}}
 
+    ;FORM_LANGUAGE_A_ID = 1
+    ;FORM_LANGUAGE_A_LABEL = english
+
 .. _`CustomVariables`:
 
 Custom variables
@@ -456,7 +468,7 @@ Existing variables will be overwritten. Be carefull not to overwrite needed valu
 This option is usefull to make generic custom values, saved in the database, accessible to all QFQ Report and Forms.
 Access such variables as usual via `{{<varname>:Y}}`.
 
-.. _`periodId :
+.. _`periodId`:
 
 periodId
 ''''''''
@@ -880,7 +892,7 @@ To protect the web application the following `escape` types are available:
 * Be careful when escaping nested variables. Best is to escape **only** the most outer variable.
 * In `config.qfq.ini`_ a global `ESCAPE_TYPE_DEFAULT` can be defined. The configured escape type applies to all substituted
   variables, who *do not* contain a *specific* escape type.
-* Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the Form Editor). This overwrites the
+* Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the *Form editor*). This overwrites the
   global definition of `config.qfq.ini`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
   in `config.qfq.ini`_.
 * To suppress a default escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
@@ -1492,8 +1504,8 @@ Form
 General
 -------
 
-* Forms will be created by using the *QFQ Form Editor* on the Typo3 frontend (HTML form).
-* The Formeditor itself consist of two predefined QFQ forms: *form* and *formElement* - these forms are often updated
+* Forms will be created by using the *Form Editor* on the Typo3 frontend (HTML form).
+* The *Form editor* itself consist of two predefined QFQ forms: *form* and *formElement* - these forms are often updated
   during the installation of new QFQ versions.
 * Every form consist of a) a *Form* record and b) multiple *FormElement* records.
 * A form is assigned to a  *table*. Such a table is called the *primary table* for this form.
@@ -2436,6 +2448,7 @@ Checkboxes can be rendered in mode:
 
       * ``itemList=red,blue,orange``
       * ``itemList=1:red,2:blue,3:orange``
+      * If ':' or ',' are part of key or value, it needs to escaped by '\'. E.g.: `itemList=1:red\:,2:blue\,,3:orange``
 
   * *FormElement.sql1* = ``{{!SELECT id, value FROM someTable}}``
   * *FormElement.maxlength* - vertical or horizontal alignment:
@@ -2629,7 +2642,8 @@ Type: radio
 
   2. *FormElement.parameter*:
 
-    * *itemList* = `<attribute>` E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue:3:orange*
+    * *itemList* = `<attribute>` E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue,3:orange*
+    * If ':' or ',' are part of key or value, it needs to escaped by '\'. E.g.: `itemList=1:red\:,2:blue\,,3:orange``
 
   3. Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -2688,6 +2702,7 @@ Type: select
   * *FormElement.parameter*:
 
     * *itemList* = `<attribute>` - E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue:3:orange*
+    * If ':' or ',' are part of key or value, it needs to escaped by '\'. E.g.: `itemList=1:red\:,2:blue\,,3:orange``
 
   * Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -3158,6 +3173,60 @@ See also `copy-form`_.
   * *recordSourceTable* - Optional: table from where the records will be copied. Default: <recordDestinationTable>
   * *recordDestinationTable* - table where the new records will be copied to.
   * *translateIdColumn* - columnname to update references of newly created id's.
+
+.. _multi-language-form:
+
+Multi Language Form
+-------------------
+
+QFQ Forms might be configured for up to 5 different languages. Per language there is one extra field in the *Form editor*.
+Which field represents which language is configured in `config.qfq.ini`_.
+
+* The Typo3 installation needs to be configured to handle different languages - this is independet of QFQ and not covered
+  here. QFQ will use the Typo3 internal variable 'pageLanguage', which typically correlates to the URL parameter 'L' in the URL.
+* In `config.qfq.ini`_ the Typo3 language index (value of 'L') and a language label have to be configured for each language.
+  Only than, the additional language fields in the *Form editor* will be shown.
+
+Example
+^^^^^^^
+
+Assuming the Typo3 page has the
+
+* default language, L=0
+* english, L=1
+* spain, L=2
+
+Configuration in `config.qfq.ini`: ::
+
+		FORM_LANGUAGE_A_ID = 1
+		FORM_LANGUAGE_A_LABEL = english
+
+		FORM_LANGUAGE_B_ID = 2
+		FORM_LANGUAGE_B_LABEL = spain
+
+The default language is not covered in config.qfq.ini.
+
+The *Form editor* now shows on the pill 'Basic' (Form und FormEditor) for both languages each an additional parameter
+input field. Any input field in the *Form editor* can be redeclared in the correspondig language parameter field. Any
+missing definition means 'take the default'. E.g.: ::
+
+	Form.title: Eingabe Person
+	Form.languageParameterA: title=Input Person
+	Form.languageParameterB: title=Persona de entrada
+
+	FormElement 'firstname':
+	FormElement.title = Vorname
+	FormElement.note = Bitte alle Vornamen erfassen
+	Form.languageParameterA: title=Input Person
+									 note=Please all firstnames
+	Form.languageParameterB: title=Persona de entrada
+									 note=Por favor, introduzca todos los nombres
+
+The following fields are possible:
+
+* Form: title, showButton, forwardMode, forwardPage, bsLabelColumns, bsInputColumns, bsNoteColumns, recordLockTimeoutSeconds
+* FormElement: label, mode, mdoeSql, class, type, subrecordOption, encode, checkType, ord, tabindex, size, maxLength,
+  bsLabelColumns, bsInputColumns, bsNoteColumns,rowLabelInputNote, note, tooltip, placeholder, value, sql1, feGroup
 
 .. _dynamic-update:
 
