@@ -3232,11 +3232,11 @@ missing definition means 'take the default'. E.g.:
 	+--------------------+------------------------------------------------+
 	| note               | Bitte alle Vornamen erfassen                   |
 	+--------------------+------------------------------------------------+
-	| languageParameterA ||title=Firstname                                |
-	|                    ||note=Please give all firstnames                |
+	| languageParameterA | | title=Firstname                              |
+	|                    | | note=Please give all firstnames              |
 	+--------------------+------------------------------------------------+
-	| languageParameterB ||title=Persona de entrada                       |
-	|                    ||note=Por favor, introduzca todos los nombres   |
+	| languageParameterB | | title=Persona de entrada                     |
+	|                    | | note=Por favor, introduzca todos los nombres |
 	+--------------------+------------------------------------------------+
 
 
