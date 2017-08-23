@@ -2226,6 +2226,7 @@ See also at specific *FormElement* definitions.
 | retypeNote             | string |                                                                                                          |
 | characterCountWrap     | string |                                                                                                          |
 | hideZero               | string |                                                                                                          |
+| emptyMeansNull         | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | typeAheadLimit         | string | See `input-typeahead`_                                                                                   |
 | typeAheadMinLength     | string |                                                                                                          |
@@ -2533,6 +2534,8 @@ Type: text
     `text1` / `text2` is missing, just display `<current>/</max>`. Customization: `characterCountWrap=<div class=qfq-cc-style>Count: |</div>`
   * Also check the  :ref:`fe-parameter-attributes` *data-...-error* to customize error messages shown by the validator.
   * *hideZero* = 0|1 (optional): `with hideZero=1` a '0' in the value will be replaced by an empty string.
+  * *emptyMeansNull* = [0|1] (optional): with `emptyMeansNull` or `emptyMeansNull=1` a NULL value will be written if
+    the value is an empty string
 
 .. _`input-typeahead`:
 
@@ -3229,11 +3232,11 @@ missing definition means 'take the default'. E.g.:
 	+--------------------+------------------------------------------------+
 	| note               | Bitte alle Vornamen erfassen                   |
 	+--------------------+------------------------------------------------+
-	| languageParameterA || title=Firstname                               |
-	|                    || note=Please give all firstnames               |
+	| languageParameterA ||title=Firstname                                |
+	|                    ||note=Please give all firstnames                |
 	+--------------------+------------------------------------------------+
-	| languageParameterB || title=Persona de entrada                      |
-	|                    || note=Por favor, introduzca todos los nombres  |
+	| languageParameterB ||title=Persona de entrada                       |
+	|                    ||note=Por favor, introduzca todos los nombres   |
 	+--------------------+------------------------------------------------+
 
 
