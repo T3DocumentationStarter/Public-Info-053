@@ -3208,25 +3208,40 @@ The default language is not covered in config.qfq.ini.
 
 The *Form editor* now shows on the pill 'Basic' (Form und FormEditor) for both languages each an additional parameter
 input field. Any input field in the *Form editor* can be redeclared in the correspondig language parameter field. Any
-missing definition means 'take the default'. E.g.: ::
+missing definition means 'take the default'. E.g.:
 
-	Form.title: Eingabe Person
-	Form.languageParameterA: title=Input Person
-	Form.languageParameterB: title=Persona de entrada
+* Form: 'person'
+	+--------------------+--------------------------+
+	| Column             | Value                    |
+	+====================+==========================+
+	| title              | Eingabe Person           |
+	+--------------------+--------------------------+
+	| languageParameterA | title=Input Person       |
+	+--------------------+--------------------------+
+	| languageParameterB | title=Persona de entrada |
+	+--------------------+--------------------------+
 
-	FormElement 'firstname':
-	FormElement.title = Vorname
-	FormElement.note = Bitte alle Vornamen erfassen
-	Form.languageParameterA: title=Input Person
-									 note=Please all firstnames
-	Form.languageParameterB: title=Persona de entrada
-									 note=Por favor, introduzca todos los nombres
+* FormElement 'firstname' in Form 'person':
+	+--------------------+------------------------------------------------+
+	| Column             | Value                                          |
+	+====================+================================================+
+	| title              | Vorname                                        |
+	+--------------------+------------------------------------------------+
+	| note               | Bitte alle Vornamen erfassen                   |
+	+--------------------+------------------------------------------------+
+	| languageParameterA | | title=Firstname                              |
+	|                    | | note=Please all firstnames                   |
+	+--------------------+------------------------------------------------+
+	| languageParameterB | | title=Persona de entrada                     |
+	|                    | | note=Por favor, introduzca todos los nombres |
+	+--------------------+------------------------------------------------+
+
 
 The following fields are possible:
 
-* Form: title, showButton, forwardMode, forwardPage, bsLabelColumns, bsInputColumns, bsNoteColumns, recordLockTimeoutSeconds
-* FormElement: label, mode, mdoeSql, class, type, subrecordOption, encode, checkType, ord, tabindex, size, maxLength,
-  bsLabelColumns, bsInputColumns, bsNoteColumns,rowLabelInputNote, note, tooltip, placeholder, value, sql1, feGroup
+* Form: *title, showButton, forwardMode, forwardPage, bsLabelColumns, bsInputColumns, bsNoteColumns, recordLockTimeoutSeconds*
+* FormElement: *label, mode, modeSql, class, type, subrecordOption, encode, checkType, ord, tabindex, size, maxLength,*
+  *bsLabelColumns, bsInputColumns, bsNoteColumns,rowLabelInputNote, note, tooltip, placeholder, value, sql1, feGroup*
 
 .. _dynamic-update:
 
