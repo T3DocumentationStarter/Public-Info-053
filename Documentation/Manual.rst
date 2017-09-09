@@ -77,8 +77,10 @@ wkhtmltopdf
 `wkhtmltopdf <http://wkhtmltopdf.org/>`_ will be used by QFQ to offer 'website print' and 'HTML to PDF' conversion.
 The program is not included in QFQ and has to be manually installed.
 
-* The Ubuntu package `wkhtmltopdf` needs a running Xserver - this does not work on a headless webserver. Best is to
-  install the QT version from the named website above.
+* The Ubuntu package `wkhtmltopdf` needs a running Xserver - this does not work on a headless webserver.
+
+  * Best is to install the QT version from the named website above.
+  * In case of trouble with wkhtmltopdf, also install 'libxrender1'.
 
 In `config-qfq-ini`_ specify the:
 
@@ -300,6 +302,8 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 |GFX_EXTRA_BUTTON_INFO_BELOW  | <img src="info.png">                            | Image for `extraButtonInfo`_ (below)                                       |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+|EXTRA_BUTTON_INFO_POSITION   | SYSTEM_EXTRA_BUTTON_INFO_POSITION=below         | 'auto' (default) or 'below'. See `extraButtonInfo`_                        |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SAVE_BUTTON_TEXT            | SAVE_BUTTON_TEXT =                              | Default text on the form save button. Typically none.                      |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SAVE_BUTTON_TOOLTIP         | SAVE_BUTTON_TOOLTIP = save                      | Default tooltip on the form save button.                                   |
@@ -436,6 +440,8 @@ Example: *typo3conf/config.qfq.ini*
 
     ;FORM_LANGUAGE_A_ID = 1
     ;FORM_LANGUAGE_A_LABEL = english
+
+    ;EXTRA_BUTTON_INFO_POSITION = auto | below
 
 .. _`CustomVariables`:
 
@@ -1817,7 +1823,7 @@ parameter
 | typeAheadMinLength          | int    | Minimum number of characters which have to typed to start the search.                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | mode                        | string | The value `readonly` will activate a global readonly mode of the form - the user can't change any data.  |
-|                             |        | See :ref:`form-mode-readonly`                                                                            |
+|                             |        | See :ref:`form-mode-global`                                                                              |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | saveButtonActive            | -      | Make the 'save'-button active on *Form* load (instead of waiting for the first user change)              |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -1922,10 +1928,10 @@ The 'extraDeleteForm' parameter might be specified for a 'form' and/or for 'subr
 
 See also: `delete-record`_.
 
-.. _form-mode-readonly:
+.. _form-mode-global:
 
-Global Form mode 'readonly'
-'''''''''''''''''''''''''''
+Form mode global - 'readonly'
+'''''''''''''''''''''''''''''
 
 The form.parameter setting `mode=readonly` will switch the whole form into a `readonly` mode, which is a fast way to use
 an existing *Form* just to display the form data, without a possibility for the user to change any data of the form.
@@ -2201,7 +2207,7 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | extraButtonPassword    | none   | No value. Show an 'eye' on the right side of the input element. See `extraButtonPassword`_               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| extraButtonInfo        | string | Text. Show a 'i' on the right side of the input element. See `extraButtonInfo`_                          |
+| extraButtonInfo        | string | Text. Show an 'i' on the right side of the input element. See `extraButtonInfo`_                         |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | autofocus              | string | See `input-option-autofocus`_                                                                            |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2241,6 +2247,7 @@ See also at specific *FormElement* definitions.
 | title                  | string |                                                                                                          |
 | extraDeleteForm        | string |                                                                                                          |
 | detail                 | string |                                                                                                          |
+| subrecordTableClass    | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | capture                | string | See `input-upload`_                                                                                      |
 | accept                 | string |                                                                                                          |
@@ -2404,12 +2411,13 @@ extraButtonInfo
 ;;;;;;;;;;;;;;;
 
 * The user has to click on the `info` button/icon to see an additional message.
-* After Form load, the information message is hided.
+* After Form load, the information message is hidden.
 * The value of this parameter is the text shown.
-* Shows an `info` button/icon, depending of the type:
+* Shows an `info` button/icon, depending of EXTRA_BUTTON_INFO_POSITION in `config.qfq.ini`_ or `FormElement` type:
 
   * on the right side of an input element for type `text`, `date`, `time` or `datetime`,
   * below the FormElement for all other types.
+
 
 .. _`input-checkbox`:
 
@@ -2730,6 +2738,13 @@ The *FormElement* type 'subrecord' renders a list of records (so called secondar
 or add new records. The list is defined as a SQL query. The number of records shown is not limited. These *FormElement*
 will be rendered inside the form as a HTML table.
 
+* *mode / modeSql*:
+  * *show / required*: the regular mode to show the subrecords
+  * *readonly*: New / Edit / Delete Buttons are disabled
+  * *hidden*: The FormElement is rendered, but disabled with `display='none'`.
+
+* *dynamicUpdate*: not supported at the moment.
+
 * *sql1*: SQL query to select records. E.g.::
 
    {{!SELECT a.id AS id, CONCAT(a.street, a.streetnumber) AS a, a.city AS b, a.zip AS c FROM Address AS a}}
@@ -2766,9 +2781,9 @@ will be rendered inside the form as a HTML table.
 
     * Examples::
 
-         SELECT note1 AS 'Comment', note2 AS 'Comment|50' , note3 AS 'title=Comment|width=100|nostrip', note4 AS '50|Comment',
+         {{!SELECT id, note1 AS 'Comment', note2 AS 'Comment|50' , note3 AS 'title=Comment|width=100|nostrip', note4 AS '50|Comment',
          'checked.png' AS 'Status|icon', email AS 'mailto', CONCAT(homepage, '|Homepage') AS 'url',
-         ELT(status,'info','warning','danger') AS '_rowClass', help AS '_rowTitle' ...
+         ELT(status,'info','warning','danger') AS '_rowClass', help AS '_rowTitle' ...}}
 
 * *FormElement.parameter*
 
@@ -2776,13 +2791,13 @@ will be rendered inside the form as a HTML table.
   * *page*: Target page with detail form. If none specified, use the current page.
   * *title*: Title displayed over the table in the current form.
   * *extraDeleteForm*: Optional. The per row delete Button will reference the form specified here (for deleting) instead of the default (*form*).
-  * *detail*: Mapping of values from the primary form to the target form (defined via `form=...`).
+  * *detail*: Mapping of values from a) the primary form, b) the current row, c) any constant or '{{...}}' - to the target form (defined via `form=...`).
 
     * Syntax::
 
         <source table column name 1|&constant 1>:<target column name 1>[,<source table column name 2|&constant 2>:<target column name 2>][...]
 
-    * Example: *detail=id:personId,&12:xId,&{{a}}:personId*
+    * Example: *detail=id:personId,rowId:secId,&12:xId,&{{a}}:personId*  (rowId is a column of the current selected row defined by sql1)
     * By default, the given value will overwrite values on the target record. In most situations, this is the wished behaviour.
     * Exceptions of the default behaviour have to be defined on the target form in the corresponding *FormElement* in the
       field *value* by changing the default Store priority definition. E.g. `{{<columnname>:RS0}}` - For existing records,
@@ -2792,6 +2807,8 @@ will be rendered inside the form as a HTML table.
       and `form=address` maps person.id to address.personId. On the target record, the column personId becomes '5'.
     * *Constant '&'*: Indicate a 'constant' value. E.g. `&12:xId` or `{{...}}` (all possibilities, incl. further SELECT
       statements) might be used.
+
+  * *subrecordTableClass*: Optional. Default: 'table table-hover'. If given, the default will be overwritten.
 
 Type: time
 ^^^^^^^^^^
@@ -2859,8 +2876,8 @@ and will be processed after saving the primary record and before any action Form
 
         fileDestination={{SELECT 'fileadmin/user/pictures/', p.name, '-{{filename}}' FROM Person AS p WHERE p.id={{id:R0}} }}
 
-      * The original filename will be sanitized: only alnum characters are allowed. German 'umlaut' will be replaced by
-        'ae', 'ue', 'oe'. All non valid characters will be replaced by '-'.
+      * The original filename will be sanitized: only '<alnum>', '.' and '_' characters are allowed. German 'umlaut' will
+        be replaced by 'ae', 'ue', 'oe'. All non valid characters will be replaced by '_'.
 
     * If a file already exist under `fileDestination`, an error message is shown and 'save' is aborted. The user has no
       possibility to overwrite the already existing file. If the whole workflow is correct, this situation should no

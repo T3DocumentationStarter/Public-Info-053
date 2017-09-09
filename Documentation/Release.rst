@@ -34,6 +34,70 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.20.0
+--------------
+
+Changes
+^^^^^^^
+
+* New configuration value EXTRA_BUTTON_INFO_POSITION in config.qfq.ini
+
+Features
+^^^^^^^^
+
+* #4386 Fuer GRC: Optional Info Button bei 'input' wie bei 'textarea' - EXTRA_BUTTON_INFO_POSITION=below
+* #4429 / subrecord: new FE parameter 'subrecordTableCass' - a custom class for the subrecord table might be specified.
+* #4428 / subrecord: mode=readonly
+* #4421 / subrecord: column of the sql1 row should go into the edit link - implemented
+* #4399 / Do not render '_pdf' when r:5 or empty string
+
+Bug Fixes
+^^^^^^^^^
+
+* #4396 / FE: Justify DATE and TIME in case it's DATETIME on a non primary table.
+* #2414 / Deaktivieren von Option 'new' bei subrecord hat keine Folge
+* #4426 / Subrecord: mode=hidden - still shown
+* #4425/ Subrecords: Table head is not wrapped in <thead>
+* #4331 / SQL Statement 'REPLACE' not fired - Keyword missing in list of SQL Keywords
+
+
+Version 0.19.7
+--------------
+
+Changes
+^^^^^^^
+
+* #4306 / Update Text Subrecord: Please save this record first
+
+Features
+^^^^^^^^
+
+Bug Fixes
+^^^^^^^^^
+
+* #4278 / Language: Check that language settings are respectet inside of container / pill / fieldset / templateGroup.
+* #4310 / Fixed error where custom values wouldn't be saved, nor not found for non pedantic.
+* #4311 / Record Lock: expired lock wird nicht geloescht bei form reload.
+* #4309 / typeahead: allow free entry
+
+Version 0.19.6
+--------------
+
+Features
+^^^^^^^^
+
+* #4299 / HTML Element 'Select': Placeholder
+* Changes to the alert generation and added btn-group for multiple buttons.
+* Should only show reload button and be modal when the conflict is mandatory.
+* #4144 / Close/New: bei acquireLock=false anschliessend keine Nachfrage ob gespeichert werden soll
+* #4120 / Removed Timeout from Dirty Alert Message
+* #4283 / FE.parameter=emptyMeansNull
+
+Bug Fixes
+^^^^^^^^^
+
+* #4281 Prevent save from being clicked multiple times. Save no turns orange when saving.
+
 Version 0.19.5
 --------------
 
