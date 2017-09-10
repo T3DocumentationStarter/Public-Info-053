@@ -433,15 +433,17 @@ Example: *typo3conf/config.qfq.ini*
 
 	;RECORD_LOCK_TIMEOUT_SECONDS = 900
 
-    ; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
+	; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
 	;DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
 
-    ;VAR_ADD_BY_SQL = {{!SELECT s.id AS _periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1}}
+	;VAR_ADD_BY_SQL = {{!SELECT s.id AS _periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1}}
 
-    ;FORM_LANGUAGE_A_ID = 1
-    ;FORM_LANGUAGE_A_LABEL = english
+	;FORM_LANGUAGE_A_ID = 1
+	;FORM_LANGUAGE_A_LABEL = english
 
-    ;EXTRA_BUTTON_INFO_POSITION = auto | below
+	;GFX_EXTRA_BUTTON_INFO_INLINE = <img src='info.png'>
+	;GFX_EXTRA_BUTTON_INFO_BELOW = <img src='info.png'>
+	;EXTRA_BUTTON_INFO_POSITION = auto | below
 
 .. _`CustomVariables`:
 
@@ -1625,7 +1627,9 @@ Definition
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Table                    | Primary table of the form. _`form-tablename`                                                                                                       |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
-|Required Parameter       | Name of required SIP parameter, seperated by comma. '#' as comment delimiter. See `form-requiredParameter`_                                        |
+|Required Parameter NEW   | Name of required SIP parameter to create a new record (r=0), separated by comma. '#' as comment delimiter. See `form-requiredParameter`_           |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Required Parameter EDIT  | Name of required SIP parameter to edit an existing record (r>0), separated by comma. '#' as comment delimiter. See `form-requiredParameter`_       |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Permit New               | 'sip, logged_in, logged_out, always, never' (Default: sip): See `form-permitNewEdit`_                                                              |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1709,12 +1713,21 @@ Depending on `r`, the following access permission will be taken:
 
 .. _`form-requiredParameter`:
 
-Required Parameter
-^^^^^^^^^^^^^^^^^^
+Required Parameter NEW|EDIT
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Comma separated list of variable names. The form will show an error message, if it was called without the named
-parameters. Especially subforms often requires additional parameters - if such parameters are missing, the record cannot
-saved correctly. The parameters must be given by SIP.
+Comma separated list of variable names. On form load, an error message will be shown in case of missing parameters.
+The parameters must be given by SIP.
+
+The list of required parameter has to be defined for 'NEW' (r=0, create a new record) and for 'EDIT' (r>0, edit existing
+record).
+
+Optional a comment might be attached to the parameter, direct after the parameter name. The comment should not contain any ','.
+
+E.g.: ::
+
+  NEW: grId, pId # Always specify a person, grId2
+  EDIT: pId
 
 .. _`form-showButton`:
 
@@ -2172,6 +2185,20 @@ to edit, on the same form, a corresponding person email address (which is in a s
 
   {{SELECT a.email FROM Address AS a WHERE a.pId={{id:R0}} ORDER BY a.id LIMIT 1}}
 
+FE: 'Report' notation
+^^^^^^^^^^^^^^^^^^^^^
+
+The FE fields 'value' and 'note' understand the `Report`_ syntax. Nested SQL queries as well as links with SIP encoding
+are possible. To distinguish between 'Form' and 'Report' syntax, the first line has to be `#!report` ::
+
+    #!report
+
+    10.sql = SELECT ...
+
+    20 {
+      sql = SELECT ...
+      5.sql = SELECT ...
+    }
 
 .. _fe-parameter-attributes:
 
@@ -3287,7 +3314,7 @@ See #3426 / Dynamic Update: Inputs loose the new content and shows the old value
 
 * On **all** `dynamic update` *FormElements* an explicit definition of `value`, including a sanitize class, is necessary
   (except the field is numeric). **A missing definition let's the content overwrite all the time with the old value**.
-  A typical definition for `value` looks like::
+  A typical definition for `value` looks like (default store priority is: FSRVD)::
 
      {{<FormElement name>::alnumx}}
 
@@ -3301,6 +3328,10 @@ See #3426 / Dynamic Update: Inputs loose the new content and shows the old value
   Remember to specify a 'sanitize' class - a missing sanitize class means 'digit', every content, which is not numeric,
   violates the sanitize class and becomes therefore an empty string!
 
+* If the dynamic update should work on existing and *new* records, it's important to guarantee that the query result is not empty!
+  even if the primary record does not exist! E.g. use a `LEFT JOIN`. The following query is ok for `new` and `edit`. ::
+
+    {{SELECT IF( IFNULL(adr.type,'') LIKE '%token%','show','hidden') FROM (SELECT 1) AS fake LEFT JOIN Address AS adr ON adr.type='{{type:FR0}}' LIMIT 1}}
 
 Examples
 ^^^^^^^^
@@ -3530,6 +3561,13 @@ already a lock for a `tablename` / `record id` pair, the most restrictive will b
 
 Best practice
 -------------
+
+Custom default value only for 'new records'
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the specific `FormElement` set `value={{columnName:RSE}}`. The link to the form should be rendered with
+'"...&columnName=<data>&..." AS _page'. The trick is that the STORE_RECORD is empty for new records, and therefore the
+corresponding value from STORE_SIP will be returned. Existing records will use the already saved value.
 
 Central configured values
 ^^^^^^^^^^^^^^^^^^^^^^^^^

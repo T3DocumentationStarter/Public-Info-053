@@ -25,14 +25,37 @@ Release
 Version 0.future
 ----------------
 
-Changes
-^^^^^^^
+Date: <date>
+
+Notes
+^^^^^
 
 Features
 ^^^^^^^^
 
 Bug Fixes
 ^^^^^^^^^
+
+Version 0.21.0
+--------------
+
+Date: 10.09.2017
+
+Notes
+^^^^^
+
+* The Form-Editor now has two 'requiredParamter' fields: one for 'New' record and one 'Edit'. Existing settings will be
+  automatically copied to both.
+* The FormElement-Editor field 'Note' is not anymore a TinyMCE Editor. Instead a regular 'textarea' is used. Main reason
+  are incompatibilities between TinyMCE HTML mode and the neede CR/LF linebreaks needed for 'Report' Syntax in the 'note'
+  column.
+
+Features
+^^^^^^^^
+
+* #4431 / FE.type=note: QFQ Report Syntax in 'FE.value' and 'FE.note'
+* #4456 / formModeGlobal=requiredOff - Switches FormElement.mode=required to 'show' for all FE of the current Form.
+* Feature #4356 / Form: required parameter - split between 'New' & 'Edit'
 
 Version 0.20.0
 --------------
