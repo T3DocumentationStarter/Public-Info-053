@@ -36,6 +36,34 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Release
+=======
+
+Version 0.22
+------------
+
+Date: 14.09.2017
+
+Notes
+^^^^^
+
+* Form Editor: element 'forwardPage' is static again (no dynamic update) - see features in #4511.
+
+Features
+^^^^^^^^
+
+* #4511 / Form: URL Forward - mode dynamic computed
+
+Bug Fixes
+^^^^^^^^^
+
+* #4512 | SIP URL does not respect anker token '#'- fixed PLUS: L and type _GET Params included in links which contain a SIP (regular links still open).
+* #4508 / Form: during Save with FE with 'report'-Note/Values an exception is thrown - report does not expect, to be called without typo3 - but this is the case during save and generating the JSON.
+* #4021 / "required" asterik does not handle multi column labels correctly
+* #4423 / Date inputs with readonly: label is grey.
+* Empty date might create '2001-00-00'
+* #4504 / Upload Button: required asterik missing after save - seems to be a problem for every element - should be fixed now.
+
 Version 0.21.0
 --------------
 

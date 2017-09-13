@@ -298,11 +298,13 @@ config.qfq.ini
 | SECURITY_GET_MAX_LENGTH     | SECURITY_GET_MAX_LENGTH = 50                    | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
 |                             |                                                 | `ExceptionMaxLength`_                                                      |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-|GFX_EXTRA_BUTTON_INFO_INLINE | <img src="info.png">                            | Image for `extraButtonInfo`_ (inline)                                      |
+| GFX_EXTRA_BUTTON_INFO_INLINE| <img src="info.png">                            | Image for `extraButtonInfo`_ (inline)                                      |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-|GFX_EXTRA_BUTTON_INFO_BELOW  | <img src="info.png">                            | Image for `extraButtonInfo`_ (below)                                       |
+| GFX_EXTRA_BUTTON_INFO_BELOW | <img src="info.png">                            | Image for `extraButtonInfo`_ (below)                                       |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-|EXTRA_BUTTON_INFO_POSITION   | SYSTEM_EXTRA_BUTTON_INFO_POSITION=below         | 'auto' (default) or 'below'. See `extraButtonInfo`_                        |
+| EXTRA_BUTTON_INFO_POSITION  | SYSTEM_EXTRA_BUTTON_INFO_POSITION=below         | 'auto' (default) or 'below'. See `extraButtonInfo`_                        |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| EXTRA_BUTTON_INFO_CLASS     | SYSTEM_EXTRA_BUTTON_INFO_CLASS=pull-right       | '' (default) or 'pull-right'. See `extraButtonInfo`_                       |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SAVE_BUTTON_TEXT            | SAVE_BUTTON_TEXT =                              | Default text on the form save button. Typically none.                      |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
@@ -444,6 +446,7 @@ Example: *typo3conf/config.qfq.ini*
 	;GFX_EXTRA_BUTTON_INFO_INLINE = <img src='info.png'>
 	;GFX_EXTRA_BUTTON_INFO_BELOW = <img src='info.png'>
 	;EXTRA_BUTTON_INFO_POSITION = auto | below
+	;EXTRA_BUTTON_INFO_CLASS = pull-right
 
 .. _`CustomVariables`:
 
@@ -1218,6 +1221,8 @@ Store: *TYPO3* (Bodytext) - T
  +-------------------------+-------------------------------------------------------------------+----------+
  | feUserGroup             | FE groups of logged in Typo3 FE User                              |          |
  +-------------------------+-------------------------------------------------------------------+----------+
+ | beUserLoggedIn          | 'yes' | 'no' - Status if a BE-User is logged in                   |          |
+ +-------------------------+-------------------------------------------------------------------+----------+
 
 * **note**: not available:
 
@@ -1639,9 +1644,9 @@ Definition
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Show button              | 'new, delete, close, save' (Default: 'new,delete,close,save'): Shown named buttons in the upper right corner of the form.  See `form-showButton`_  |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
-|Forward                  | 'client | no | url | url-skip-history' (Default: client): See `form-forward`_.                                                                     |
+|Forward Mode             | 'client | no | url | url-skip-history' (Default: client): See `form-forward`_.                                                                     |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
-|Forward Page             | URL or Typo3 page id/alias. See `form-forward`_.                                                                                                   |
+|Forward (Mode) Page      | a) URL / Typo3 page id/alias or b) Forward Mode (via '{{...}}') or combination of a) & b). See `form-forward`_.                                    |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Parameter                |  Misc additional parameters. See `form-parameter`_.                                                                                                |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1769,12 +1774,27 @@ Only with `Forward` == `url` | `url-skip-history`, the definition of `Forward UR
 Forward URL / Page
 ''''''''''''''''''
 
-Possible values:
+Type: dynamic URL/Page
+^^^^^^^^^^^^^^^^^^^^^^
 
-* `http://john-doe.com` - fix URL.
-* `?thanks` - fix URL, inside current Typo3 installation.
-* `{{SELECT ... }}` - dynamically calculated, after all processing is done. This is very usefull, to redirect to different
-  targets, depending on user input or whatever.
+* `forwardPage=http://john-doe.com` - fix URL.
+* `forwardPage=?thanks` - fix Typo3 alias or page id, inside current Typo3 installation.
+* `forwardPage=?id=thanks` - same as above, but more complete notation.
+* `forwardPage={{SELECT ... }}` - dynamically calculated, after all processing is done. This is very usefull, to redirect to different
+  targets, depending on user input or other dependency/ies.
+
+Type: dynamic Mode
+^^^^^^^^^^^^^^^^^^
+
+* Specify in `forwardPage` any of the forward modes: `forwardPage=no | client | url | url-skip-history`,
+* Or vua an SQL statement: `forwardPage={{SELECT IF('{{formModeGlobal:S:anumx)}}'='requiredOff', 'no', 'client') }}`
+
+Type: combined dynamic mode & URL/page
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Syntax: `forwardPage=<mode>|<page>`
+
+* `forwardPage={{SELECT IF(a.url='','no','url'), '|', a.url FROM address AS a }}`
 
 
 .. _form-parameter:
@@ -1871,6 +1891,8 @@ parameter
 | newButtonClass              | string | Overwrite default from config.qfq.ini: NEW_BUTTON_CLASS                                                  |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | newButtonGlyphIcon          | string | Overwrite default from config.qfq.ini: NEW_BUTTON_GLYPH_ICON                                             |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| extraButtonInfoClass        | string | Overwrite default from config.qfq.ini: EXTRA_BUTTON_INFO_CLASS                                           |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 * Example:
@@ -2107,6 +2129,7 @@ Fields:
 |Name                 | string                      |                                                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Label                | string                      | Label of *FormElement*. Depending on layout model, left or on top of the *FormElement*              |
+|                     |                             | Additional label description can be added by wrapping in HTML tag '<small>'                         |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Mode                 | enum('show', 'readonly',    | *Show*: regular user input field. This is the default.                                              |
 |                     | 'required',                 | *Required*: User has to specify a value. Typically, an <empty string> represents 'no value'.        |
@@ -2235,6 +2258,8 @@ See also at specific *FormElement* definitions.
 | extraButtonPassword    | none   | No value. Show an 'eye' on the right side of the input element. See `extraButtonPassword`_               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | extraButtonInfo        | string | Text. Show an 'i' on the right side of the input element. See `extraButtonInfo`_                         |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| extraButtonInfoClass   | string | By default empty. Specify any class to be assigned to wrap extraButtonInfo                               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | autofocus              | string | See `input-option-autofocus`_                                                                            |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2440,11 +2465,17 @@ extraButtonInfo
 * The user has to click on the `info` button/icon to see an additional message.
 * After Form load, the information message is hidden.
 * The value of this parameter is the text shown.
-* Shows an `info` button/icon, depending of EXTRA_BUTTON_INFO_POSITION in `config.qfq.ini`_ or `FormElement` type:
+* Shows an `info` button/icon, depending of EXTRA_BUTTON_INFO_POSITION in `config.qfq.ini`_
 
-  * on the right side of an input element for type `text`, `date`, `time` or `datetime`,
-  * below the FormElement for all other types.
+  * `auto`, depending on `FormElement` type:
 
+    * on the right side of an input element for type `text`, `date`, `time` or `datetime`,
+    * below the FormElement for all other types.
+
+  * `below`: below the FormElement for all types.
+
+* With display `below`, a defined class in `extraButtonInfoClass` (FE, F, config.qfq.ini) will be applied. E.g. this
+  might be `pull-right` to align the grafic on the right side of the input element.
 
 .. _`input-checkbox`:
 
