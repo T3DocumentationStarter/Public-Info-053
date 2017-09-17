@@ -1753,41 +1753,58 @@ Display or hide the button `new`, `delete`, `close`, `save`.
 Forward: Save / Close
 ^^^^^^^^^^^^^^^^^^^^^
 
-Forward
-'''''''
+Forward (=forwardMode)
+''''''''''''''''''''''
 
 After the user presses *Save*, *Close*, *Delete* or *New*, different actions are possible where the browser redirects to.
 
-* `client` (default) - the QFQ Javascript logic, inside the browser, decides to stay on the page or to force a redirection 
+* `client` (default) - the QFQ browser Javascript logic, decides to stay on the page or to force a redirection
   to a previous page.
   
-  * *Close* closes the current page and goes back to the previous page.
+  * *Close* closes the current page and goes back to the previous page. Note: if a new tab is opened and the user presses
+    QFQ close (in any way) - in that new browser tab there is no previous page! QFQ won't close the tab, instead a message
+    is shown
   * *Save* stays on the current page.
   
 * `no` - no change, the browser remains on the current side. Close does not close the page. It just triggers a save if 
   there are modified data.
-* `url` - the browser redirects to the named URL or T3 page. Independent if the user presses `save` or `close`.
+* `url` - the browser redirects to the URL or T3 page named in `Forward URL / Page`. Independent if the user presses `save` or `close`.
 * `url-skip-history` - same as `url`, but the current location won't saved in the browser history.
 
 Only with `Forward` == `url` | `url-skip-history`, the definition of `Forward URL / Page` becomes active.
 
-Forward URL / Page
-''''''''''''''''''
+Forward URL / Page (=forwardPage)
+'''''''''''''''''''''''''''''''''
 
-Type: dynamic URL/Page
-^^^^^^^^^^^^^^^^^^^^^^
+Format: [<url>] or [<mode>|<url>]
 
-* `forwardPage=http://john-doe.com` - fix URL.
-* `forwardPage=?thanks` - fix Typo3 alias or page id, inside current Typo3 installation.
-* `forwardPage=?id=thanks` - same as above, but more complete notation.
-* `forwardPage={{SELECT ... }}` - dynamically calculated, after all processing is done. This is very usefull, to redirect to different
-  targets, depending on user input or other dependency/ies.
+* `<url>`:
 
-Type: dynamic Mode
-^^^^^^^^^^^^^^^^^^
+  * `http://www.example.com/index.html?a=123#bottom`
+  * `website.html?a=123#bottom`
+  * `?<T3 Alias pageid>&a=123#bottom, ?id=<T3 page id>&a=123#bottom`
+  * `{{SELECT ...}}`
+  * `<mode>|<url>`
 
-* Specify in `forwardPage` any of the forward modes: `forwardPage=no | client | url | url-skip-history`,
-* Or vua an SQL statement: `forwardPage={{SELECT IF('{{formModeGlobal:S:anumx)}}'='requiredOff', 'no', 'client') }}`
+* `<mode>` - Valid keywords are as above: `no|client|url|url-skip-history`
+
+Specifying the mode in `forwardPage` overwrites `formMode` (but only if `formMode` is `url...`).
+
+Also regular QFQ statements like {{var}} or {{SELECT ...}} are possible in `forwardPage`. This is useful to dynamically
+redirect to different targets, depending on user input or any other dependencies.
+
+If a forwardMode 'url...' is specified and there is no `forwardPage`, QFQ falls down to `client` mode.
+
+On a form, the user might click 'save' or 'save,close' or 'close' (with modified data this leads to 'save,close').
+The CLIENT `submit_reason` shows the user action:
+
+* `{{submit_reason:CE:alnumx}}` = `save` or `save,close`
+
+Example forwardPage
+^^^^^^^^^^^^^^^^^^^
+
+* `{{SELECT IF('{{formModeGlobal:S:anumx}}'='requiredOff', 'no', 'client') }}`
+* `{{SELECT IF('{{submit_reason:CE:alnumx}}'='save', 'no', 'url'), '|http://example.com' }}`
 
 Type: combined dynamic mode & URL/page
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2026,12 +2043,21 @@ Type: pill
 * Pill is synonymous for a tab. A pill looks like a tab.
 * Pills are only available with mode render='bootstrap'.
 * If there is at least one pill defined, every native *FormElement* needs to be assigned to a pill or to a fieldset.
-* If there is at least one pill defined, every fieldset needs to be assigned to a pill.
+* If there is at least one pill defined, every *fieldset* needs to be assigned to a pill.
+* Pills are not 'dynamicUpdate' aware (at the moment). At least during form load, *modeSql* can be dynamically computed to
+  switch the pill in show / readonly (disabled) / hidden state.
 
 * FormElement settings:
 
   * *name*: technical name, used as HTML identifier.
   * *label*: Label shown on the corresponding pill button or inside the drop-down menu.
+  * *mode*:
+
+    * *show*, *required*: regular mode. The pill will be shown.
+    * *readonly*: the pill and it's name is visible, but not clickable.
+    * *hidden*: the pill is not shown at all.
+
+  * *modeSql*:
   * *type*: *pill*
   * *feIdContainer*: `0`  - Pill's can't be nested.
   * *parameter*:
