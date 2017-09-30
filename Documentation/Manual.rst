@@ -1982,23 +1982,32 @@ See also: `delete-record`_.
 
 .. _form-mode-global:
 
-Form mode global - 'readonly'
-'''''''''''''''''''''''''''''
+Form mode global
+''''''''''''''''
 
-The form.parameter setting `mode=readonly` will switch the whole form into a `readonly` mode, which is a fast way to use
-an existing *Form* just to display the form data, without a possibility for the user to change any data of the form.
-The mode can be statically defined in the *Form.parameter* field via::
+The Form global mode `mode` is given by default with `{{formModeGlobal:SE:alnumx}}`.
 
-    mode=readonly
+Optional it might be defined via *Form.parameter* ::
 
-Or dynamically, e.g. via::
+    mode=readonly|requiredOff
 
-    mode={{formModeGlobal:S:alnumx}}
 
-Such variant might be called via SIP. The following shows the same *Form* in the `regular` mode and second in `readonly` mode::
+* `readonly`: all `FormElement`s of the whole form are temporarily in `readonly` mode. This is a fast way to use an
+  existing *Form* just to display the form data, without a possibility for the user to change any data of the form.
 
-	10.sql = SELECT CONCAT('from&form=person&r=', p.id) as _Pagee, CONCAT('from&form=person&formModeGlobal=readonly&r=', p.id) as _Pagee FROM Person AS p
+* `requiredOff`: all `FormElement`s of the whole, with `mode=required`, will temporarily switch to `mode=show`. In this
+  mode, the user might save the form without providing all necessary data. Later on, when application logic requires a
+  final submit, this mode is not used any longer (call the form as regular without the 'formModeGlobal' parameter) and
+  the form can only be saved with all data given.
+  Than, e.g. an action-FormElement 'afterSave' can be used to detect the final submit situation and do some extra stuff,
+  necessary for the final submit.
 
+The following shows the same *Form* in the `regular`, `readonly` and `requiredOff` mode::
+
+	10.sql = SELECT CONCAT('from&form=person&r=', p.id, '|Regular') as _Pagee,
+	                CONCAT('from&form=person&formModeGlobal=readonly&r=', p.id, '|Readonly') as _Pagee,
+	                CONCAT('from&form=person&formModeGlobal=requiredOff&r=', p.id, '|Required off') as _Pagee
+	                FROM Person AS p
 ..
 
 FormElements
