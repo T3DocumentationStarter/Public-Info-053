@@ -39,6 +39,36 @@ Bug Fixes
 Release
 =======
 
+Version 0.23.1
+--------------
+
+Date: 23.9.2017
+
+Bug Fixes
+^^^^^^^^^
+
+* #4620 / Easy Fix: saveButtonText / closeButtonText Formatierung
+
+
+Version 0.23.0
+--------------
+
+Date: 17.09.2017
+
+Features
+^^^^^^^^
+
+* #3752 / Pills auf mode|modeSql=hidden|readonly setzen - implemented during 'form load' (not dynamic update)
+
+Bug Fixes
+^^^^^^^^^
+
+* #4548 /Template Group: 'form-update' broken - Broken Redirect after Save - Broken same HTML ID for FE copies in a template group.
+* #4548 /Template Group: 'form-update' broken - max tg element value/index shown after save instead of last user supplied value, but save is ok. Neu wird nach dem Speichern das Formular nochmal komplett geladen. Das ist wichtig um die durch aftersave geaenderten Records in die Formularelemente zu bekommen.
+
+Release
+=======
+
 Version 0.22
 ------------
 

@@ -197,7 +197,7 @@ Setup a *report* to manage all *forms*:
 	10 {
 		# List of Forms: Do not show this list of forms if there is a form given by SIP.
 		# Table header.
-		sql = SELECT CONCAT('{{pageId:T}}&form=Form&') as _Pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE  '{{form:SE}}'=''
+		sql = SELECT CONCAT('{{pageId:T}}&form=form&') as _Pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE  '{{form:SE}}'=''
 		head = <table class="table table-hover qfq-table-50">
 		tail = </table>
 		rbeg = <thead><tr>
@@ -207,7 +207,7 @@ Setup a *report* to manage all *forms*:
 
 		10 {
 			# All forms
-			sql = SELECT CONCAT('{{pageId:T}}&form=Form&r=', f.id) as _Pagee, f.id, f.name, f.title, f.tableName, CONCAT('form=Form&r=', f.id) as _Paged FROM Form AS f  ORDER BY f.name
+			sql = SELECT CONCAT('{{pageId:T}}&form=form&r=', f.id) as _Pagee, f.id, f.name, f.title, f.tableName, CONCAT('form=form&r=', f.id) as _Paged FROM Form AS f ORDER BY f.name
 			rbeg = <tr>
 			rend = </tr>
 			fbeg = <td>
@@ -2339,6 +2339,8 @@ See also at specific *FormElement* definitions.
 | sqlDelete              | string |                                                                                                          |
 | sqlAfter               | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| fileButtonText         | string | Overwrite default 'Choose File'                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 
 Effect matrix
@@ -2931,6 +2933,10 @@ Inside the *Form editor* it's shown as a 'native FormElement'.
 During saving the current record, it behaves like an action FormElement
 and will be processed after saving the primary record and before any action FormElements are processed.
 
+* *FormElement.value*: By default, the full path of any already uploaded file is shown. To show something different, e.g.
+  only the filename, define: ::
+
+	 {{SELECT SUBSTRING_INDEX(pathFilenamePicture, '/', -1) FROM Note WHERE id={{id:R0}} }}
 
 * *FormElement.parameter*:
 
@@ -2951,7 +2957,7 @@ and will be processed after saving the primary record and before any action Form
     * If for a specific filetype is no mime type available, the definition of file extension(s) is possible. This is **less
       secure**, cause there is no *content* check on the server after the upload.
 
-  * *maxFileSize*: max filesize in Bytes for an uploaded file. Default: 10485760 (=10MB)
+  * *maxFileSize*: max filesize in bytes for an uploaded file. Default: 10485760 (=10MB)
 
   * *fileDestination*: Destination where to copy the file. A good practice is to specify a relative `fileDestination` -
     such an installation (filesystem and database) are moveable.
@@ -2983,7 +2989,7 @@ and will be processed after saving the primary record and before any action Form
 Immediately after the upload finished (before the user press save), the file will be checked on the server for it's
 content or file extension (see 'accept').
 
-The maximum size is defined by the minimum of `upload_max_filesize`, `post_max_size`and `memory_limit` (PHP script) in the php.ini.
+The maximum size is defined by the minimum of `upload_max_filesize`, `post_max_size` and `memory_limit` (PHP script) in the php.ini.
 
 In case of broken uploads, please also check `max_input_time` in php.ini.
 
@@ -4517,6 +4523,8 @@ Column: _link
 |   |   |Text          |t:<text>                           |t:Firstname Lastname       |-                                                                                                                                       |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Render        |r:<mode>                           |r:[0-5]                    |See: `render-mode`_, Default: 0                                                                                                         |
++---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
+|   |   |Button        |b[:0|1|<btn class>]                | b:0, b:1, b:success       |'b', 'b:1': a bootstrap button is created. 'b:0' disable the button. <btn class>: default, primary, success, info, warning,danger       |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Picture       |P:<filename>                       |P:bullet-red.gif           |Picture '<img src="bullet-red.gif"alt="....">', default link class: internal.                                                           |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
