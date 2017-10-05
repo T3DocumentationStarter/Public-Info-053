@@ -1718,21 +1718,21 @@ Depending on `r`, the following access permission will be taken:
 
 .. _`form-requiredParameter`:
 
-Required Parameter NEW|EDIT
+Required Parameter New|Edit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Comma separated list of variable names. On form load, an error message will be shown in case of missing parameters.
 The parameters must be given by SIP.
 
-The list of required parameter has to be defined for 'NEW' (r=0, create a new record) and for 'EDIT' (r>0, edit existing
+The list of required parameter has to be defined for `New` (r=0, create a new record) and for `Edit` (r>0, edit existing
 record).
 
-Optional a comment might be attached to the parameter, direct after the parameter name. The comment should not contain any ','.
+Optional a comment might be attached after the parameter definition.
 
 E.g.: ::
 
-  NEW: grId, pId # Always specify a person, grId2
-  EDIT: pId
+  New: grId, pId # Always specify a person, grId2
+  Edit: pId
 
 .. _`form-showButton`:
 
@@ -1992,10 +1992,10 @@ Optional it might be defined via *Form.parameter* ::
     mode=readonly|requiredOff
 
 
-* `readonly`: all `FormElement`s of the whole form are temporarily in `readonly` mode. This is a fast way to use an
+* `readonly`: all `FormElement` of the whole form are temporarily in `readonly` mode. This is a fast way to use an
   existing *Form* just to display the form data, without a possibility for the user to change any data of the form.
 
-* `requiredOff`: all `FormElement`s of the whole, with `mode=required`, will temporarily switch to `mode=show`. In this
+* `requiredOff`: all `FormElement` of the whole, with `mode=required`, will temporarily switch to `mode=show`. In this
   mode, the user might save the form without providing all necessary data. Later on, when application logic requires a
   final submit, this mode is not used any longer (call the form as regular without the 'formModeGlobal' parameter) and
   the form can only be saved with all data given.
@@ -2834,6 +2834,7 @@ or add new records. The list is defined as a SQL query. The number of records sh
 will be rendered inside the form as a HTML table.
 
 * *mode / modeSql*:
+
   * *show / required*: the regular mode to show the subrecords
   * *readonly*: New / Edit / Delete Buttons are disabled
   * *hidden*: The FormElement is rendered, but disabled with `display='none'`.
@@ -2847,13 +2848,13 @@ will be rendered inside the form as a HTML table.
   * Notice the **exclamation mark** after '{{' - this is necessary to return an array of elements, instead of a single string.
   * Exactly one column **'id'** has to exist; it specifies the primary record for the target form.
     In case the id should not be visible to the user, it has to be named **'_id'**.
-  * Columnname: *[title=]<title>[|[width=]<number>][|nostrip][|icon][|link][|url][|mailto][|_rowClass][|_rowTitle]*
+  * Columnname: *[title=]<title>[|[maxLength=]<number>][|width=<number>][|nostrip][|icon][|link][|url][|mailto][|_rowClass][|_rowTooltip]*
 
-    * All parameter are position independet.
-    * Separate parameter by '|'.
+    * If the keyword is used, all parameter are position independent.
+    * Parameter are seperated by '|'.
     * *[title=]<text>*: Title of the column. The keyword 'title=' is optional. Columns with a title starting with '_' won't be rendered.
-    * *[width=]<number>*: Max. width of chars displayed per cell. The keyword 'width=' is optional. Default max width: 20.
-      This setting also affects the title of the column.
+    * *[maxLength=]<number>*: Max. number of characters displayed per cell. The keyword 'maxLength=' is optional. Default
+       maxLength '20'. A value of '0' means no limit. This setting also affects the title of the column.
     * *nostrip*: by default, html tags will be stripped off the cell content before rendering. This protects the table
       layout. 'nostrip' deactivates the cleaning to make pure html possible.
     * *icon*: the cell value contains the name of an icon in *typo3conf/ext/qfq/Resources/Public/icons*. Empty cell values
@@ -2864,21 +2865,21 @@ will be rendered inside the form as a HTML table.
     * *_rowClass*
 
       * The value is a CSS class name(s) which will be rendered in the *<tr class="<_rowClass>">* of the subrecord table.
-      * The column itself is hidden to the user.
+      * The column itself is not rendered.
       * By using Bootstrap, the following predefined classes are available:
 
         * Text color: *text-muted|text-primary|text-success|text-info|text-warning|text-danger* (http://getbootstrap.com/css/#helper-classes)
         * Row background: *active|success|info|warning|danger* (http://getbootstrap.com/css/#tables-contextual-classes)
 
-    * *_rowTitle*
+    * *_rowTooltip*
 
-      * Defines the title attribute of a subrecod table row (tooltip).
+      * Defines the title attribute (=tooltip) of a subrecord table row.
 
     * Examples::
 
-         {{!SELECT id, note1 AS 'Comment', note2 AS 'Comment|50' , note3 AS 'title=Comment|width=100|nostrip', note4 AS '50|Comment',
+         {{!SELECT id, note1 AS 'Comment', note2 AS 'Comment|50' , note3 AS 'title=Comment|maxLength=100|nostrip', note4 AS '50|Comment',
          'checked.png' AS 'Status|icon', email AS 'mailto', CONCAT(homepage, '|Homepage') AS 'url',
-         ELT(status,'info','warning','danger') AS '_rowClass', help AS '_rowTitle' ...}}
+         ELT(status,'info','warning','danger') AS '_rowClass', help AS '_rowTooltip' ...}}
 
 * *FormElement.parameter*
 
