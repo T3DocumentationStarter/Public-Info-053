@@ -2008,6 +2008,7 @@ The following shows the same *Form* in the `regular`, `readonly` and `requiredOf
 	                CONCAT('from&form=person&formModeGlobal=readonly&r=', p.id, '|Readonly') as _Pagee,
 	                CONCAT('from&form=person&formModeGlobal=requiredOff&r=', p.id, '|Required off') as _Pagee
 	                FROM Person AS p
+
 ..
 
 FormElements

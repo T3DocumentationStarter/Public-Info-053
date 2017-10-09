@@ -36,6 +36,37 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+
+Version 0.24.0
+--------------
+
+Date: 09.10.2017
+
+Notes
+^^^^^
+
+* Change Remove SYSTEM_SECURITY_ABSOLUTE_GET_MAX_LENGTH - makes no sense to hardcode an upper limit.
+
+Features
+^^^^^^^^
+
+* Feature Manual.rst: Doc updated for latest subrecord column special names
+* Feature AbstractBuildForm.php: new function subrecordHead(). Replaced several hard coded subrecord column names against constants.
+* Feature #4456 / formModeGlobal=requiredOff - update Manual.rst
+* Feature #4606 / _link: qualifier to render bootstrap button - fix unit tests for tooltip. Add tooltip to button/text, even if there is no link. Implement token  'b:...' for link class. Manual is updated. Open: `pageX` should be recoded to use the new 'b:' instead of hardcoed behaviour to render a button.
+* Feature: Upload Button - wrapped with Bootstrap Button. New option 'fileButtonText' to specify a button text.
+* Feature #3752 / Pills auf mode|modeSql=hidden|readonly setzen - implemented during 'form load' (not dynamic update)
+* Feature: Neu wird nach dem Speichern das Formular nochmal komplett geladen. Das ist wichtig um die durch aftersave geaenderten Records in die Formularelemente zu bekommen.
+* Feature #4511 / Form: URL Forward - mode dynamic computed - more generic implementation.
+
+Bug Fixes
+^^^^^^^^^
+
+* Bug #4731 / Dynamic Update: load(post) triggers 'check required' - makes no sense during filling a form - fixed
+* Bug #4730 / InvalidDate-00-00-2000 FE.type=date - detection of empty date was broken for '00.00.0000'.
+* Bug Fixed problem in subrecord when no record is selected.
+* Bug #4620 / Easy Fix: saveButtonText / closeButtonText Formatierung
+
 Release
 =======
 
