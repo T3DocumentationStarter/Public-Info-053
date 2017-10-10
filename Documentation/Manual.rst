@@ -223,15 +223,19 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | Keyword                     | Example                                         | Description                                                                |
 +=============================+=================================================+============================================================================+
-| DB_USER                     | DB_USER=qfqUser                                 | Credentials configured in MySQL                                            |
+| DB_<n>_USER                 | DB_1_USER=qfqUser                               | Credentials configured in MySQL                                            |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_PASSWORD                 | DB_PASSWORD=1234567890                          | Credentials configured in MySQL                                            |
+| DB_<n>_PASSWORD             | DB_1_PASSWORD=1234567890                        | Credentials configured in MySQL                                            |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_SERVER                   | DB_SERVER=localhost                             | Hostname of MySQL Server                                                   |
+| DB_<n>_SERVER               | DB_1_SERVER=localhost                           | Hostname of MySQL Server                                                   |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_NAME                     | DB_NAME=qfq_db                                  | Database name                                                              |
+| DB_<n>_NAME                 | DB_1_NAME=qfq_db                                | Database name                                                              |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | DB_INIT                     | DB_INIT=set names utf8                          | Global init for using the database.                                        |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| DB_INDEX_DATA               | DB_INDEX_DATA = 1                               | Optional. Default: 1.                                                      |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| DB_INDEX_QFQ                | DB_INDEX_QFQ = 1                                | Optional. Default: 1.                                                      |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SQL_LOG                     | SQL_LOG=sql.log                                 | Filename to log SQL commands: relative to <ext_dir> or absolute.           |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
@@ -367,11 +371,13 @@ Example: *typo3conf/config.qfq.ini*
 ::
 
 	; To get internal default values, inactivate the option by commenting (= ';') it.
-	DB_USER = qfqUser
-	DB_SERVER = localhost
-	DB_PASSWORD = 12345678
-	DB_NAME = qfq_db
+	DB_1_USER = qfqUser
+	DB_1_SERVER = localhost
+	DB_1_PASSWORD = 12345678
+	DB_1_NAME = qfq_db
 	DB_INIT = set names utf8
+	; DB_INDEX_DATA = 1
+   ; DB_INDEX_QFQ = 1
 	; SQL_LOG = sql.log
 	; SQL_LOG_MODE = modify
 	; SHOW_DEBUG_INFO = auto
@@ -487,13 +493,13 @@ periodId
 This is
 
 * a usecase, implemented via `VariablesAddBySql`_,
-* a way to access `Period.id` with respect to the current period (the period itself is defined by you).
+* a way to access `Period.id` with respect to the current period (the period itself is custom defined).
 
 After a full QFQ installation, three things are prepared:
 
 * a table `Period` (extend / change it to your needs, fill them with your periods),
 * one sample record in table `Period`,
-* in config.qfq.ini the default definition of `VAR_ADD_BY_SQL` will set the variable `periodId` during QFQ load.
+* in `config.qfq.ini`_ the default definition of `VAR_ADD_BY_SQL` will set the variable `periodId` during QFQ load.
 
 Websites, delivering semester data, schoolyears schedules, or any other type or periods, often need an index to the
 *current* period. One way is a) to mark the current period and b) to change the marker every time when the next period
@@ -718,6 +724,57 @@ File: `config.qfq.ini`_
     * Write a note and the original configured receiver at the top of the email body.
 
 .. _variables:
+
+Databases
+---------
+
+A Typo3 / QFQ Installation needs at least two databases. One for the Typo3 installation and one for QFQ.
+
+QFQ itself can be separated in 'QFQ system' and 'QFQ data' databases, if necessary (than at least three databases are needed).
+Furthermore a `Form` can operate on any additional database, specified per `Form`.parameter.dbIndex and configured via `config.qfq.ini`_.
+
+* Option 'A' is the most simple and commonly used.
+* Option 'B' separate the T3 and QFQ databases on two database hosts.
+* Option 'C' is like 'B' but with a shared 'QFQ data'-database between three 'Typo3 / QFQ' instances.
+* Further variants are possible.
+
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+|   | Domain         | Website Host | T3                            | QFQ system                   | QFQ data                         |
++===+================+==============+===============================+==============================+==================================+
+| A | standalone.edu | 'w'          | <dbHost>, <dbname>_t3, <dbnameSingle>_db                                                        |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| B | appB1.edu      | 'wApp'       | <dbHostApp>, <dbnameB1>_t3    | <dbHostB1>, <dbnameApp>_db                                      |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| B | appB2.edu      | 'wApp'       | <dbHostApp>, <dbnameB2>_t3    | <dbHostB2>, <dbnameApp>_db                                      |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| C | appC1.edu      | 'wAppC'      | <dbHostAppC>, <dbnameC1>_t3   | <dbHostC>, <dbnameSysC1>_db  | <dbHostData>_db, <dbNameData>_db |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| C | appC2.edu      | 'wAppC'      | <dbHostAppC>, <dbnameC2>_t3   | <dbHostC>, <dbnameSysC2>_db  | <dbHostData>_db, <dbNameData>_db |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| C | appC3.edu      | 'wAppC3'     | <dbHostAppC3>, <dbnameC3>_t3  | <dbHostC3>, <dbnameSysC3>_db | <dbHostData>_db, <dbNameData>_db |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+
+In `config.qfq.ini`_ mutliple database credentials can be prepared. Mandatory is at least one credential setup like
+`DB_1_USER`, `DB_1_SERVER`, `DB_1_PASSWORD`, `DB_1_NAME`. The number '1' indicates the `dbIndex`. Increment the number
+to specify further database credential setups.
+
+Often the `DB_1_xxx` is identically to the used Typo3 database credentials.
+
+If not explicit specified, 'QFQ system' and 'QFQ database' will use the same database with the same credentials (setup 'A').
+
+To define separate 'QFQ data' and 'QFQ system', in `config.qfq.ini`_ define  `DB_1_USER`, ... (e.g. 'QFQ data') and `DB_2_USER`,
+... (e.g. 'QFQ system') and specify the assignment::
+
+	DB_INDEX_DATA = 1
+	DB_INDEX_QFQ = 2
+
+To let a form operate (show, load and save) on a different database, use `Form.parameter.dbIndexData` (see `form-parameter`_).
+
+Different QFQ versions, shared database
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When using different QFQ versions and a shared 'QFQ data'-database, there is some risk of conflicting
+'QFQ system' tables. Best is to always use the same QFQ version on all instances.
 
 Variable
 ========
@@ -1816,7 +1873,7 @@ Syntax: `forwardPage=<mode>|<page>`
 
 .. _form-parameter:
 
-parameter
+Parameter
 ^^^^^^^^^
 
 * The following parameter are optional and can be configured in the *Form.parameter* field.
@@ -1824,41 +1881,43 @@ parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | Name                        | Type   | Description                                                                                              |
 +=============================+========+==========================================================================================================+
+| dbIndexData                 | int    | Database credential index, given via `config.qfq.ini`_ to let the current `Form` operate on the database.|
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | bsColumns                   | int    | Wrap the whole form in '<div class="col-md-??">                                                          |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| maxVisiblePill              | int    | Show pills upto <maxVisiblePill> as button, all further in a drop-down menu. Eg.: maxVisiblePill=3       |
+| maxVisiblePill              | int    | Show pills upto <maxVisiblePill> as button, all further in a drop-down menu. Eg.: maxVisiblePill=3.      |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| class                       | string | HTML div with given class, surrounding the whole form. Eg.: class=container-fluid                        |
+| class                       | string | HTML div with given class, surrounding the whole form. Eg.: class=container-fluid.                       |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | classPill                   | string | HTML div with given class, surrounding the `pill` title line.                                            |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | classBody                   | string | HTML div with given class, surrounding all *FormElement*.                                                |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| submitButtonText            | string | Show save button, with the <submitButtonText> at the bottom of the form                                  |
+| submitButtonText            | string | Show save button, with the <submitButtonText> at the bottom of the form.                                 |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| extraDeleteForm             | string | Name of a form which specifies how to delete the primary record and optional slave records               |
+| extraDeleteForm             | string | Name of a form which specifies how to delete the primary record and optional slave records.              |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-pattern-error          | string | Pattern violation: Text for error message used for all FormElements of current form                      |
+| data-pattern-error          | string | Pattern violation: Text for error message used for all FormElements of current form.                     |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-required-error         | string | Required violation: Text for error message used for all FormElements of current form                     |
+| data-required-error         | string | Required violation: Text for error message used for all FormElements of current form.                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-match-error            | string | Match violation: Text for error message used for all FormElements of current form                        |
+| data-match-error            | string | Match violation: Text for error message used for all FormElements of current form.                       |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-error                  | string | If none specific is defined: Text for error message used for all FormElements of current form            |
+| data-error                  | string | If none specific is defined: Text for error message used for all FormElements of current form.           |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| buttonOnChangeClass         | string | Color for save button after user modified some content or current form. E.g.: 'btn-info alert-info'      |
+| buttonOnChangeClass         | string | Color for save button after user modified some content or current form. E.g.: 'btn-info alert-info'.     |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| ldapServer                  | string | FQDN Ldap Server. E.g.: directory.example.com                                                            |
+| ldapServer                  | string | FQDN Ldap Server. E.g.: directory.example.com.                                                           |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| ldapBaseDn                  | string | E.g.: `ou=Addressbook,dc=example,dc=com`                                                                 |
+| ldapBaseDn                  | string | E.g.: `ou=Addressbook,dc=example,dc=com`.                                                                |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| ldapAttributes              | string | List of attributes to fill STORE_LDAP with. E.g.: cn, email                                              |
+| ldapAttributes              | string | List of attributes to fill STORE_LDAP with. E.g.: cn, email.                                             |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | ldapSearch                  | string | E.g.: `(mail={{email::alnumx:l}})`                                                                       |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| ldapTimeLimit               | int    | Maximum time to wait for an answer of the LDAP Server                                                    |
+| ldapTimeLimit               | int    | Maximum time to wait for an answer of the LDAP Server.                                                   |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| typeAheadLdap               | -      | Enable LDAP as 'Typeahead' data source                                                                   |
+| typeAheadLdap               | -      | Enable LDAP as 'Typeahead' data source.                                                                  |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | typeAheadLdapSearch         | string | Regular LDAP search expresssion. E.g.:  `(|(cn=*?*)(mail=*?*))`                                          |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -1866,16 +1925,16 @@ parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | typeAheadLdapIdPrintf       | string | Key formatting of LDAP result, per entry. E.g.: `'%s', mail`                                             |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| typeAheadLdapSearchPerToken | -      | Split search value in token and OR-combine every search with the individual tokens                       |
+| typeAheadLdapSearchPerToken | -      | Split search value in token and OR-combine every search with the individual tokens.                      |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| typeAheadLimit              | int    | Maximum number of entries. The limit is applied to the server (LDAP or SQL) and the Client               |
+| typeAheadLimit              | int    | Maximum number of entries. The limit is applied to the server (LDAP or SQL) and the Client.              |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | typeAheadMinLength          | int    | Minimum number of characters which have to typed to start the search.                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | mode                        | string | The value `readonly` will activate a global readonly mode of the form - the user can't change any data.  |
 |                             |        | See :ref:`form-mode-global`                                                                              |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| saveButtonActive            | -      | Make the 'save'-button active on *Form* load (instead of waiting for the first user change)              |
+| saveButtonActive            | -      | Make the 'save'-button active on *Form* load (instead of waiting for the first user change).             |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | saveButtonText              | string | Overwrite default from config.qfq.ini: SAVE_BUTTON_TEXT                                                  |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+

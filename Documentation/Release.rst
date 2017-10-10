@@ -36,6 +36,23 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.25.0
+--------------
+
+Date: 10.10.2017
+
+Notes
+^^^^^
+
+* The config.qfq.ini directives DB_USER, DB_NAME, DB_HOST, DB_PASSWORD are replaced by DB_1_USER, DB_1_NAME, DB_1_HOST,
+  DB_1_PASSWORD. The old directives are still used, as long as the new directives does not exist.
+
+* New config.qfq.ini directives: DB_INDEX_DATA, DB_INDEX_QFQ
+
+Features
+^^^^^^^^
+* #4720 - Separate database handles for QFQ 'form' and QFQ 'data' - 'Form' might  now load/save from forign database/host/user.
+
 
 Version 0.24.0
 --------------
