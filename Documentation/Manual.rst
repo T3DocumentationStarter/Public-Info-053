@@ -22,8 +22,9 @@
 General
 =======
 
-* Project homepage: https://git.math.uzh.ch/typo3/qfq
+* Project homepage: https://qfq.io
 * Latest relases: https://w3.math.uzh.ch/qfq/
+* Development: https://git.math.uzh.ch/typo3/qfq
 
 
 .. _installation:
@@ -410,7 +411,7 @@ Example: *typo3conf/config.qfq.ini*
 	; LDAP_1_RDN='ou=Admin,dc=example,dc=com'
 	; LDAP_1_PASSWORD=mySecurePassword
 
-	; ESCAPE_TYPE_DEFAULT=s
+	; ESCAPE_TYPE_DEFAULT=m
 	; SECURITY_VARS_HONEYPOT=email,username,password
 	; SECURITY_ATTACK_DELAY=5
 	; SECURITY_SHOW_MESSAGE=true
@@ -444,7 +445,7 @@ Example: *typo3conf/config.qfq.ini*
 	; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
 	;DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
 
-	;VAR_ADD_BY_SQL = {{!SELECT s.id AS _periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1}}
+	;VAR_ADD_BY_SQL = 'SELECT s.id AS _periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1'
 
 	;FORM_LANGUAGE_A_ID = 1
 	;FORM_LANGUAGE_A_LABEL = english
@@ -508,7 +509,7 @@ The QFQ approach works without a marker and without manual intervention: the whi
 
 In `config.qfq.ini`: ::
 
-	VAR_ADD_BY_SQL = SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1
+	VAR_ADD_BY_SQL = 'SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1'
 
 a variable 'periodId' will automatically computed and filled in STORE SYSTEM. Access it via `{{periodId:Y0}}`.
 To get the name and current period: ::
@@ -823,7 +824,7 @@ Types
 Store variables
 ^^^^^^^^^^^^^^^
 
-Syntax:  *{{VarName[:<store / prio>[:<sanitize class>[:<escape>]]]}}*
+Syntax:  *{{VarName[:<store / prio>[:<sanitize class>[:<escape>[:<default>]]]]}}*
 
 * Example::
 
@@ -831,11 +832,13 @@ Syntax:  *{{VarName[:<store / prio>[:<sanitize class>[:<escape>]]]}}*
   {{pId:FSE}}
   {{pId:FSE:digit}}
   {{name:FSE:alnumx:m}}
+  {{name:FSE:alnumx:m:John Doe}}
 
 * Zero or more stores might be specified to be searched for the given VarName.
 * If no store is specified, the by default searched stores are: **FSRVD** (=FORM > SIP > RECORD > VARS > DEFAULT).
 * If the VarName is not found in one store, the next store is searched,  up to the last specified store.
-* If the VarName is not found in any store, nothing is replaced - the string '{{<VarName>}}' remains.
+* If the VarName is not found and a default value is given, the default is returned.
+* If no value is found, nothing is replaced - the string '{{<VarName>}}' remains.
 * If anywhere along the line an empty string is found, this **is** a value: therefore, the search will stop.
 
 See also:
@@ -952,6 +955,8 @@ To protect the web application the following `escape` types are available:
 	* 'L' - LDAP DN values will be escaped. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
 	* 's' - single ticks will be escaped. str_replace() of ' against \\'.
 	* 'd' - double ticks will be escaped: str_replace() of " against \\".
+	* 'c' - config - the escape type configured in `config.qfq.ini`_.
+	* ''  - the escape type configured in `config.qfq.ini`_.
 	* '-' - no escaping.
 
 * The `escape` type is defined by the fourth parameter of the variable. E.g.: `{{name:FE:alnumx:m}}` (m = mysql).
@@ -1262,7 +1267,7 @@ Store: *TYPO3* (Bodytext) - T
  +-------------------------+-------------------------------------------------------------------+----------+
  | pageId                  | Record id of current Typo3 page                                   | see note |
  +-------------------------+-------------------------------------------------------------------+----------+
- | pageAlias               | Alias of current Typo3 page                                       | see note |
+ | pageAlias               | Alias of current Typo3 page. If empty, take  pageId.              | see note |
  +-------------------------+-------------------------------------------------------------------+----------+
  | pageTitle               | Title of current Typo3 page                                       | see note |
  +-------------------------+-------------------------------------------------------------------+----------+

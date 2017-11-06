@@ -36,6 +36,17 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.25.1
+--------------
+
+Date: 3.11.17
+
+Bug Fixes
+^^^^^^^^^
+
+* #4857 - broken (stale) download: multiple 'u:..' or 'u:...'
+* #4212 - Broken JSON on response to save new record 'Unknown index' fixed by isset()
+
 Version 0.25.0
 --------------
 
