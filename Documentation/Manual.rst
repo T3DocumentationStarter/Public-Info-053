@@ -869,8 +869,8 @@ SQL variables
 * Example::
 
   {{SELECT id, name FROM Person}}
-  {{SELECT id, name, IF({{feUser}}=0,'Yes','No')  FROM Person WHERE id={{r:S}} }}
-  {{SELECT id, city FROM Address AS adr WHERE adr.accId={{SELECT id FROM Account AS acc WHERE acc.name={{feUser}} }} }}
+  {{SELECT id, name, IF({{feUser:T0}}=0,'Yes','No')  FROM Person WHERE id={{r:S}} }}
+  {{SELECT id, city FROM Address AS adr WHERE adr.accId={{SELECT id FROM Account AS acc WHERE acc.name={{feUser:T0}} }} }}
 
 * Special case for `SELECT` input fields and FormElement.type=action `sqlValidate`. To deliver a result array specify an '!' before the SELECT: ::
 

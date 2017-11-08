@@ -36,6 +36,33 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.25.2
+--------------
+
+Date: 8.11.17
+
+Notes
+^^^^^
+
+* Starting with this release, the default escape mode is 'm' (mysql_real_escape).
+
+Features
+^^^^^^^^
+
+* Default Escape Type changed from 's' to 'm'. DatabaseUpdateData.php: removed the DB update from last commit - not necessary.
+  Config.php: New default 'm' Evaluate.php: Respect EscapeTypeDefault in form definition.
+  QuickFormQuery.php: Replace 'EscapeTypeDefault' in form defintion very early.
+* #4049 - QFQ Variables '{{...}}' might now contain a default value.
+* If 'pageAlias:T' is empty, take 'pageId:T'.
+
+Bug Fixes
+^^^^^^^^^
+
+* #4836 - Multiple entries in table after several clicks on save. Created a saveInProgress Variable
+* Replaced latest project homepage URL in Manual.rst
+* Fix example SQL for periodId in config.qfq.ini in Manual.rst
+* Remove multiple header 'RELEASE' - there has to be only one.
+
 Version 0.25.1
 --------------
 
@@ -95,9 +122,6 @@ Bug Fixes
 * Bug Fixed problem in subrecord when no record is selected.
 * Bug #4620 / Easy Fix: saveButtonText / closeButtonText Formatierung
 
-Release
-=======
-
 Version 0.23.1
 --------------
 
@@ -124,9 +148,6 @@ Bug Fixes
 
 * #4548 /Template Group: 'form-update' broken - Broken Redirect after Save - Broken same HTML ID for FE copies in a template group.
 * #4548 /Template Group: 'form-update' broken - max tg element value/index shown after save instead of last user supplied value, but save is ok. Neu wird nach dem Speichern das Formular nochmal komplett geladen. Das ist wichtig um die durch aftersave geaenderten Records in die Formularelemente zu bekommen.
-
-Release
-=======
 
 Version 0.22
 ------------
