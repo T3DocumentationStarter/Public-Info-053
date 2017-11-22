@@ -61,3 +61,4 @@ QFQ Extension
     	Release
     	Links
     	README
+    	License

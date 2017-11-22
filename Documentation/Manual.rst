@@ -68,7 +68,7 @@ Preparation for Ubuntu 14.04::
 Preparation for Ubuntu 16.04::
 
 	sudo apt install php7.0-intl
-	sudo apt install pdftk libxrender1 file        # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf)
+	sudo apt install pdftk libxrender1 file pdf2svg       # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf), PDF split
 
 .. _wkhtml:
 
@@ -238,10 +238,14 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | DB_INDEX_QFQ                | DB_INDEX_QFQ = 1                                | Optional. Default: 1.                                                      |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SQL_LOG                     | SQL_LOG=sql.log                                 | Filename to log SQL commands: relative to <ext_dir> or absolute.           |
+| SQL_LOG                     | SQL_LOG=../../sql.log                           | Filename to log SQL commands: relative to <ext_dir> or absolute.           |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SQL_LOG_MODE                | SQL_LOG_MODE=modify                             | *all*: every statement will be logged - this might a lot.                  |
 |                             |                                                 | *modify*: log only statements who change data.                             |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| MAIL_LOG                    | SQL_LOG=../../mail.log                          | Filename to log `sendEmail` commands: relative to <ext_dir> or absolute.   |
++-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
+| SEND_E_MAIL_OPTIONS         | SEND_E_MAIL_OPTIONS="-o tls=yes"                | General options. Check: http://caspian.dotconf.net/menu/Software/SendEmail |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SHOW_DEBUG_INFO             | SHOW_DEBUG_INFO=auto                            | FE - Possible values: yes|no|auto|download. For 'auto': If a BE User is    |
 |                             |                                                 | logged in, a debug information will be shown on the FE.                    |
@@ -353,8 +357,8 @@ config.qfq.ini
 | DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...      | Link to the online documentation of QFQ. Every QFQ installation also       |
 |                             |                                                 | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| VAR_ADD_BY_SQL              | VAR_ADD_BY_SQL = {{!SELECT s.id AS ...          | Specific values read from the database to fill the system store during QFQ |
-|                             |                                                 | load. See `VariablesAddBySql`_ for a usecase.                              |
+| FILL_STORE_SYSTEM_BY_SQL    | FILL_STORE_SYSTEM_BY_SQL = {{!SELECT s.id AS ...| Specific values read from the database to fill the system store during QFQ |
+|                             |                                                 | load. See `fillStoreSystemBySql`_ for a usecase.                           |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | FORM_LANGUAGE_A_ID          | FORM_LANGUAGE_A__ID = 1                         | In Typo3 configured pageLanguage id. The number after the 'L' parameter.   |
 | FORM_LANGUAGE_B_ID          |                                                 |                                                                            |
@@ -445,7 +449,9 @@ Example: *typo3conf/config.qfq.ini*
 	; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
 	;DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
 
-	;VAR_ADD_BY_SQL = 'SELECT s.id AS _periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1'
+	;FILL_STORE_SYSTEM_BY_SQL_1 = 'SELECT s.id AS periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1'
+   ; Important: only define an error message, if QFQ should stop running in case of an error or not exact 1 record.
+   ;FILL_STORE_SYSTEM_BY_SQL_ERROR_MSG_1 = No current period found
 
 	;FORM_LANGUAGE_A_ID = 1
 	;FORM_LANGUAGE_A_LABEL = english
@@ -474,17 +480,23 @@ E.g. to setup a contact address and reuse the information inside your installati
 
       {{ADMINISTRATIVE_CONTACT:Y}}, {{ADMINISTRATIVE_ADDRESS:Y}}, {{ADMINISTRATIVE_NAME}}
 
-.. _`VariablesAddBySql`:
+.. _`fillStoreSystemBySql`:
 
-Variables add by SQL
-^^^^^^^^^^^^^^^^^^^^
+Fill STORE_SYSTEM by SQL
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-A specified SELECT statement in `config.qfq.ini`_ in variable `VAR_ADD_BY_SQL` fill be fired after filling the SYSTEM STORE.
-The query should have 0 (nothing happens) or 1 row. The column names and column values will be added as variables to the SYSTEM_STORE.
-Existing variables will be overwritten. Be carefull not to overwrite needed values.
+A specified SELECT statement in `config.qfq.ini`_ in variable `FILL_STORE_SYSTEM_BY_SQL_1` (or `FILL_STORE_SYSTEM_BY_SQL_2`,
+or `FILL_STORE_SYSTEM_BY_SQL_3`) will be fired. The query should have 0 (nothing happens) or 1 row. All columns will be
+**added** to the existing STORE_SYSTEM. Existing variables will be overwritten. Be careful not to overwrite system values.
  
-This option is usefull to make generic custom values, saved in the database, accessible to all QFQ Report and Forms.
-Access such variables as usual via `{{<varname>:Y}}`.
+This option is useful to make generic custom values, saved in the database, accessible to all QFQ Report and Forms.
+Access such variables via `{{<varname>:Y}}`.
+
+In case QFQ should stop working if a given query does not select exact one record (e.g. a missing period), define an
+error message: ::
+
+  FILL_STORE_SYSTEM_BY_SQL_1 = "SELECT name FROM Person WHERE name='Doe'"
+  FILL_STORE_SYSTEM_BY_SQL_ERROR_MSG_1 = Too many or to few "Doe's" in our database
 
 .. _`periodId`:
 
@@ -493,23 +505,21 @@ periodId
 
 This is
 
-* a usecase, implemented via `VariablesAddBySql`_,
+* a usecase, implemented via `fillStoreSystemBySql`_,
 * a way to access `Period.id` with respect to the current period (the period itself is custom defined).
 
 After a full QFQ installation, three things are prepared:
 
 * a table `Period` (extend / change it to your needs, fill them with your periods),
 * one sample record in table `Period`,
-* in `config.qfq.ini`_ the default definition of `VAR_ADD_BY_SQL` will set the variable `periodId` during QFQ load.
+* in `config.qfq.ini`_ the default definition of `FILL_STORE_SYSTEM_BY_SQL_1` will set the variable `periodId` during QFQ load.
 
 Websites, delivering semester data, schoolyears schedules, or any other type or periods, often need an index to the
-*current* period. One way is a) to mark the current period and b) to change the marker every time when the next period
-becomes current.
-The QFQ approach works without a marker and without manual intervention: the whished index will be computed during QFQ load.
+*current* period.
 
 In `config.qfq.ini`: ::
 
-	VAR_ADD_BY_SQL = 'SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1'
+	FILL_STORE_SYSTEM_BY_SQL_1 = 'SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1'
 
 a variable 'periodId' will automatically computed and filled in STORE SYSTEM. Access it via `{{periodId:Y0}}`.
 To get the name and current period: ::
@@ -629,13 +639,19 @@ QFQ Keywords (Bodytext)
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.fend      | End token for every field (=column)                                             |
  +-------------------+---------------------------------------------------------------------------------+
- | <level>.head      | Start token for whole <level>                                                   |
+ | <level>.shead     | Static start token for whole <level>, independent if records are selected       |
+ |                   | Shown before `head`.                                                            |
  +-------------------+---------------------------------------------------------------------------------+
- | <level>.tail      | End token for whole <level>                                                     |
+ | <level>.stail     | Static end token for whole <level>, independent if records are selected.        |
+ |                   | Shown after `tail`.                                                             |
+ +-------------------+---------------------------------------------------------------------------------+
+ | <level>.head      | Dynamic start token for whole <level>. Only if at least one record is select.   |
+ +-------------------+---------------------------------------------------------------------------------+
+ | <level>.tail      | Dynamic end token for whole <level>. Only if at least one record is select.     |
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.rbeg      | Start token for row.                                                            |
  +-------------------+---------------------------------------------------------------------------------+
- | <level>.rbgd      | Alternating (per row) token                                                     |
+ | <level>.rbgd      | Alternating (per row) token.                                                    |
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.rend      | End token for row. Will be rendered **before** subsequent levels are processed  |
  +-------------------+---------------------------------------------------------------------------------+
@@ -647,7 +663,10 @@ QFQ Keywords (Bodytext)
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.sql       | SQL Query                                                                       |
  +-------------------+---------------------------------------------------------------------------------+
- | <level>.althead   | If <level>.sql is empty, these token will be rendered                           |
+ | <level>.althead   | If <level>.sql is empty, these token will be rendered.                          |
+ +-------------------+---------------------------------------------------------------------------------+
+ | <level>.altsql    | If <level>.sql is empty, these query will be fired. No sub queries.             |
+ |                   | Shown after `althead`                                                           |
  +-------------------+---------------------------------------------------------------------------------+
  | debugShowBodyText | If='1' and config.qfq.ini:*SHOW_DEBUG_INFO = yes*, shows a tooltip with bodytext|
  +-------------------+---------------------------------------------------------------------------------+
@@ -656,10 +675,64 @@ QFQ Keywords (Bodytext)
  | sqlLogMode        | Overwrites config.qfq.ini: `SQL_LOG_MODE`_ . Only affects `Report`, not `Form`. |
  +-------------------+---------------------------------------------------------------------------------+
 
+Databases
+---------
+
+A Typo3 / QFQ Installation needs at least two databases. One for the Typo3 installation and one for QFQ.
+
+QFQ itself can be separated in 'QFQ system' and 'QFQ data' databases, if necessary (than at least three databases are needed).
+Furthermore a `Form` can operate on any additional database, specified per `Form`.parameter.dbIndex and configured via `config.qfq.ini`_.
+
+* Option 'A' is the most simple and commonly used.
+* Option 'B' separate the T3 and QFQ databases on two database hosts.
+* Option 'C' is like 'B' but with a shared 'QFQ data'-database between three 'Typo3 / QFQ' instances.
+* Further variants are possible.
+
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+|   | Domain         | Website Host | T3                            | QFQ system                   | QFQ data                         |
++===+================+==============+===============================+==============================+==================================+
+| A | standalone.edu | 'w'          | <dbHost>, <dbname>_t3, <dbnameSingle>_db                                                        |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| B | appB1.edu      | 'wApp'       | <dbHostApp>, <dbnameB1>_t3    | <dbHostB1>, <dbnameApp>_db                                      |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| B | appB2.edu      | 'wApp'       | <dbHostApp>, <dbnameB2>_t3    | <dbHostB2>, <dbnameApp>_db                                      |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| C | appC1.edu      | 'wAppC'      | <dbHostAppC>, <dbnameC1>_t3   | <dbHostC>, <dbnameSysC1>_db  | <dbHostData>_db, <dbNameData>_db |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| C | appC2.edu      | 'wAppC'      | <dbHostAppC>, <dbnameC2>_t3   | <dbHostC>, <dbnameSysC2>_db  | <dbHostData>_db, <dbNameData>_db |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+| C | appC3.edu      | 'wAppC3'     | <dbHostAppC3>, <dbnameC3>_t3  | <dbHostC3>, <dbnameSysC3>_db | <dbHostData>_db, <dbNameData>_db |
++---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
+
+In `config.qfq.ini`_ mutliple database credentials can be prepared. Mandatory is at least one credential setup like
+`DB_1_USER`, `DB_1_SERVER`, `DB_1_PASSWORD`, `DB_1_NAME`. The number '1' indicates the `dbIndex`. Increment the number
+to specify further database credential setups.
+
+Often the `DB_1_xxx` is identically to the used Typo3 database credentials.
+
+If not explicit specified, 'QFQ system' and 'QFQ database' will use the same database with the same credentials (setup 'A').
+
+To define separate 'QFQ data' and 'QFQ system', in `config.qfq.ini`_ define  `DB_1_USER`, ... (e.g. 'QFQ data') and `DB_2_USER`,
+... (e.g. 'QFQ system') and specify the assignment::
+
+	DB_INDEX_DATA = 1
+	DB_INDEX_QFQ = 2
+
+To let a form operate (show, load and save) on a different database, use `Form.parameter.dbIndexData` (see `form-parameter`_).
+
+Different QFQ versions, shared database
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When using different QFQ versions and a shared 'QFQ data'-database, there is some risk of conflicting
+'QFQ system' tables. Best is to always use the same QFQ version on all instances.
+
 .. _debug:
 
 Debug
-^^^^^
+=====
+
+SQL Logging
+-----------
 
 File: `config.qfq.ini`_
 
@@ -713,6 +786,11 @@ File: `config.qfq.ini`_
 
 .. _REDIRECT_ALL_MAIL_TO:
 
+Redirect all mail to (catch all)
+--------------------------------
+
+File: `config.qfq.ini`_
+
 * *REDIRECT_ALL_MAIL_TO=john@doe.com*
 
   * During the development, it might be helpful to configure a 'catch all' email address, which QFQ uses as the final receiver
@@ -725,57 +803,6 @@ File: `config.qfq.ini`_
     * Write a note and the original configured receiver at the top of the email body.
 
 .. _variables:
-
-Databases
----------
-
-A Typo3 / QFQ Installation needs at least two databases. One for the Typo3 installation and one for QFQ.
-
-QFQ itself can be separated in 'QFQ system' and 'QFQ data' databases, if necessary (than at least three databases are needed).
-Furthermore a `Form` can operate on any additional database, specified per `Form`.parameter.dbIndex and configured via `config.qfq.ini`_.
-
-* Option 'A' is the most simple and commonly used.
-* Option 'B' separate the T3 and QFQ databases on two database hosts.
-* Option 'C' is like 'B' but with a shared 'QFQ data'-database between three 'Typo3 / QFQ' instances.
-* Further variants are possible.
-
-+---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
-|   | Domain         | Website Host | T3                            | QFQ system                   | QFQ data                         |
-+===+================+==============+===============================+==============================+==================================+
-| A | standalone.edu | 'w'          | <dbHost>, <dbname>_t3, <dbnameSingle>_db                                                        |
-+---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
-| B | appB1.edu      | 'wApp'       | <dbHostApp>, <dbnameB1>_t3    | <dbHostB1>, <dbnameApp>_db                                      |
-+---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
-| B | appB2.edu      | 'wApp'       | <dbHostApp>, <dbnameB2>_t3    | <dbHostB2>, <dbnameApp>_db                                      |
-+---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
-| C | appC1.edu      | 'wAppC'      | <dbHostAppC>, <dbnameC1>_t3   | <dbHostC>, <dbnameSysC1>_db  | <dbHostData>_db, <dbNameData>_db |
-+---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
-| C | appC2.edu      | 'wAppC'      | <dbHostAppC>, <dbnameC2>_t3   | <dbHostC>, <dbnameSysC2>_db  | <dbHostData>_db, <dbNameData>_db |
-+---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
-| C | appC3.edu      | 'wAppC3'     | <dbHostAppC3>, <dbnameC3>_t3  | <dbHostC3>, <dbnameSysC3>_db | <dbHostData>_db, <dbNameData>_db |
-+---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
-
-In `config.qfq.ini`_ mutliple database credentials can be prepared. Mandatory is at least one credential setup like
-`DB_1_USER`, `DB_1_SERVER`, `DB_1_PASSWORD`, `DB_1_NAME`. The number '1' indicates the `dbIndex`. Increment the number
-to specify further database credential setups.
-
-Often the `DB_1_xxx` is identically to the used Typo3 database credentials.
-
-If not explicit specified, 'QFQ system' and 'QFQ database' will use the same database with the same credentials (setup 'A').
-
-To define separate 'QFQ data' and 'QFQ system', in `config.qfq.ini`_ define  `DB_1_USER`, ... (e.g. 'QFQ data') and `DB_2_USER`,
-... (e.g. 'QFQ system') and specify the assignment::
-
-	DB_INDEX_DATA = 1
-	DB_INDEX_QFQ = 2
-
-To let a form operate (show, load and save) on a different database, use `Form.parameter.dbIndexData` (see `form-parameter`_).
-
-Different QFQ versions, shared database
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-When using different QFQ versions and a shared 'QFQ data'-database, there is some risk of conflicting
-'QFQ system' tables. Best is to always use the same QFQ version on all instances.
 
 Variable
 ========
@@ -793,7 +820,7 @@ Some examples, including nesting::
   #---------------------------------------------
   {{r}}
   {{index:FS}}
-  {{name:FS:alnumx:s}}
+  {{name:FS:alnumx:s:my default}}
 
   # SQL
   #---------------------------------------------
@@ -1216,7 +1243,7 @@ This store is handy to compare new and old values of a form.
  +------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------+
  | Name                   | Explanation                                                                                                                                      |
  +========================+==================================================================================================================================================+
- | <column name>          | Name of a column of the primary table (as defined in the current form). To get, exactly and only, the specified form *FormElement*: *{{pId:R}}*  |
+ | <column name>          | Name of a column of the primary table (as defined in the current form). To get, exactly and only, the specified form *FormElement*: *{{pId:B}}*  |
  +------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. _STORE_CLIENT:
@@ -1307,8 +1334,18 @@ Store: *VARS* - V
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | filename                | Original filename of an uploaded file via an 'upload'-FormElement. Valid only during processing of the current 'upload'-formElement.       |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
- | fileDestinaton          | Destination (path & filename) for an uploaded file. Defined in an 'upload'-FormElement.parameter. Valid: same as 'filename'.               |
+ | fileDestination         | Destination (path & filename) for an uploaded file. Defined in an 'upload'-FormElement.parameter. Valid: same as 'filename'.               |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+
+The directive `fillStoreVar` will fill the this store with custom values. Existing values will remain or are overwritten,
+depending of if they exist in the given statement. E.g.: ::
+
+    fillStoreVar = {{!SELECT p.name, p.email FROM Person AS p WHERE p.id={{pId:S}} }}
+
+* After filling the store, the values can be retrieved via `{{name:v}}` and `{{email:V}}`.
+* Be careful by specifying general purpose variables like `id`, `r`, `pageId` and so on. This might conflict with existing variables.
+* `fillStoreVar` can be used in `form-parameter`_ and `fe-parameter-attributes`_
+
 
 .. _STORE_LDAP:
 
@@ -1403,7 +1440,7 @@ Server configurations.
 
 To decide which Parameter should be placed on *Form.parameter* and which on *FormElement.parameter*: If LDAP access is ...
 
-* only necessary in one *FormElement*, most usefull setup is to specify all values in that specific *FormElement*,
+* only necessary in one *FormElement*, most useful setup is to specify all values in that specific *FormElement*,
 * needed on multiple *FormElement*s (of the same *Form*, e.g. one *input* with *typeAhead*, one *note* and one *action*), it's more
   efficient to specify the base parameter *ldapServer*, *ldapBaseDn* in *Form.parameter* and the rest on the current
   *FormElement*.
@@ -1531,7 +1568,7 @@ E.g.::
 
    Result: (& (|(a=*X*)(b=*X*)) (|(a=*Y*)(b=*Y*))
 
-Attention: this option is only usefull in specific environments. Only use it, if it is really needed. The query becomes
+Attention: this option is only useful in specific environments. Only use it, if it is really needed. The query becomes
 much more cpu / IO intensive.
 
 
@@ -1975,6 +2012,8 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | extraButtonInfoClass        | string | Overwrite default from config.qfq.ini: EXTRA_BUTTON_INFO_CLASS                                           |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| fillStoreVar                | string | Fill the STORE_VAR with custom values. See `STORE_VARS`_.                                                |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 * Example:
 
@@ -2236,7 +2275,7 @@ Fields:
 |                     | 'disabled' )                | *Readonly*: user can't change any data. Data not saved.                                             |
 |                     |                             | *Disabled*: *FormElement* is not visible.                                                           |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Mode sql             | `SELECT` statement with     | A value given here overwrites the setting from `mode`. Most usefull with :ref:`dynamic-update`.     |
+|Mode sql             | `SELECT` statement with     | A value given here overwrites the setting from `mode`. Most useful with :ref:`dynamic-update`.      |
 |                     | a value like in `mode`      | E.g.: {{SELECT IF( '{{otherFunding:FR:alnumx}}'='yes' ,'show', 'hidden' }}                          |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Class                | enum('native', 'action',    | Details below.                                                                                      |
@@ -2414,6 +2453,8 @@ See also at specific *FormElement* definitions.
 | sqlAfter               | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | fileButtonText         | string | Overwrite default 'Choose File'                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| fillStoreVar           | string | Fill the STORE_VAR with custom values. See `STORE_VARS`_.                                                |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 
@@ -3233,7 +3274,7 @@ Parameter: sqlBefore / sqlInsert / sqlUpdate / sqlDelete / sqlAfter
   * *sqlBefore*: always fired (before any *sqlInsert*, *sqlUpdate*, ..)
   * *sqlInsert*: fired if *slaveId* == `0` or *slaveId* == `''`.
   * *sqlUpdate*: fired if *slaveId* > `0`.
-  * *sqlDelete*: fired if *slaveId* > `0`, after *sqlInsert* or *sqlUpdate*. Be carefull not to delete filled records!
+  * *sqlDelete*: fired if *slaveId* > `0`, after *sqlInsert* or *sqlUpdate*. Be careful not to delete filled records!
     Always add a check, if values given, not to delete the record! *sqlHonorFormElements* helps to skip such checks.
   * *sqlAfter*: always fired (after *sqlInsert*, *sqlUpdate* or *sqlDelete*).
   * *sqlHonorFormElements*: list of *FormElement* names (this parameter is optional).
@@ -3329,10 +3370,14 @@ Type: sendmail
   * *sendMailFrom* - Sender of the email. Optional: 'realname <john@doe.com>'. **Mandatory**.
   * *sendMailSubject* - Subject of the email.
   * *sendMailReplyTo* - Reply this email address. Optional: 'realname <john@doe.com>'.
+  * *sendMailAttachment* - List of files to attach to the mail. Multiple files separated by comma.
+  * *sendMailHeader* - Specify custom header.
   * *sendMailFlagAutoSubmit* - **on|off** - If 'on' (default), the mail contains the header
     'Auto-Submitted: auto-send' - this suppress a) OoO replies, b) forwarding of emails.
   * *sendMailGrId* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
   * *sendMailXId* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
+  * *sendMailXId2* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
+  * *sendMailXId3* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
 
 * To use values of the submitted form, use the STORE_FORM. E.g. `{{name:F:allbut}}`
 * To use the `id` of a new created or already existing one, use the STORE_RECORD. E.g. `{{id:R}}`
@@ -4238,19 +4283,13 @@ FAQ
 Report
 ======
 
-The QFQ extension is activated through tt-content records. One or more tt-content records per page are necessary to render
-*forms* and *reports*.
-
 QFQ content element
 -------------------
 
-QFQ is used by configuring Typo3 content elements. Insert one or more QFQ content elements on a Typo3 page.
-Specify column and language per content record as wished.
+The QFQ extension is activated through tt-content records. One or more tt-content records per page are necessary to render
+*forms* and *reports*. Specify column and language per content record as wished.
 
-The title of the QFQ content element will not be rendered. It's only visible in the backend for orientation.
-
-General
--------
+The title of the QFQ content element will not be rendered. It's only visible in the backend for orientation of the webmaster.
 
 To display a report on any given TYPO3 page, create a content element of type 'QFQ Element' (plugin) on that page.
 
@@ -4299,15 +4338,18 @@ Syntax of `report`
 
     For **each** row of a query (this means *all* queries), all subqueries will be fired once.
 
-    *   E.g. if the outer query selects 5 rows, and a nested query always select 3 rows, than the total number of rows are 5 x 3 = 15 rows.
+    *   E.g. if the outer query selects 5 rows, and a nested query select 3 rows, than the total number of rows are 5 x 3 = 15 rows.
 
     There is a set of **variables** that will get replaced before the SQL-Query gets executed:
 
-        Column values of the recent rows: {{<level>.<columnname>}}
+        Variables from specific stores: {{<name>[:<store/s>[:...]]}}
+
+        STORE_RECORD is automatically merged with the existing STORE_RECORD content and the current row. Use the STORE_RECORD
+        to access outer level values.
+
+        Column values of a given row: {{<level>.<columnname>}}
 
         Global variables: {{global.<name>}}
-
-        Variables from specific stores: {{<name>[:<store/s>[:<sanitize class>]]}}
 
         Current row index: {{<level>.line.count}}
 
@@ -4320,22 +4362,21 @@ Syntax of `report`
     Be aware that line.count / line.total have to be known before the query is fired. E.g. `10.sql = SELECT {{10.line.count}}, ... WHERE {{10.line.count}} = ...`
     won't work as expected. `{{10.line.count}}` can't be replaced before the query is fired, but will be replaced during processing the result!
 
-
     Different types of SQL queries are possible: SELECT, INSERT, UPDATE, DELETE, SHOW
 
     Only SELECT and SHOW queries will fire subqueries.
 
-    *   Processing of the resulting rows and columns:
+    Processing of the resulting rows and columns:
 
-    *   In general, all columns of all rows will be printed out sequentially.
+    * In general, all columns of all rows will be printed out sequentially.
 
-        On a per column base, printing of columns can be suppressed. This might be useful to select values which will be
-        accessed later on in another query via the {{level.columnname}} variable. To suppress printing of a column, use a
-        underscore as column name prefix.
+    * On a per column base, printing of columns can be suppressed by starting the columnname with an underscore '_'. E.g. `SELECT id AS _id`.
+      This might be useful to store values, which will be used later on in another query via the `{{id:R}}` or `{{level.columnname}}` variable. To suppress printing of a column, use a
+      underscore as column name prefix. E.g. `SELECT id AS _id`
 
-        Reserved column names have a special meaning and will be processed in a special way. See `Processing of columns in the SQL result`_ for details.
+    Reserved column names have a special meaning and will be processed in a special way. See `Processing of columns in the SQL result`_ for details.
 
-        There are extensive ways to wrap columns and rows automatically. See :ref:`wrapping-rows-and-columns`
+    There are extensive ways to wrap columns and rows automatically. See :ref:`wrapping-rows-and-columns`
 
 Debug the bodytext
 ------------------
@@ -4478,7 +4519,33 @@ Be careful to:
 Access column values
 ^^^^^^^^^^^^^^^^^^^^
 
-Columns of the upper / outer level result can be accessed via variables, eg. {{10.pId}} will be replaced by the value in the pId column.
+Columns of the upper / outer level result can be accessed via variables in two ways
+
+ * STORE_RECORD: `{{pId:R}}`
+ * Level Key: `{{10.pId}}`
+
+The STORE_RECORD will always be merged with previous content. The Level Keys are unique.
+
+Example STORE_RECORD: ::
+
+  10.sql= SELECT p.id AS _pId, p.name FROM Person AS p
+  10.5.sql = SELECT adr.city, 'dummy' AS _pId FROM Address AS adr WHERE adr.pId={{pId:R}}
+  10.5.20.sql = SELECT '{{pId:R}}'
+  10.10.sql = SELECT '{{pId:R}}'
+
+The line '10.10' will output 'dummy' in cases where there is at least one corresponding address.
+If there are no addresses (all persons) it reports the person id.
+If there is at least one address, it reports 'dummy', cause that's the last stored content. This behaviour might change in the future.
+
+Example 'Level Key': ::
+
+  10.sql= SELECT p.id AS _pId, p.name FROM Person AS p
+  10.5.sql = SELECT adr.city, 'dummy' AS _pId FROM Address AS adr WHERE adr.pId={{10.pId}}
+  10.5.20.sql = SELECT '{{10.pId}}'
+  10.10.sql = SELECT '{{10.pId}}'
+
+
+Notes to the level level:
 
 +-------------+------------------------------------------------------------------------------------------------------------------------+
 | Levels      |A report is divided into levels. The Example has levels *10*, *20*, *30*, *30.5*, *30.5.1*, *50*                        |
@@ -4916,7 +4983,7 @@ is allowed to access: ::
       page.10.value = Please access from localhost or log in as 'admin' user.
    [global]
 
-..
+.. _column_pageX:
 
 Columns: _page[X]
 ^^^^^^^^^^^^^^^^^
@@ -4984,6 +5051,8 @@ The colum name is composed of the string *page* and a trailing character to spec
 |<create sip> |s                                                                                                |                                                          |'s': create a SIP                                              |
 +-------------+-------------------------------------------------------------------------------------------------+----------------------------------------------------------+---------------------------------------------------------------+
 
+.. _column_paged:
+
 Column: _paged
 ^^^^^^^^^^^^^^
 
@@ -5029,6 +5098,8 @@ Examples:
     SELECT 'U:table=Person&r=123|q:Do you want delete John Doe?' AS _paged
     SELECT 'U:form=person-main&r=123|q:Do you want delete John Doe?' AS _paged
 
+.. _column_ppageX:
+
 Columns: _Page[X]
 ^^^^^^^^^^^^^^^^^
 
@@ -5039,7 +5110,7 @@ Columns: _Page[X]
 
     "[<page id|alias>[&param=value&...]] | [text] | [tooltip] | [question parameter] | [class] | [target] | [render mode]" as _Pagee.
 
-..
+.. _column_ppaged:
 
 Column: _Paged
 ^^^^^^^^^^^^^^
@@ -5052,7 +5123,7 @@ Column: _Paged
     "[table=<table name>&r-<record id>[&param=value&...] | [text] | [tooltip] | [question parameter] | [class] | [render mode]" as _Paged.
     "[form=<form name>&r-<record id>[&param=value&...] | [text] | [tooltip] | [question parameter] | [class] | [render mode]" as _Paged.
 
-..
+.. _column_vertical:
 
 Column: _vertical
 ^^^^^^^^^^^^^^^^^
@@ -5104,7 +5175,7 @@ angle.
 
 ..
 
-
+.. _column_mailto:
 
 Column: _mailto
 ^^^^^^^^^^^^^^^
@@ -5153,11 +5224,12 @@ Easily create Email links.
 
 ..
 
+.. _column_sendmail:
 
 Column: _sendmail
 ^^^^^^^^^^^^^^^^^
 
-<TO:email[,email]>|<FROM:email>|<subject>|<body>|[<REPLY-TO:email>]|[<flag autosubmit: on /off>]|[<grid>]|[xId]|<CC:email[,email]>|<BCC:email[,email]>
+t:<TO:email[,email]>|f:<FROM:email>|s:<subject>|b:<body>|[F:<REPLY-TO:email>]|[a:<flag autosubmit: on /off>]|[g:<grid>]|[x:xId]|[c:<CC:email[,email]]>|[B:<BCC:email[,email]]|[y:xId2]|[z:xId3]>
 
 
 Send text emails. Every mail will be logged in the table `mailLog`.
@@ -5166,45 +5238,51 @@ Send text emails. Every mail will be logged in the table `mailLog`.
 
 ::
 
-    SELECT "john@doe.com|jane@doe.com|Reminder tomorrow|Please dont miss the meeting tomorrow" AS _sendmail
+    SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
+    SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
 
 ..
 
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|**Parameter**                                               |**Description**                                                                           |**Required**|
-+============================================================+==========================================================================================+============+
-|TO:email[,email]                                            |Comma-separated list of receiver email addresses. Optional: `realname <john@doe.com>`     |    yes     |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|FROM:email                                                  |Sender of the email. Optional: 'realname <john@doe.com>'                                  |    yes     |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|subject                                                     |Subject of the email                                                                      |    yes     |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|body                                                        |Message                                                                                   |    yes     |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|REPLY-TO:email                                              |Email address to reply to (if different from sender)                                      |            |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|flagAutoSubmit  'on' / 'off'                                |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies     |            |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|grId                                                        |Will be copied to the mailLog record. Helps to setup specific logfile queries             |            |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|xId                                                         |Will be copied to the mailLog record. Helps to setup specific logfile queries             |            |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|CC:email[,email]                                            |Comma-separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
-|BCC:email[,email]                                           |Comma-separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
-+------------------------------------------------------------+------------------------------------------------------------------------------------------+------------+
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+|***Token** | **Parameter**                  |**Description**                                                                                   |**Required**|
++===+========================================+==================================================================================================+============+
+| f | FROM:email                             |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| t | email[,email]                          |**TO**: Comma separated list of receiver email addresses. Optional: `realname <john@doe.com>`     |    yes     |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| c | email[,email]                          |**CC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| B | email[,email]                          |**BCC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'    |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| r | REPLY-TO:email                         |**Reply-to**: Email address to reply to (if different from sender)                                |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| s | Subject                                |**Subject**: Subject of the email                                                                 |    yes     |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| b | Body                                   |**Body**: Message                                                                                 |    yes     |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| h | Header                                 |**Custom Header**: Separate multiple header with \r\n                                             |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| a | Attachment                             |**Attachment**: Comma separated list of filenames to attach to the mail                           |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| A | flagAutoSubmit  'on' / 'off'           |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies             |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| g | grId                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| x | xId                                    |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| y | xId2                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| z | xId3                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 
 
 **Minimal Example**
 
 ::
 
-
-    10.sql = SELECT "john.doe@example.com|company@example.com|Latest News|The new version is now available." AS _sendmail
+    10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available." AS _sendmail
 
 ..
-
-
 
 This will send an email with subject *Latest News* from company@example.com to john.doe@example.com.
 
@@ -5212,8 +5290,8 @@ This will send an email with subject *Latest News* from company@example.com to j
 
 ::
 
-
-    10.sql = SELECT "customer1@example.com,Firstname Lastname <customer2@example.com>, Firstname Lastname <customer3@example.com>|company@example.com|Latest News|The new version is now available.|sales@example.com|on|101|222|ceo@example.com|backup@example.com" AS _sendmail
+    10.sql = SELECT "t:customer1@example.com,Firstname Lastname <customer2@example.com>, Firstname Lastname <customer3@example.com>|
+                     f:company@example.com|s:Latest News|b:The new version is now available.|r:sales@example.com|A:on|g:101|x:222|c:ceo@example.com|B:backup@example.com" AS _sendmail
 
 ..
 
@@ -5223,6 +5301,7 @@ Additional the CEO as well as backup will receive the mail via CC and BCC.
 
 For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
 
+.. _column_img:
 
 Column: _img
 ^^^^^^^^^^^^
@@ -5281,7 +5360,7 @@ Renders images. Allows to define an alternative text and a title attribute for t
 
 ..
 
-
+.. _column_exec:
 
 Column: _exec
 ^^^^^^^^^^^^^
@@ -5316,6 +5395,7 @@ Runs batch files or executables on the webserver. In case of an error, returncod
 
 ..
 
+.. _column_pdf:
 
 Column: _pdf | _file | _zip
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -5343,7 +5423,7 @@ Most of the other Link-Class attributes can be used to customize the link.
 
 		SELECT "d:complete.pdf|t:Download PDF|f:fileadmin/test.pdf|U:id=export&r=1|u:www.w3c.org" AS _pdf
 
-..
+.. _column_ppdf:
 
 Column: _Pdf | _File | _Zip
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -5366,6 +5446,7 @@ A limited set of attributes is supported: ::
 
 ..
 
+.. _column_F:
 
 Column: _F
 ^^^^^^^^^^
@@ -5801,6 +5882,8 @@ Same as above, but written in the nested notation ::
 
 * Columns starting with a '_' won't be printed but can be accessed as regular columns.
 
+.. _help:
+
 Help
 ====
 
@@ -5813,6 +5896,39 @@ Tips:
 
 	* Always check the Javascript console of your browser, see `javascriptProblem`_.
 	* Always check the Webserver logfiles, see `webserverErrorLog`_.
+
+QFQ specific
+------------
+
+Variable empty: {{...}}
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Specify the required sanitize class. Remember: for STORE_FORM and STORE_CLIENT the default is `digit`. This means if
+the variable content is a string, this violates the sanitize class and the replaced content will be an empty string!
+
+Form: put the problematic variable or SQL statement in the 'title' or note 'field' of a `FormElement`. This should show
+the content. For SQL statements insert a character before the SQL Keyword to avoid SQL triggering.
+
+Error read file config.qfq.ini: syntax error on line xx
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Check the given line number. If it's a SQL statement, enclose it in single or double ticks.
+
+Logging
+-------
+
+General webserver error log
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For apache: /var/log/apache2/error_log
+
+Especially if you got a blank page (no rendering at all), this is typically an uncaught PHP error. Check the error message
+and report the bug.
+
+Call to undefined function qfq\\mb_internal_encoding()
+''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Check that all required php modules are installed. See `preparation`_.
 
 
 Error Messages
@@ -5838,22 +5954,4 @@ Open the 'Webdeveloper Tools' (FF: F12, Chrome/Opera: Right mouse click > Inspec
 
 .. _`webserverErrorLog`:
 
-Webserver error log
--------------------
 
-For apache: /var/log/apache2/error_log
-
-
-Call to undefined function qfq\\mb_internal_encoding()
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Check that all required php modules are installed. See `preparation`_.
-
-QFQ specific
-------------
-
-Variable empty: {{...}}
-^^^^^^^^^^^^^^^^^^^^^^^
-
-Specify the required sanitize class. Remember: for STORE_FORM and STORE_CLIENT the default is `digit`. This means if
-the variable content is a string, this violates the sanitize class and the replaced content will be an empty string!

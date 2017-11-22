@@ -36,10 +36,72 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.25.4
+--------------
+
+Date: 22.11.17
+
+Notes
+^^^^^
+
+* New keywords / features in report:
+
+  * `altsql`: Fire the query if there is no record selected in `sql`. Shown after `althead`
+  * `shead`: Static head - will always be shown (before `head`), independent of sql selects records or not.
+  * `stail`: Static tail - will always be shown (after `tail`), independent of sql selects records or not.
+
+Features
+^^^^^^^^
+
+* #2948 /altsql, shead, stail - new directives in Report.
+* #4255 / Attachments fuer 'Email'. Static files can be attached to mails.
+
+Bug Fixes
+^^^^^^^^^
+
+* #4980 / Variables in Report: a) nested not replaced, b) 'rbeg' not replaced, c) missing unit tests.
+
+
+Version 0.25.3
+--------------
+
+Date: 19.11.2017
+
+Notes
+^^^^^
+
+* Report:
+
+  * Special column name 'sendmail': the old way of position dependent parameter are deprecated. Instead use the new
+    defined token. See https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html#column_sendmail
+
+  * Every row is now merged in STORE_RECORD. Inner SQL statement can now retrieve outer values via STORE_RECORD.
+    E.g. `{{column:R}}`. No more level keys!
+
+* The config.qfq.ini directive `VAR_ADD_BY_SQL` is replaced by `FILL_STORE_SYSTEM_BY_SQL_?`. Up to 3 statements are possible.
+
+Features
+^^^^^^^^
+
+* Report / sendmail: control via token.
+* #4967 / config.qfq.ini: Rename 'VAR_ADD_BY_SQL' to 'FILL_STORE_SYSTEM_BY_SQL_1'. Handle up to 3 FILL_STORE_SYSTEM_SQL_x.
+  Implement an optional error message together with a full stop.
+* #4766: Set STORE_RECORD in Report per row.
+
+Bug Fixes
+^^^^^^^^^
+
+* #4966 / Variable {{feUser:T}} is not available in config.qfq.ini `FILL_STORE_SYSTEM_?` - changed ordering of store
+  initialization. Now: TCY...
+* #4944 / Delete: broken when using 'tableName' (instead of form).
+* #4904 / Undefined Index: DIRTY_FE_USER - PHP problem that constants cant be replaced inside of single ticks. Fixed.
+* #4965: insert path to QFQ cookie/session, to make usage of multiple QFQ installation on one host possible.
+
+
 Version 0.25.2
 --------------
 
-Date: 8.11.17
+Date: 8.11.2017
 
 Notes
 ^^^^^
@@ -66,7 +128,7 @@ Bug Fixes
 Version 0.25.1
 --------------
 
-Date: 3.11.17
+Date: 3.11.2017
 
 Bug Fixes
 ^^^^^^^^^
