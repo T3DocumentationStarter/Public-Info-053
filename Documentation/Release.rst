@@ -36,6 +36,17 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.25.5
+--------------
+
+Date: 23.11.17
+
+Bug Fixes
+^^^^^^^^^
+
+* #4771: Workaround which switches off updates to SELECT lists, if they are part of a Multi-FE-Row.
+
+
 Version 0.25.4
 --------------
 

@@ -3117,8 +3117,7 @@ If the user deletes a record (e.g. pressing the delete button on a form) which c
 are deleted too. Slave records, which might be also deleted through a 'delete'-form, are *not* checked for file references
 and therefore such files are not deleted on the filesystem.
 
-Only columns where the columname contains `pathFileName` are checked for file references. Therefore, always choose a
-columnanme which contains `pathFileName`.
+Only column(name)s which contains `pathFileName` as part of their name, are checked for file references.
 
 If there are other records, which references the same file, such files are not deleted.
 It's a very basic check: just the current column of the current table is compared. In general it's not a good idea to
@@ -3184,7 +3183,6 @@ A typical name for such an 'upload'-FormElement, to show that the name does not 
   * *sqlAfter*: fired after all previous queries have been fired. Might update the new created id to a primary record. E.g.::
 
       sqlAfter={{UPDATE Person SET noteIdPicture = {{slaveId}} WHERE id={{id:R0}} LIMIT 1 }}
-
 
 
 .. _class-action:
