@@ -2150,15 +2150,33 @@ Type: fieldset
   * *name*: technical name, used as HTML identifier.
   * *label*: Shown title of the fieldset.
 
-Type: pill
-^^^^^^^^^^
+Type: pill (tab)
+^^^^^^^^^^^^^^^^
 
-* Pill is synonymous for a tab. A pill looks like a tab.
-* Pills are only available with mode render='bootstrap'.
-* If there is at least one pill defined, every native *FormElement* needs to be assigned to a pill or to a fieldset.
-* If there is at least one pill defined, every *fieldset* needs to be assigned to a pill.
-* Pills are not 'dynamicUpdate' aware (at the moment). At least during form load, *modeSql* can be dynamically computed to
-  switch the pill in show / readonly (disabled) / hidden state.
+* Pill is synonymous for a tab and looks like a tab.
+* If there is at least one pill defined:
+
+  * every native *FormElement* needs to be assigned to a pill or to a fieldset.
+  * every *fieldset* needs to be assigned to a pill.
+
+* Mode:
+
+  * `show`: all child elements will be shown.
+  * `required`: same as 'show'. This mode has no other meaning than 'show'.
+  * `readonly`: technical it's like HTML/CSS `disabled`.
+
+    * The pill title is shown, but not clickable.
+    * The `FormElements` on the pill still exist, but are not reachable for the user via UI.
+
+  * `hidden`:
+
+    * The pill is invisible.
+    * The `FormElements` on the pill still exist, but are not reachable for the user via UI.
+
+
+  * Note: Independent of the *mode*, all child elements are always rendered and processed by the client/server.
+
+* Pills are 'dynamicUpdate' aware. `title` and `mode` are optional recalculated during 'dynamicUpdate'.
 
 * FormElement settings:
 

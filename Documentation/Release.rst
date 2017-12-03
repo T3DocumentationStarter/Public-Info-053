@@ -36,6 +36,29 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.25.6
+--------------
+
+Date: 03.12.2017
+
+Notes
+^^^^^
+
+Bigger changes in update form after save/dynamic update.
+
+Bug Fixes
+^^^^^^^^^
+
+* #4865: Pill Dynamic Updates Show / Hide
+* #5031 / Missing details in DbException: New definition of SYSTEM_SHOW_DEBUG_INFO: even after config.qfq.ini is parsed
+   and SIP Infos has been read - if there is no BE User logged in, the value stays on 'auto' (earlier it has been replaced
+   to 'no'). Staying on 'auto' keeps the information that replacing is still open and not replaced means 'no'-BE User logged in.
+* #5016 Loose checkbox value on save - Dirty workaround - better solution necessary.
+* #5017 - STORE_RECORD used in FormElement and via '#!report' - save & restore STORE_RECORD.
+* #5004 FormElement with state 'ReadOnly' will be saved with empty value - existing values will be overwritten - fixed.
+* 'element-update' for type 'UPLOAD seems to make trouble. Exclude it like 'SELECT'
+
+
 Version 0.25.5
 --------------
 
@@ -50,7 +73,7 @@ Bug Fixes
 Version 0.25.4
 --------------
 
-Date: 22.11.17
+Date: 22.11.2017
 
 Notes
 ^^^^^
