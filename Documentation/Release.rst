@@ -36,6 +36,29 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 0.25.7
+--------------
+
+Date: 07.12.2017
+
+Notes
+^^^^^
+
+* Report: parameter in '... AS _sendmail' needs token now - position dependent is removed now.
+* Report: parameter 'a:' in '... AS _sendmail' replaced by 'F:' to be compatible with downloads. Do not separate files by comma.
+* Manual: most occurences of 'U:' replaced by 'p:' - same meaning.
+
+Features
+^^^^^^^^
+
+* #4255 / Attachments for emails implemented.
+
+Bug Fixes
+^^^^^^^^^
+
+* Bug - PHP Warning: Declaration of qfq\BuildFormTable::head() should be compatible with qfq\AbstractBuildForm::head($mode = qfq\FORM_LOAD)  - fixed
+
+
 Version 0.25.6
 --------------
 

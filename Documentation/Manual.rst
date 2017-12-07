@@ -2290,8 +2290,8 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Mode                 | enum('show', 'readonly',    | *Show*: regular user input field. This is the default.                                              |
 |                     | 'required',                 | *Required*: User has to specify a value. Typically, an <empty string> represents 'no value'.        |
-|                     | 'disabled' )                | *Readonly*: user can't change any data. Data not saved.                                             |
-|                     |                             | *Disabled*: *FormElement* is not visible.                                                           |
+|                     | 'hidden' )                  | *Readonly*: user can't change any data. Data not saved.                                             |
+|                     |                             | *Hidden*: *FormElement* is not visible.                                                             |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Mode sql             | `SELECT` statement with     | A value given here overwrites the setting from `mode`. Most useful with :ref:`dynamic-update`.      |
 |                     | a value like in `mode`      | E.g.: {{SELECT IF( '{{otherFunding:FR:alnumx}}'='yes' ,'show', 'hidden' }}                          |
@@ -2343,7 +2343,7 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |feGroup              | string                      | Comma-separated list of Typo3 FE Group ID. NOT SURE IF THIS WILL BE IMPLEMENTED. Native             |
 |                     |                             | *FormElements*, fieldsets and pills can be assigned to feGroups. Group status: show, hidden,        |
-|                     |                             | disabled. Group Access: FE-Groups. User will be assigned to FE-Groups and the form definition       |
+|                     |                             | hidden. Group Access: FE-Groups. User will be assigned to FE-Groups and the form definition         |
 |                     |                             | reference such FE-groups. Easy way of granting permission.                                          |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Deleted              | string                      | 'yes'|'no'.                                                                                         |
@@ -2961,7 +2961,7 @@ will be rendered inside the form as a HTML table.
 
   * *show / required*: the regular mode to show the subrecords
   * *readonly*: New / Edit / Delete Buttons are disabled
-  * *hidden*: The FormElement is rendered, but disabled with `display='none'`.
+  * *hidden*: The FormElement is rendered, but hidden with `display='none'`.
 
 * *dynamicUpdate*: not supported at the moment.
 
@@ -3386,7 +3386,7 @@ Type: sendmail
   * *sendMailFrom* - Sender of the email. Optional: 'realname <john@doe.com>'. **Mandatory**.
   * *sendMailSubject* - Subject of the email.
   * *sendMailReplyTo* - Reply this email address. Optional: 'realname <john@doe.com>'.
-  * *sendMailAttachment* - List of files to attach to the mail. Multiple files separated by comma.
+  * *sendMailAttachment* - List of 'sources' to attach to the mail as files. Check `attachment`_ for options.
   * *sendMailHeader* - Specify custom header.
   * *sendMailFlagAutoSubmit* - **on|off** - If 'on' (default), the mail contains the header
     'Auto-Submitted: auto-send' - this suppress a) OoO replies, b) forwarding of emails.
@@ -3396,9 +3396,13 @@ Type: sendmail
   * *sendMailXId3* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
 
 * To use values of the submitted form, use the STORE_FORM. E.g. `{{name:F:allbut}}`
-* To use the `id` of a new created or already existing one, use the STORE_RECORD. E.g. `{{id:R}}`
+* To use the `id` of a new created or already existing primary record, use the STORE_RECORD. E.g. `{{id:R}}`.
 
 * For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
+
+Example to attach one file and concatenate PDF files to a single one, whose source are web pages: ::
+
+  sendMailAttachmemt = F:fileadmin/file1.pdf|d:readme.pdf|C|u:http://www.example.com|p:?id=export&r=123&_sip=1|d:personal.pdf
 
 Type: paste
 '''''''''''
@@ -4704,7 +4708,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Check         |C:[<color>]                        |C:green                    |Show checked with '<color>'. Colors: blue, gray, green, pink, red, yellow. Default Color: green.                                        |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |   |URL Params    |U:<key1>=<value1>[&<keyN>=<valueN>]|U:a=value1&b=value2&c=...  |Any number of additional Params. Links to forms: U:form=Person&r=1234                                                                   |
+|   |   |URL Params    |U:<key1>=<value1>[&<keyN>=<valueN>]|U:a=value1&b=value2&c=...  |Any number of additional Params. Links to forms: U:form=Person&r=1234. Used to create 'record delete'-links.                            |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Tooltip       |o:<text>                           |o:More information here    |Tooltip text                                                                                                                            |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -4724,7 +4728,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Mode          |M:file|pdf|zip                     |M:file, M:pdf, M:zip       |Mode. Used to specify type of download. One or more element sources needs to be configured. See `download`_.                            |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |   |File          |f:<filename>                       |f:fileadmin/file.pdf       |Element source for download mode file|pdf|zip. See `download`_.                                                                         |
+|   |   |File          |F:<filename>                       |F:fileadmin/file.pdf       |Element source for download mode file|pdf|zip. See `download`_.                                                                         |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Delete record | x[:a|r|c]                         |x, x:r, x:c                |a: ajax (only QFQ internal used), r: report (default), c: close (current page, open last page)                                          |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -4793,7 +4797,7 @@ Link Examples
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT "U:form=Person&r=123|x|t:Delete" as _link                      | <a href="typo3conf/ext/qfq/qfq/api/delete.php?s=badcaffee1234">Delete</a>                                                               |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "s:1|d:full.pdf|M:pdf|U:id=det1&r=12|U:id=det2|f:cv.pdf|       | <a href="typo3conf/ext/qfq/qfq/api/download.php?s=badcaffee1234">Download</a>                                                           |
+| SELECT "s:1|d:full.pdf|M:pdf|p:id=det1&r=12|p:id=det2|F:cv.pdf|       | <a href="typo3conf/ext/qfq/qfq/api/download.php?s=badcaffee1234">Download</a>                                                           |
 |         t:Download|a:Create complete PDF - please wait" as _link      |                                                                                                                                         |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 
@@ -4902,7 +4906,7 @@ Parameter and (element) sources
         is allowed per download link (no concatenation).
 
       * In case of multiple element sources, only `pdf` or `zip` is supported.
-      * If `m:zip` is used together with `U:...` oder `u:..`, those HTML pages will be converted to PDF. Those files
+      * If `m:zip` is used together with `p:...`, `U:...` or `u:..`, those HTML pages will be converted to PDF. Those files
         get generic filenames inside the archive.
       * If not specified, the **default** 'Mode' depends on the number of specified element sources (=file or web page):
 
@@ -4911,14 +4915,14 @@ Parameter and (element) sources
 
 * *element sources* - for `m:pdf` or `m:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
 
-  * *file*: `f:<pathFilename>` - relative or absolute pathFilename offered for a) download (single), or to be concatenated
+  * *file*: `F:<pathFilename>` - relative or absolute pathFilename offered for a) download (single), or to be concatenated
     in a PDF or ZIP.
-  * *urlParam*: `U:id=<t3 page>&<key 1>=<value 1>&<key 2>=<value 2>&...&<key n>=<value n>`.
+  * *page*: `p:id=<t3 page>&<key 1>=<value 1>&<key 2>=<value 2>&...&<key n>=<value n>`.
 
     * By default, the options given to wkhtml will *not* be encoded by a SIP!
     * To encode the parameter via SIP: Add '_sip=1' to the URL GET parameter.
 
-      E.g. `U:id=form&_sip=1&form=Person&r=1`.
+      E.g. `p:id=form&_sip=1&form=Person&r=1`.
 
       In that way, specific sources for the `download` might be SIP encrypted.
 
@@ -4929,54 +4933,54 @@ Parameter and (element) sources
 
   * *url*: `u:<url>` - any URL, pointing to an internal or external destination.
 
-  * *WKHTML Options* for `urlParam` or `url`:
+  * *WKHTML Options* for `page`, `urlParam` or `url`:
 
     * The 'HTML to PDF' will be done via `wkhtmltopdf`.
-    * All possible options, suitable for `wkhtmltopdf`, can be submitted in the `u:...` or `U:...` element source.
+    * All possible options, suitable for `wkhtmltopdf`, can be submitted in the `p:...`, `u:...` or `U:...` element source.
       Check `wkhtmltopdf.txt <https://wkhtmltopdf.org/usage/wkhtmltopdf.txt>`_ for possible options. Be aware that
       key/value tuple in the  documentation is separated by a space, but to respect the QFQ key/value notation of URLs,
-      the key/value tuple in `u:...` or `U:...` has to be separated by '='. Please see last example below.
+      the key/value tuple in `p:...`, `u:...` or `U:...` has to be separated by '='. Please see last example below.
 
 	Most of the other Link-Class attributes can be used to customize the link as well.
 
 Example `_link`: ::
 
 	# single `file`. Specifying a popup message window text is not necessary, cause a file directly accessed is fast.
-	SELECT "d:file.pdf|s|t:Download|f:fileadmin/pdf/test.pdf" AS _link
+	SELECT "d:file.pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
 
 	# single `file`, with mode
-	SELECT "d:file.pdf|m:pdf|s|t:Download|f:fileadmin/pdf/test.pdf" AS _link
+	SELECT "d:file.pdf|m:pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file
-	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1|f:fileadmin/pdf/test.pdf" AS _link
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file
-	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1|f:fileadmin/pdf/test.pdf" AS _link
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file, parameter to wkhtml will be SIP encoded
-	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1&_sip=1|U:id=detail2&r=1&_sip=1|f:fileadmin/pdf/test.pdf" AS _link
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1&_sip=1|p:id=detail2&r=1&_sip=1|F:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file, the second page will be in landscape and pagesize A3
-	SELECT "d:complete.pdf|s|t:Complete PDF|U:id=detail&r=1|U:id=detail2&r=1&--orientation=Landscape&--page-size=A3|f:fileadmin/pdf/test.pdf" AS _link
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1&--orientation=Landscape&--page-size=A3|F:fileadmin/pdf/test.pdf" AS _link
 
 ..
 
 Example `_pdf`, `_zip`: ::
 
-	# File 1: U:id=1&--orientation=Landscape&--page-size=A3
-	# File 2: U:id=form
-	# File 3: f:fileadmin/file.pdf
-	SELECT 't:PDF|a:Creating a new PDF|U:id=1&--orientation=Landscape&--page-size=A3|U:id=form|f:fileadmin/file.pdf' AS _pdf
+	# File 1: p:id=1&--orientation=Landscape&--page-size=A3
+	# File 2: p:id=form
+	# File 3: F:fileadmin/file.pdf
+	SELECT 't:PDF|a:Creating a new PDF|p:id=1&--orientation=Landscape&--page-size=A3|p:id=form|F:fileadmin/file.pdf' AS _pdf
 
-	# File 1: U:id=1
+	# File 1: p:id=1
 	# File 2: u:http://www.example.com
-	# File 3: f:fileadmin/file.pdf
-	SELECT 't:PDF - 3 Files|a:Please be patient|U:id=1|u:http://www.example.com|f:fileadmin/file.pdf' AS _pdf
+	# File 3: F:fileadmin/file.pdf
+	SELECT 't:PDF - 3 Files|a:Please be patient|p:id=1|u:http://www.example.com|F:fileadmin/file.pdf' AS _pdf
 
-	# File 1: U:id=1
-	# File 2: U:id=form
-	# File 3: f:fileadmin/file.pdf
-	SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|U:id=1|U:id=form|f:', p.pathFilename) AS _zip
+	# File 1: p:id=1
+	# File 2: p:id=form
+	# File 3: F:fileadmin/file.pdf
+	SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|p:id=1|p:id=form|F:', p.pathFilename) AS _zip
 
 ..
 
@@ -5013,7 +5017,7 @@ The colum name is composed of the string *page* and a trailing character to spec
 
     SELECT "[options]" AS _page[<link type>]
 
-    with: [options] = [p:<page & param>]|[t:<text>]|[o:<tooltip>]|[q:<question parameter>]|[c:<class>]|[g:<target>]|[r:<render mode>]
+    with: [options] = [p:<page & param>][|t:<text>][|o:<tooltip>][|q:<question parameter>][|c:<class>][|g:<target>][|r:<render mode>]
 
     <link type> = c,d,e,h,i,n,s
 
@@ -5245,22 +5249,24 @@ Easily create Email links.
 Column: _sendmail
 ^^^^^^^^^^^^^^^^^
 
-t:<TO:email[,email]>|f:<FROM:email>|s:<subject>|b:<body>|[F:<REPLY-TO:email>]|[a:<flag autosubmit: on /off>]|[g:<grid>]|[x:xId]|[c:<CC:email[,email]]>|[B:<BCC:email[,email]]|[y:xId2]|[z:xId3]>
+t:<TO:email[,email]>|F:<FROM:email>|s:<subject>|b:<body>
+ [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|F:<REPLY-TO:email>]
+ [|a:<flag autosubmit: on /off>][|g:<grid>][|x:<xId>][|y:<xId2>][|z:<xId3>]
+ [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
 
-
-Send text emails. Every mail will be logged in the table `mailLog`.
+Send text emails. Every mail will be logged in the table `mailLog`. Attachments are supported.
 
 **Syntax**
 
 ::
 
-    SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
-    SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
+    SELECT "t:john@doe.com|F:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
+    SELECT "t:john@doe.com|F:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
 
 ..
 
 +---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-|***Token** | **Parameter**                  |**Description**                                                                                   |**Required**|
+|**Token** | **Parameter**                   |**Description**                                                                                   |**Required**|
 +===+========================================+==================================================================================================+============+
 | f | FROM:email                             |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
 +---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
@@ -5278,7 +5284,15 @@ Send text emails. Every mail will be logged in the table `mailLog`.
 +---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | h | Header                                 |**Custom Header**: Separate multiple header with \r\n                                             |            |
 +---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| a | Attachment                             |**Attachment**: Comma separated list of filenames to attach to the mail                           |            |
+| F | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| u | Attach created PDF of a given URL      |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| U | Attach created PDF of a given T3 URL   |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| d | Filename of the attachment             |**Attachment**: Useful for URL to PDF converted attachments. Repeatable.                          |            |
++---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| M | Merge multiple F|p|u|U| together       |**Attachment**: All given 'F|p|u|U' concatenated to one attachment. Repeatable.                   |            |
 +---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | A | flagAutoSubmit  'on' / 'off'           |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies             |            |
 +---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
@@ -5296,7 +5310,7 @@ Send text emails. Every mail will be logged in the table `mailLog`.
 
 ::
 
-    10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available." AS _sendmail
+    10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available." AS _sendmail
 
 ..
 
@@ -5307,7 +5321,7 @@ This will send an email with subject *Latest News* from company@example.com to j
 ::
 
     10.sql = SELECT "t:customer1@example.com,Firstname Lastname <customer2@example.com>, Firstname Lastname <customer3@example.com>|
-                     f:company@example.com|s:Latest News|b:The new version is now available.|r:sales@example.com|A:on|g:101|x:222|c:ceo@example.com|B:backup@example.com" AS _sendmail
+                     F:company@example.com|s:Latest News|b:The new version is now available.|r:sales@example.com|A:on|g:101|x:222|c:ceo@example.com|B:backup@example.com" AS _sendmail
 
 ..
 
@@ -5316,6 +5330,54 @@ using a realname for customer2 and customer3 and suppress generating of OoO answ
 Additional the CEO as well as backup will receive the mail via CC and BCC.
 
 For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
+
+.. _attachment:
+
+Attachment
+''''''''''
+
+The following options are provided to attach files to an email:
+
++-------+------------------------------------------------------+--------------------------------------------------------+
+| Token | Example                                              | Comment                                                |
++=======+======================================================+========================================================+
+| F     | F:fileadmin/file3.pdf                                | Single file  to attach                                 |
++-------+------------------------------------------------------+--------------------------------------------------------+
+| u     | u:www.example.com/index.html?key=value&...           | A URL, will be converted to a PDF and than attached.   |
++-------+------------------------------------------------------+--------------------------------------------------------+
+| p     | p:?id=export&r=123&_sip=1                            | A SIP protected local T3 page.                         |
+|       |                                                      | Will be converted to a PDF and than attached.          |
++-------+------------------------------------------------------+--------------------------------------------------------+
+| d     | d:myfile.pdf                                         | Name of the attachment in the email.                   |
++-------+------------------------------------------------------+--------------------------------------------------------+
+| C     | C|u:http://www.example.com|F:file1.pdf|C|F:file2.pdf | Concatenate all named sources to one PDF file. The     |
+|       |                                                      | souces has to be PDF files or a web page, which will be|
+|       |                                                      | converted to a PDF first.                              |
++-------+------------------------------------------------------+--------------------------------------------------------+
+
+Any combination (incl. repeating them) are possible. Any source will be added as a single attachment.
+
+Optional any number of sources can be concatenated to a single PDF file: 'C|F:<file1>|F:<file2>|p:export&a=123'.
+
+Examples in Report::
+
+	# One file attached.
+	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf" AS _sendmail
+
+	# Two files attached.
+	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf" AS _sendmail
+
+	# Two files and a webpage (converted to PDF) are attached.
+	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf|p:?id=export&r=123|d:person.pdf" AS _sendmail
+
+	# Two webpages (converted to PDF) are attached.
+	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123|d:person123.pdf|p:?id=export&r=234|d:person234.pdf" AS _sendmail
+
+	# One file and two webpages (converted to PDF) are *concatenated* to one PDF and attached.
+	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|C|F:fileadmin/summary.pdf|p:?id=export&r=123|p:?id=export&r=234|d:complete.pdf" AS _sendmail
+
+	# One T3 webpage, protected by a SIP, are attached.
+	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123&_sip=1|d:person123.pdf" AS _sendmail
 
 .. _column_img:
 
@@ -5421,23 +5483,23 @@ Most of the other Link-Class attributes can be used to customize the link.
 
     SELECT "[options]" AS _pdf, "[options]" AS _file, "[options]" AS _zip
 
-    with: [options] = [d:<exportFilename]|[U:<params>]|[u:<url>]|[f:file]|[t:<text>]|[a:<message>]|[o:<tooltip>]|[c:<class>]|[r:<render mode>]
+    with: [options] = [d:<exportFilename][|p:<params>][|U:<params>][|u:<url>][|F:file][|t:<text>][|a:<message>][|o:<tooltip>][|c:<class>][|r:<render mode>]
 
 
 * Parameter are position independent.
 * *<params>*: see `download-parameter-files`_
-* For column `_pdf` and `_zip`, the element sources `U:...`, `u:...`, `f:...` might repeated multiple times.
+* For column `_pdf` and `_zip`, the element sources `p:...`, `U:...`, `u:...`, `F:...` might repeated multiple times.
 * Example: ::
 
-		SELECT "f:fileadmin/test.pdf" as _pdf,  "f:fileadmin/test.pdf" as _file,  "f:fileadmin/test.pdf" as _zip
-		SELECT "U:id=export&r=1" as _pdf,  "U:id=export&r=1" as _file,  "U:id=export&r=1" as _zip
+		SELECT "F:fileadmin/test.pdf" as _pdf,  "F:fileadmin/test.pdf" as _file,  "F:fileadmin/test.pdf" as _zip
+		SELECT "p:id=export&r=1" as _pdf,  "p:id=export&r=1" as _file,  "p:id=export&r=1" as _zip
 
-		SELECT "t:Download PDF|f:fileadmin/test.pdf" as _pdf,  "t:Download PDF|f:fileadmin/test.pdf" as _file,  "t:Download ZIP|f:fileadmin/test.pdf" as _zip
-		SELECT "t:Download PDF|U:id=export&r=1" as _pdf,  "t:Download PDF|U:id=export&r=1" as _file,  "t:Download ZIP|U:id=export&r=1" as _zip
+		SELECT "t:Download PDF|F:fileadmin/test.pdf" as _pdf,  "t:Download PDF|F:fileadmin/test.pdf" as _file,  "t:Download ZIP|F:fileadmin/test.pdf" as _zip
+		SELECT "t:Download PDF|p:id=export&r=1" as _pdf,  "t:Download PDF|p:id=export&r=1" as _file,  "t:Download ZIP|p:id=export&r=1" as _zip
 
-		SELECT "d:complete.pdf|t:Download PDF|f:fileadmin/test1.pdf|f:fileadmin/test2.pdf" as _pdf, "d:complete.zip|t:Download ZIP|f:fileadmin/test1.pdf|f:fileadmin/test2.pdf" as _zip
+		SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _pdf, "d:complete.zip|t:Download ZIP|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _zip
 
-		SELECT "d:complete.pdf|t:Download PDF|f:fileadmin/test.pdf|U:id=export&r=1|u:www.w3c.org" AS _pdf
+		SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test.pdf|p:id=export&r=1|u:www.example.com" AS _pdf
 
 .. _column_ppdf:
 
