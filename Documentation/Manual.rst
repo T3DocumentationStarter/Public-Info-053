@@ -616,7 +616,8 @@ Typo3 QFQ content element
 
 Insert one or more QFQ content elements on a Typo3 page. Specify column and language per content record as wished.
 
-The title of the QFQ content element will not be rendered. It's only visible in the backend for orientation.
+The title of the QFQ content element will not be rendered on the frontend. It's only visible to the webmaster in the
+backend for orientation.
 
 QFQ Keywords (Bodytext)
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2975,7 +2976,7 @@ will be rendered inside the form as a HTML table.
   * Columnname: *[title=]<title>[|[maxLength=]<number>][|width=<number>][|nostrip][|icon][|link][|url][|mailto][|_rowClass][|_rowTooltip]*
 
     * If the keyword is used, all parameter are position independent.
-    * Parameter are seperated by '|'.
+    * Parameter are separated by '|'.
     * *[title=]<text>*: Title of the column. The keyword 'title=' is optional. Columns with a title starting with '_' won't be rendered.
     * *[maxLength=]<number>*: Max. number of characters displayed per cell. The keyword 'maxLength=' is optional. Default
        maxLength '20'. A value of '0' means no limit. This setting also affects the title of the column.
@@ -3081,7 +3082,7 @@ and will be processed after saving the primary record and before any action Form
 
     * List of mime types (also known as 'media types'): http://www.iana.org/assignments/media-types/media-types.xhtml
     * If none is specified, 'application/pdf' is set. This forces that always (!) one type is specified.
-    * One or more media types might be specified, seperated by ','.
+    * One or more media types might be specified, separated by ','.
     * Different browser respect the given definitions in different ways. Typically the 'file choose' dialog offer:
 
       * the specified mime type (some browers only show 'custom', if more than one mime type is given),
@@ -3400,7 +3401,8 @@ Type: sendmail
 
 * For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
 
-Example to attach one file and concatenate PDF files to a single one, whose source are web pages: ::
+Example to attach one file1.pdf (with the attachment filename 'readme.pdf') and concatenate two PDF, created on the fly
+from the www.example.com and ?export (with the attachment filename 'personal.pdf'): ::
 
   sendMailAttachmemt = F:fileadmin/file1.pdf|d:readme.pdf|C|u:http://www.example.com|p:?id=export&r=123&_sip=1|d:personal.pdf
 
@@ -4321,21 +4323,21 @@ Assume that the database has a table person with columns firstName and lastName.
 
     10.sql = SELECT id AS pId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
 
-10 Stands for a *root level* of the report (see section `Structure`_). 10.sql defines a SQL query for this specific level. When the query is executed it will return a result having one single column name containing first and last name
+The '10' indicates a *root level* of the report (see section `Structure`_). The expresssion '10.sql' defines a SQL query
+for the specific level. When the query is executed, it will return a result having one single column name containing first and last name
 separated by a space character.
 
-The HTML output displayed on the page resulting from only this definition could look as follows:
+The HTML output, displayed on the page, resulting from only this definition, could look as follows:
 ::
 
     John DoeJane MillerFrank Star
 
 ..
 
-
-
 I.e., QFQ will simply output the content of the SQL result row after row for each single level.
 
-However, we can modify (wrap) the output by setting the values of various keys for each level: 10.rsep=<br/> for example tells QFQ to seperate the rows of the result by a HTML-line break. The final result in this case is:
+However, we can modify (wrap) the output by setting the values of various keys for each level: 10.rsep=<br/> for example
+tells QFQ to separate the rows of the result by a HTML-line break. The final result in this case is:
 
 ::
 
@@ -4442,7 +4444,7 @@ This would result in
 Text across several lines
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To make SQL queries, or QFQ records in general, more readable, it's possible to split a line across several lines. Lines
+To get better human readable SQL queries, it's possible to split a line across several lines. Lines
 with keywords are on their own (`QFQ Keywords (Bodytext)`_ start a new line). If a line is not a 'keyword' line, it will
 be appended to the last keyword line. 'Keyword' lines are detected on:
 
@@ -4453,7 +4455,7 @@ be appended to the last keyword line. 'Keyword' lines are detected on:
 Example::
 
     10.sql = SELECT 'hello world'
-             FROM mastertable
+               FROM mastertable
     10.tail = End
 
     20.sql = SELECT 'a warm welcome'
@@ -4463,6 +4465,38 @@ Example::
 
     20.head = <h3>
     20.tail = </h3>
+
+Join mode: SQL
+''''''''''''''
+
+This is the default. All lines are joined with a space in between. E.g.: ::
+
+    10.sql = SELECT 'hello world'
+               FROM mastertable
+
+Results to: `10.sql = SELECT 'hello world' FROM mastertable`
+
+Notice the space between "...world'" and "FROM ...".
+
+Join mode: strip whitespace
+'''''''''''''''''''''''''''
+
+Ending a line with a '\' forces the removing off all leading and trailing whitespaces in that line and do not insert an
+extra space in between. E.g.: ::
+
+    10.sql = SELECT 'hello world', 'd:final.pdf \
+                                    |p:id=export  \
+                                    |t:Download' AS _pdf \
+
+Results to: `10.sql = SELECT 'hello world', 'd:final.pdf|p:id=export|t:Download' AS _pdf`
+
+Note: the '\' does not force the joining, it only removes the whitespaces.
+
+To get the same result, the following is also possible: ::
+
+    10.sql = SELECT 'hello world', CONCAT('d:final.pdf'
+                                    '|p:id=export',
+                                    '|t:Download') AS _pdf
 
 Nesting of levels
 ^^^^^^^^^^^^^^^^^
@@ -4816,7 +4850,7 @@ Question
 * If a user clicks on a link, an alert is shown. If the user answers the alert by clicking on the 'positive button', the browser opens the specified link.
   If the user click on the negative answer (or waits for timout), the alert is closed and the browser does nothing.
 * All parameter are optional.
-* Parameter are seperated by ':'
+* Parameter are separated by ':'
 * To use ':' inside the text, the colon has to be escaped by '\\'. E.g. 'ok\\: I understand'.
 
 +----------------------+--------------------------------------------------------------------------------------------------------------------------+
@@ -4986,6 +5020,99 @@ Example `_pdf`, `_zip`: ::
 
 Use the `--print-media-type` as wkthml option to access the page with media type 'printer'. Depending on the website
 configuration this switches off navigation and background images.
+
+Rendering 'official' look-alike PDF letters
+'''''''''''''''''''''''''''''''''''''''''''
+
+`wkhtmltopdf`, with the header and footer options, can be used to render multi page PDF letters (repeating header,
+pagination) in combination with dynamic content. Such PDFs might look-alike official letters, together with logo and signature.
+
+Best practice:
+
+#. Create a clean (=no menu, no website layout) letter layout in a separated T3 branch: ::
+
+	page = PAGE
+	page.typeNum = 0
+	page.includeCSS {
+	  10 = typo3conf/ext/qfq/Resources/Public/Css/qfq-letter.css
+	}
+
+	// Grant access to any logged in user or specific development IPs
+	[usergroup = *] || [IP = 127.0.0.1,192.168.1.* ]
+	  page.10 < styles.content.get
+	[else]
+	  page.10 = TEXT
+	  page.10.value = access forbidden
+	[global]
+
+#. Create a T3 `body` page (e.g. page alias: 'letterbody') with some content. Example static HTML content: ::
+
+	<div class="letter-receiver">
+	  <p>Address</p>
+	</div>
+	<div class="letter-sender">
+	 <p><b>firstName name</b><br>
+	  Phone +00 00 000 00 00<br>
+	  Fax +00 00 000 00 00<br>
+	 </p>
+	</div>
+
+	<div class="letter-date">
+	  Zurich, 01.12.2017
+	</div>
+
+	<div class="letter-body">
+	 <h1>Subject</h1>
+
+	 <p>Dear Mrs...</p>
+	 <p>Lucas ipsum dolor sit amet organa solo skywalker darth c-3p0 anakin jabba mara greedo skywalker.</p>
+
+	 <div class="letter-no-break">
+	 <p>Regards</p>
+	 <p>Company</p>
+	 <img class="letter-signature" src="">
+	 <p>Firstname Name<br>Function</p>
+	 </div>
+	</div>
+
+#. Create a T3 letter-`header` page (e.g. page alias: 'letterheader') , with only the header information: ::
+
+		<header>
+		<img src="fileadmin/logo.png" class="letter-logo">
+
+		<div class="letter-unit">
+		  <p class="letter-title">Department</p>
+		  <p>
+			 Company name<br>
+			 Company department<br>
+			 Street<br>
+			 City
+		  </p>
+		</div>
+		</header>
+
+#. Create a) a link (Report) to the PDF letter or b) attach the PDF (on the fly rendered) to a mail. Both will call the
+   `wkhtml` via the `download` mode and forwards the necessary parameter.
+
+Report: ::
+
+  sql = SELECT CONCAT('d:Letter.pdf|t:',p.firstName, ' ', p.name,
+                       '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&',
+                               '--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&',
+                               '--footer-right="Seite: [page]/[toPage]"&',
+                               '--footer-font-size=8&--footer-spacing=10') AS _pdf
+                FROM Person AS p ORDER BY p.id
+
+
+Sendmail. Parameter: ::
+
+	sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}}
+
+Replace the static content elements from 2. and 3. by QFQ Content elements as needed: ::
+
+  10.sql = SELECT '<div class="letter-receiver"><p>', p.name AS '_+br', p.street AS '_+br', p.city AS '_+br', '</p>'
+            FROM Person AS p WHERE p.id={{pId:S}}
+
 
 Export area
 '''''''''''
@@ -5249,10 +5376,12 @@ Easily create Email links.
 Column: _sendmail
 ^^^^^^^^^^^^^^^^^
 
-t:<TO:email[,email]>|F:<FROM:email>|s:<subject>|b:<body>
- [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|F:<REPLY-TO:email>]
- [|a:<flag autosubmit: on /off>][|g:<grid>][|x:<xId>][|y:<xId2>][|z:<xId3>]
- [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
+::
+
+	t:<TO:email[,email]>|F:<FROM:email>|s:<subject>|b:<body>
+	 [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|F:<REPLY-TO:email>]
+	 [|a:<flag autosubmit: on /off>][|g:<grid>][|x:<xId>][|y:<xId2>][|z:<xId3>]
+	 [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
 
 Send text emails. Every mail will be logged in the table `mailLog`. Attachments are supported.
 
