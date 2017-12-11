@@ -36,6 +36,28 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+
+
+Version 0.25.8
+--------------
+
+Date: 11.12.2017
+
+Notes
+^^^^^
+
+Features
+^^^^^^^^
+
+* #5080 / Dynamic PDF Letter
+* #5083 / Bodytext / Report: join lines without spaces.
+
+Bug Fixes
+^^^^^^^^^
+
+* Fix problem with commit from 8.12.17 / Store.php: appendToStore.php stopped working - 'report' failed to replace '{{<column>:R}}'
+* Store.php: fix problem with empty 'appendToStore()' call.
+
 Version 0.25.7
 --------------
 

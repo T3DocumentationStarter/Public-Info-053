@@ -23,7 +23,7 @@ General
 =======
 
 * Project homepage: https://qfq.io
-* Latest relases: https://w3.math.uzh.ch/qfq/
+* Latest releases: https://w3.math.uzh.ch/qfq/
 * Development: https://git.math.uzh.ch/typo3/qfq
 
 
@@ -5094,7 +5094,7 @@ Best practice:
 #. Create a) a link (Report) to the PDF letter or b) attach the PDF (on the fly rendered) to a mail. Both will call the
    `wkhtml` via the `download` mode and forwards the necessary parameter.
 
-Report: ::
+Use in `report`: ::
 
   sql = SELECT CONCAT('d:Letter.pdf|t:',p.firstName, ' ', p.name,
                        '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&',
@@ -5106,7 +5106,7 @@ Report: ::
 
 Sendmail. Parameter: ::
 
-	sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}}
+	sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}} }}
 
 Replace the static content elements from 2. and 3. by QFQ Content elements as needed: ::
 
