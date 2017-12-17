@@ -32,11 +32,13 @@ General
 Installation
 ============
 
-The following features are only tested on linux hosts:
+The following features are only tested / supported on linux hosts:
 
+* General: QFQ is coded to run on Linux hosts, preferable on Debian derivates like Ubuntu.
 * HTML to PDF conversion - command `wkhtmltopdf`.
 * Concatenation of PDF files - command `pdftk`.
 * Mime type detection for uploads - command `file`.
+
 
 .. _`preparation`:
 
@@ -108,6 +110,10 @@ Typosript) from specific IPs **or** if a FE-User is logged in.
 
 If there are problems with converting/downloading FE_GROUP protected pages, check `SHOW_DEBUG_INFO = download` to debug.
 
+**Important**: Converting HTML to PDF gives no error message but RC=-1? Check carefully all includes of CSS, JS, images
+and so on! Typically some of them fails to load and wkhtml stops running!
+
+
 HTML to PDF conversion
 ''''''''''''''''''''''
 
@@ -132,6 +138,20 @@ Typoscript code to implement a print link on every page::
 		wrap = <a href="typo3conf/ext/qfq/qfq/api/print.php?id=|&type=2"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
 		data = page:uid
 	}
+
+Send Email
+^^^^^^^^^^
+
+QFQ sends mail via `sendEmail` http://caspian.dotconf.net/menu/Software/SendEmail/ - a small perl script without a central
+configuration.
+
+By default, `sendEmail` uses the local installed MTA, writes a logfile to `typo3conf/mail.log` and handles attachments
+via commandline options. A basic HTML email support is implemented.
+
+The latest version is v1.56, which has at least one bug. That one is patched in the QFQ internal version v1.56p1 (see
+QFQ GIT sources in directory 'patches/sendEmail.patch').
+
+The Typo3 sendmail eco-system is not used at all.
 
 Setup
 -----
@@ -382,7 +402,7 @@ Example: *typo3conf/config.qfq.ini*
 	DB_1_NAME = qfq_db
 	DB_INIT = set names utf8
 	; DB_INDEX_DATA = 1
-   ; DB_INDEX_QFQ = 1
+	; DB_INDEX_QFQ = 1
 	; SQL_LOG = sql.log
 	; SQL_LOG_MODE = modify
 	; SHOW_DEBUG_INFO = auto
@@ -450,8 +470,8 @@ Example: *typo3conf/config.qfq.ini*
 	;DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
 
 	;FILL_STORE_SYSTEM_BY_SQL_1 = 'SELECT s.id AS periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1'
-   ; Important: only define an error message, if QFQ should stop running in case of an error or not exact 1 record.
-   ;FILL_STORE_SYSTEM_BY_SQL_ERROR_MSG_1 = No current period found
+	; Important: only define an error message, if QFQ should stop running in case of an error or not exact 1 record.
+	;FILL_STORE_SYSTEM_BY_SQL_ERROR_MSG_1 = No current period found
 
 	;FORM_LANGUAGE_A_ID = 1
 	;FORM_LANGUAGE_A_LABEL = english
@@ -3395,9 +3415,14 @@ Type: sendmail
   * *sendMailXId* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
   * *sendMailXId2* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
   * *sendMailXId3* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
+  * *sendMailSubjectHtmlEntity* - **encode|decode|none** - the mail subject will htmlspecialchar() encoded / decoded (default) or none (untouched).
+  * *sendMailBodyHtmlEntity* - **encode|decode|none** - the mail body will htmlspecialchar() encoded, decoded (default) or none (untouched).
 
 * To use values of the submitted form, use the STORE_FORM. E.g. `{{name:F:allbut}}`
 * To use the `id` of a new created or already existing primary record, use the STORE_RECORD. E.g. `{{id:R}}`.
+* By default, QFQ stores values 'htmlspecialchars()' encoded. If such values have to send by email, the html entities are
+  unwanted. Therefore the default setting for 'subject' und 'body' is to decode the values via 'htmlspecialchars_decode()'.
+  If this is not wished, it can be turned off by `sendMailSubjectHtmlEntity=none` and/or `sendMailBodyHtmlEntity=none`.
 
 * For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
 
@@ -4714,7 +4739,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |x  |   |Page          |p:<pageId>                         |p:impressum                |Prepend '?' or '?id=', no hostname qualifier (automatically set by browser), default link class: internal, default value: {{pageId}}    |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|x  |   |Download      |d:[<exportFilename>]               |d:complete.pdf             |Link points to `api/download.php`. Additonal parameter are encoded into a SIP. 'Download' needs an enabled SIP.  See `download`_.       |
+|x  |   |Download      |d:[<exportFilename>]               |d:complete.pdf             |Link points to `api/download.php`. Additional parameter are encoded into a SIP. 'Download' needs an enabled SIP.  See `download`_.      |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Text          |t:<text>                           |t:Firstname Lastname       |-                                                                                                                                       |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -5018,7 +5043,7 @@ Example `_pdf`, `_zip`: ::
 
 ..
 
-Use the `--print-media-type` as wkthml option to access the page with media type 'printer'. Depending on the website
+Use the `--print-media-type` as wkhtml option to access the page with media type 'printer'. Depending on the website
 configuration this switches off navigation and background images.
 
 Rendering 'official' look-alike PDF letters
@@ -5394,45 +5419,54 @@ Send text emails. Every mail will be logged in the table `mailLog`. Attachments 
 
 ..
 
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-|**Token** | **Parameter**                   |**Description**                                                                                   |**Required**|
-+===+========================================+==================================================================================================+============+
-| f | FROM:email                             |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| t | email[,email]                          |**TO**: Comma separated list of receiver email addresses. Optional: `realname <john@doe.com>`     |    yes     |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| c | email[,email]                          |**CC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| B | email[,email]                          |**BCC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'    |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| r | REPLY-TO:email                         |**Reply-to**: Email address to reply to (if different from sender)                                |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| s | Subject                                |**Subject**: Subject of the email                                                                 |    yes     |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| b | Body                                   |**Body**: Message                                                                                 |    yes     |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| h | Header                                 |**Custom Header**: Separate multiple header with \r\n                                             |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| F | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| u | Attach created PDF of a given URL      |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| U | Attach created PDF of a given T3 URL   |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| d | Filename of the attachment             |**Attachment**: Useful for URL to PDF converted attachments. Repeatable.                          |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| M | Merge multiple F|p|u|U| together       |**Attachment**: All given 'F|p|u|U' concatenated to one attachment. Repeatable.                   |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| A | flagAutoSubmit  'on' / 'off'           |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies             |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| g | grId                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| x | xId                                    |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| y | xId2                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| z | xId3                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-+---+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+|**Token** | **Parameter**                          |**Description**                                                                                   |**Required**|
++==========+========================================+==================================================================================================+============+
+| f        | email                                  |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| t        | email[,email]                          |**TO**: Comma separated list of receiver email addresses. Optional: `realname <john@doe.com>`     |    yes     |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| c        | email[,email]                          |**CC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| B        | email[,email]                          |**BCC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'    |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| r        | REPLY-TO:email                         |**Reply-to**: Email address to reply to (if different from sender)                                |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| s        | Subject                                |**Subject**: Subject of the email                                                                 |    yes     |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| b        | Body                                   |**Body**: Message                                                                                 |    yes     |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| h        | Mail header                            |**Custom mail header**: Separate multiple header with \r\n                                        |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| F        | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| u        | Attach created PDF of a given URL      |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| p        | Attach created PDF of a given T3 URL   |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| d        | Filename of the attachment             |**Attachment**: Useful for URL to PDF converted attachments. Repeatable.                          |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| C        | Concat multiple F|p|u| together        |**Attachment**: All following (until the next 'C') 'F|p|u' concatenated to one attachment.        |            |
+|          |                                        | Repeatable.                                                                                      |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| A        | flagAutoSubmit  'on' / 'off'           |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies             |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| g        | grId                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| x        | xId                                    |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| y        | xId2                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| z        | xId3                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| e        | encode|decode|none                     |**Subject**: will be htmlspecialchar() encoded, decoded (default) or none (untouched)             |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| E        | encode|decode|none                     |**Body**: will be htmlspecialchar() encoded, decoded (default) or none (untouched).               |            |
++----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+
+* **e|E**: By default, QFQ stores values 'htmlspecialchars()' encoded. If such values have to send by email, the html entities are
+  unwanted. Therefore the default setting for 'subject' und 'body' is to decode the values via 'htmlspecialchars_decode()'.
+  If this is not wished, it can be turned off by `e=none` and/or `E=none`.
 
 
 **Minimal Example**

@@ -37,14 +37,31 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 0.25.9
+--------------
+
+Date: 17.12.2017
+
+Notes
+^^^^^
+
+Features
+^^^^^^^^
+
+* #5133 / sendmail: subject and body html entity decode: Introduce options for 'subject' and 'body' to switch on/off HTML encoding / decoding
+* Manual.rst: Add notes to QFQ installation, wkhtml problems, paragraph on 'sendEmail' Html2Pdf.php: Add error codes and a hint on wkhtml fails.
+* Reformat table qfq-letter.css.less: redefined h1, letter-receiver
+
+Bug Fixes
+^^^^^^^^^
+
+* Bug in sendeEmail: invalid SSL_version specified at /usr/share/perl5/IO/Socket/SSL.pm line 575. Patch for sendEmail (see https://unix.stackexchange.com/a/68952).
+
 
 Version 0.25.8
 --------------
 
 Date: 11.12.2017
-
-Notes
-^^^^^
 
 Features
 ^^^^^^^^
