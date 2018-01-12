@@ -1349,17 +1349,21 @@ Store: *VARS* - V
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | Name                    | Explanation                                                                                                                                |
  +=========================+============================================================================================================================================+
- | random                  | random string with length of 32 chars, alphanum                                                                                            |
+ | random                  | Random string with length of 32 alphanum chars (lower & upper case). This is variable is always filled.                                    |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | slaveId                 | see *FormElement* `action`                                                                                                                 |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | filename                | Original filename of an uploaded file via an 'upload'-FormElement. Valid only during processing of the current 'upload'-formElement.       |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+ | filenameBase            | Like `filename`, but without an optional extension. E.g. filename='image.png' comes to filenameBase='image'                                |
+ +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+ | filenameExt             | Like `filename`, but only the optional extension. E.g. filename='image.png' comes to filenameExt='png'                                     |
+ +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | fileDestination         | Destination (path & filename) for an uploaded file. Defined in an 'upload'-FormElement.parameter. Valid: same as 'filename'.               |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
-The directive `fillStoreVar` will fill the this store with custom values. Existing values will remain or are overwritten,
-depending of if they exist in the given statement. E.g.: ::
+The directive `fillStoreVar` will fill the store VARS with custom values. Existing Store VARS values will be merged together with them.
+E.g.: ::
 
     fillStoreVar = {{!SELECT p.name, p.email FROM Person AS p WHERE p.id={{pId:S}} }}
 
@@ -2320,8 +2324,8 @@ Fields:
 |Class                | enum('native', 'action',    | Details below.                                                                                      |
 |                     | 'container')                |                                                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Type                 | enum('checkbox', 'date', 'time', 'datetime',  'dateJQW', 'datetimeJQW', 'extra', 'gridJQW', 'text', 'editor', 'note',             |
-|                     | 'password', 'radio', 'select', 'subrecord', 'upload', 'fieldset', 'pill', 'beforeLoad', 'beforeSave',                             |
+|Type                 | enum('checkbox', 'date', 'time', 'datetime',  'dateJQW', 'datetimeJQW', 'extra', 'gridJQW', 'text', 'editor', 'annotate',         |
+|                     | 'imageCut', 'note', 'password', 'radio', 'select', 'subrecord', 'upload', 'fieldset', 'pill', 'beforeLoad', 'beforeSave',         |
 |                     | 'beforeInsert', 'beforeUpdate', 'beforeDelete', 'afterLoad', 'afterSave', 'afterInsert', 'afterUpdate', 'afterDelete',            |
 |                     | 'sendMail')                                                                                                                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
@@ -2865,6 +2869,35 @@ Type: editor
   * <min_height>,<max_height>: in pixels, including top and bottom bars. E.g.: 300,600
 
 
+Type: annotate
+^^^^^^^^^^^^^^
+
+The `Formelement`.type=`annotate` is a simple grafic editor which can be used to annotate images. All modifications to
+a image is saved into a JSON fabric.js data string. The current `FormElement` value is the JSON fabric.js data string.
+An image, specified by `FormElement.parameter`: imageSource={{pathFileName}}, will be displayed in the background. On
+form load both, the image and an optional already given JSON fabric.js data string, will be displayed. The original image
+file is not modified.
+
+* *FormElement.parameter*::
+
+  * *imageSource*: Background image - imageSource={{pathFileName2}}
+
+Type: imageCut
+^^^^^^^^^^^^^^
+
+Uploaded images can be cut or rotate via QFQ (via fabric.js). The modified image is saved under the given pathFileName.
+
+* The 'value' of the `FormElement` has to be a valid PathFileName to an image.
+* Valid image file formats are SVG, PNG, JPG, GIF.
+* Invalid or missing filenames results to an empty 'imageCut' element.
+
+* *FormElement.parameter*::
+
+  * *resizeWidth* = <empty>|[width in pixel] - the final width of the modified image. If empty (or not given), no change.
+  * *keepOriginal* = <empty>|[string] - By default: '.save'. If empty (no string given), don't keep the original. If an
+    extension is given and if there is not already a <pathFileName><.extension>, than the original file is to copied to it.
+
+
 Type: note
 ^^^^^^^^^^
 
@@ -3091,7 +3124,7 @@ and will be processed after saving the primary record and before any action Form
 * *FormElement.value*: By default, the full path of any already uploaded file is shown. To show something different, e.g.
   only the filename, define: ::
 
-	 {{SELECT SUBSTRING_INDEX(pathFilenamePicture, '/', -1) FROM Note WHERE id={{id:R0}} }}
+	 {{SELECT SUBSTRING_INDEX(pathFileNamePicture, '/', -1) FROM Note WHERE id={{id:R0}} }}
 
 * *FormElement.parameter*:
 
@@ -3140,6 +3173,10 @@ and will be processed after saving the primary record and before any action Form
   * *slaveId*, *sqlBefore*, *sqlInsert*, *sqlUpdate*, *sqlDelete*, *sqlUpdate*, *sqlAfter*: Only used in :ref:`Upload advanced mode`.
 
   * *fileReplace=always*: If `fileDestination` exist - replace it by the new one.
+
+  * fileSplit:
+  * fileDestinationSplit:
+  * tableNameSplit: see split-pdf-upload_
 
 Immediately after the upload finished (before the user press save), the file will be checked on the server for it's
 content or file extension (see 'accept').
@@ -3193,7 +3230,7 @@ A typical name for such an 'upload'-FormElement, to show that the name does not 
 * *FormElement.value*: The path/filename, shown during 'form load' to indicate a previous uploaded file, has to be queried
   with this field. E.g.::
 
-      {{SELECT pathFilenamePicture FROM Note WHERE id={{slaveId}} }}
+      {{SELECT pathFileNamePicture FROM Note WHERE id={{slaveId}} }}
 
 * *FormElement.parameter*:
 
@@ -3223,6 +3260,43 @@ A typical name for such an 'upload'-FormElement, to show that the name does not 
 
       sqlAfter={{UPDATE Person SET noteIdPicture = {{slaveId}} WHERE id={{id:R0}} LIMIT 1 }}
 
+
+.. _split-pdf-upload:
+
+Split PDF Upload
+;;;;;;;;;;;;;;;;
+
+Additional to the upload, it's possible to split the uploaded file (only PDF files) into several SVG files, one file per
+page. The split is done via http://www.cityinthesky.co.uk/opensource/pdf2svg/.
+
+ * *FormElement.parameter*:
+
+   * *fileSplit*: Activate the splitting process. Only possible value: `fileSplit=svg`.
+   * *fileDestinationSplit*: Target directory and filename pattern for the created & splitted files. E.g.
+     `fileDestinationSplit=fileadmin/protected/{{id:R}}.{{filenameBase}}.%02d.svg.
+   * *tableNameSplit*: Reference in table 'Split' to the table, which holds the original PDF file.
+
+The splitting happens immediately after the user pressed save.
+
+To easily access the split files via QFQ, per file per record is created in table 'Split'.
+
+Table 'Split':
+
++--------------+--------------------------------------------------------------------------------------------+
+| Column       | Description                                                                                |
++==============+============================================================================================+
+| id           | Uniq auto increment index                                                                  |
++--------------+--------------------------------------------------------------------------------------------+
+| tableName    | Name of the table, where the reference to the original file (multipage PDF file) is saved. |
++--------------+--------------------------------------------------------------------------------------------+
+| xId          | Primary id of the reference record.                                                        |
++--------------+--------------------------------------------------------------------------------------------+
+| pathFileName | Path/filename referenc to one of the created files                                         |
++--------------+--------------------------------------------------------------------------------------------+
+| created      | Timestamp                                                                                  |
++--------------+--------------------------------------------------------------------------------------------+
+
+One usecase why to split an upload: annotate individual pages by using the `FormElement`.type=`annotate`.
 
 .. _class-action:
 
@@ -4974,7 +5048,7 @@ Parameter and (element) sources
 
 * *element sources* - for `m:pdf` or `m:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
 
-  * *file*: `F:<pathFilename>` - relative or absolute pathFilename offered for a) download (single), or to be concatenated
+  * *file*: `F:<pathFileName>` - relative or absolute pathFileName offered for a) download (single), or to be concatenated
     in a PDF or ZIP.
   * *page*: `p:id=<t3 page>&<key 1>=<value 1>&<key 2>=<value 2>&...&<key n>=<value n>`.
 
@@ -5039,7 +5113,7 @@ Example `_pdf`, `_zip`: ::
 	# File 1: p:id=1
 	# File 2: p:id=form
 	# File 3: F:fileadmin/file.pdf
-	SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|p:id=1|p:id=form|F:', p.pathFilename) AS _zip
+	SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|p:id=1|p:id=form|F:', p.pathFileName) AS _zip
 
 ..
 
