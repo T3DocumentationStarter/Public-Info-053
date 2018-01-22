@@ -171,6 +171,10 @@ Setup
   played and fills the database with the *Form editor* records. This also happens automatically after each software update of QFQ.
 * Configure Typoscript to include Bootstrap, jQuery, QFQ javascript and CSS files.
 
+.. _setup-css-js:
+
+Setup CSS & JS
+^^^^^^^^^^^^^^
 ::
 
 	page.meta {
@@ -188,14 +192,19 @@ Setup
 	}
 
 	page.includeJS {
-		file1 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.min.js
-		file2 = typo3conf/ext/qfq/Resources/Public/JavaScript/bootstrap.min.js
-		file3 = typo3conf/ext/qfq/Resources/Public/JavaScript/validator.min.js
-		file4 = typo3conf/ext/qfq/Resources/Public/JavaScript/jqx-all.js
-		file5 = typo3conf/ext/qfq/Resources/Public/JavaScript/globalize.js
-		file6 = typo3conf/ext/qfq/Resources/Public/JavaScript/tinymce.min.js
-		file7 = typo3conf/ext/qfq/Resources/Public/JavaScript/EventEmitter.min.js
-		file8 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.min.js
+		file01 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.min.js
+		file02 = typo3conf/ext/qfq/Resources/Public/JavaScript/bootstrap.min.js
+		file03 = typo3conf/ext/qfq/Resources/Public/JavaScript/validator.min.js
+		file04 = typo3conf/ext/qfq/Resources/Public/JavaScript/jqx-all.js
+		file05 = typo3conf/ext/qfq/Resources/Public/JavaScript/globalize.js
+		file06 = typo3conf/ext/qfq/Resources/Public/JavaScript/tinymce.min.js
+		file07 = typo3conf/ext/qfq/Resources/Public/JavaScript/EventEmitter.min.js
+      file08 = typo3conf/ext/qfq/Resources/Public/JavaScript/typeahead.bundle.min.js
+		file09 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.min.js
+
+		# Only needed in case FormElement 'annotate' is used.
+		file10 = typo3conf/ext/qfq/Resources/Public/JavaScript/fabric.min.js
+      file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
 	}
 
 .. _form-editor:
@@ -315,7 +324,7 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+ crendentials is supported.                                                 |
 | LDAP_1_PASSWORD             | LDAP_1_PASSWORD=mySecurePassword                |                                                                            |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| ESCAPE_TYPE_DEFAULT         | ESCAPE_TYPE_DEFAULT=s                           | All variables `{{...}}` get this escape class by default.                  |
+| ESCAPE_TYPE_DEFAULT         | ESCAPE_TYPE_DEFAULT=m                           | All variables `{{...}}` get this escape class by default.                  |
 |                             |                                                 | See `variable-escape`_.                                                    |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password| If empty: no check. All named variables will rendered as INPUT elements    |
@@ -2064,6 +2073,7 @@ class
 * Any CSS class name(s) can be specified.
 * Check `typo3conf/ext/qfq/Resources/Public/Css/qfq-bs.css` for predefined classes.
 * Typical use: adjust the floating rules of the form.
+
   * See: http://getbootstrap.com/css/#overview-container
   * Expand the form over the whole area: `container-fluid`
 
@@ -2362,7 +2372,7 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |value                | text                        |Default value: See `field-value`_                                                                    |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|sql1                 | text                        |SQL query                                                                                            |
+|sql1                 | text                        |SQL query. See individual `FormEelement`. _`sql1`                                                           |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Parameter            | text                        |Might contain misc parameter. See `fe-parameter-attributes`_                                         |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
@@ -2382,7 +2392,7 @@ FE: Value
 By default this field is empty: QFQ will fill it with the corresponding existing column value on form load.
 For a customized default value define: ::
 
-   {{SELECT IF('{{column:RE}}'='','custom default',{{column:R}}) }}
+  {{SELECT IF('{{column:RE}}'='','custom default',{{column:R}}) }}
 
 
 For non primary records, this is the place to load an existing value. E.g. we're on a 'Person' detail form and would like
@@ -2718,6 +2728,7 @@ Checkboxes can be rendered in mode:
   * *buttonClass*: Instead of the plain HTML  checkbox fields, Bootstrap
     `buttons <http://getbootstrap.com/javascript/#buttons-checkbox-radio>`_. are rendered as `checkbox` elements. Use
     one of the following `classes <http://getbootstrap.com/css/#buttons-options>`_:
+
     * `btn-default` (default, grey),
     * `btn-primary` (blue),
     * `btn-success` (green),
@@ -2882,6 +2893,9 @@ file is not modified.
 
   * *imageSource*: Background image - imageSource={{pathFileName2}}
 
+By using the the `FormElement` `annotate`, the JS code `fabric.min.js` and `qfq.fabric.min.js` has to be included.
+See setup-css-js_.
+
 Type: imageCut
 ^^^^^^^^^^^^^^
 
@@ -2950,12 +2964,14 @@ Type: radio
   * *buttonClass*: Instead of the plain radio fields, Bootstrap
     `buttons <http://getbootstrap.com/javascript/#buttons-checkbox-radio>`_. are rendered as `radio` elements. Use
     one of the following `classes <http://getbootstrap.com/css/#buttons-options>`_:
+
     * `btn-default` (default, grey),
     * `btn-primary` (blue),
     * `btn-success` (green),
     * `btn-info` (light blue),
     * `btn-warning` (orange),
     * `btn-danger` (red).
+
     With a given *buttonClass*, all buttons (=radios) are rendered horizontal. A value in *FormElement.maxlength* has no effect.
 
 * *No preselection*:
@@ -3063,7 +3079,6 @@ will be rendered inside the form as a HTML table.
 
   * *form*: Target form, e.g. *form=person*
   * *page*: Target page with detail form. If none specified, use the current page.
-  * *title*: Title displayed over the table in the current form.
   * *extraDeleteForm*: Optional. The per row delete Button will reference the form specified here (for deleting) instead of the default (*form*).
   * *detail*: Mapping of values from a) the primary form, b) the current row, c) any constant or '{{...}}' - to the target form (defined via `form=...`).
 
@@ -3090,6 +3105,7 @@ Type: time
 * Range time: '00:00:00' to '23:59:59' or '00:00:00'. (http://dev.mysql.com/doc/refman/5.5/en/datetime.html)
 * Optional:
 * *FormElement.parameter*
+
   * *showSeconds*: 0|1 - shows the seconds. Independent if the user specifies seconds, they are displayed '1' or not '0'.
   * *showZero*: 0|1 - For an empty timestamp, With '0' nothing is displayed. With '1' the string '00:00[:00]' is displayed.
 
@@ -3562,6 +3578,7 @@ input field. Any input field in the *Form editor* can be redeclared in the corre
 missing definition means 'take the default'. E.g.:
 
 * Form: 'person'
+
 	+--------------------+--------------------------+
 	| Column             | Value                    |
 	+====================+==========================+
@@ -3573,6 +3590,7 @@ missing definition means 'take the default'. E.g.:
 	+--------------------+--------------------------+
 
 * FormElement 'firstname' in Form 'person':
+
 	+--------------------+------------------------------------------------+
 	| Column             | Value                                          |
 	+====================+================================================+
@@ -3902,8 +3920,8 @@ More detailed error messages
 
 If *SHOW_DEBUG_INFO* is enabled, a full stacktrace and variable contents are displayed in case of an error.
 
-Person search form
-^^^^^^^^^^^^^^^^^^
+Form search
+^^^^^^^^^^^
 
 QFQ content record::
 
@@ -3913,11 +3931,11 @@ QFQ content record::
     head = <form action='#' method='get'><input type='hidden' name='id' value='{{pageId:T}}'>Search: <input type='text' name='search' value='{{search:CE:all}}'><input type='submit' value='Submit'></form>
   }
 
-  # SQL statement will find and list all the relevant forms
+  # SQL statement will find and list all the relevant forms - be careful not to open a cross site scripting door: the parameter 'search' needs to be sanatized.
   20 {
     sql = SELECT CONCAT('?detail&form=form&r=', f.id) AS _Pagee, f.id, f.name, f.title
               FROM Form AS f
-              WHERE f.name LIKE  '%{{search:CE:all}}%'
+              WHERE f.name LIKE  '%{{search:CE:alnumx}}%'
     head = <table class='table'>
     tail = </table>
     rbeg = <tr>
