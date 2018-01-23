@@ -989,7 +989,7 @@ For QFQ variables and FormElements:
 Only in FormElement:
 
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}                                          |
+| **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}                                         |
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
 | **min|max**      | Form |       | Compares the value against an lower and upper limit (numeric or string).                |
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
@@ -1745,7 +1745,7 @@ Comment- and space-character
 The following applies to the fields `Form.parameter` and `FormElement.parameter`:
 
 * Lines will be trimmed - leading and trailing spaces will be removed.
-* If a leading and/or trailing space is needed, escape it: '\ hello world \' > ' hello world '.
+* If a leading and/or trailing space is needed, escape it: '\\ hello world \\' > ' hello world '.
 * Lines starting with a '#' are treated as a comment and will not be parsed. Such lines are treated as 'empty lines'.
 * The comment sign can be escaped with '\\'.
 
@@ -2711,7 +2711,8 @@ Checkboxes can be rendered in mode:
 
       * ``itemList=red,blue,orange``
       * ``itemList=1:red,2:blue,3:orange``
-      * If ':' or ',' are part of key or value, it needs to escaped by '\'. E.g.: `itemList=1:red\:,2:blue\,,3:orange``
+      * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
+        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange``
 
   * *FormElement.sql1* = ``{{!SELECT id, value FROM someTable}}``
   * *FormElement.maxlength* - vertical or horizontal alignment:
@@ -2941,7 +2942,8 @@ Type: radio
   2. *FormElement.parameter*:
 
     * *itemList* = `<attribute>` E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue,3:orange*
-    * If ':' or ',' are part of key or value, it needs to escaped by '\'. E.g.: `itemList=1:red\:,2:blue\,,3:orange``
+    * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
+        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange``
 
   3. Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -3002,7 +3004,8 @@ Type: select
   * *FormElement.parameter*:
 
     * *itemList* = `<attribute>` - E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue:3:orange*
-    * If ':' or ',' are part of key or value, it needs to escaped by '\'. E.g.: `itemList=1:red\:,2:blue\,,3:orange``
+    * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
+        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
 
   * Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -4598,7 +4601,7 @@ Notice the space between "...world'" and "FROM ...".
 Join mode: strip whitespace
 '''''''''''''''''''''''''''
 
-Ending a line with a '\' forces the removing off all leading and trailing whitespaces in that line and do not insert an
+Ending a line with a '\\' forces the removing off all leading and trailing whitespaces in that line and do not insert an
 extra space in between. E.g.: ::
 
     10.sql = SELECT 'hello world', 'd:final.pdf \
@@ -4607,7 +4610,7 @@ extra space in between. E.g.: ::
 
 Results to: `10.sql = SELECT 'hello world', 'd:final.pdf|p:id=export|t:Download' AS _pdf`
 
-Note: the '\' does not force the joining, it only removes the whitespaces.
+Note: the '\\' does not force the joining, it only removes the whitespaces.
 
 To get the same result, the following is also possible: ::
 
@@ -5528,7 +5531,7 @@ Send text emails. Every mail will be logged in the table `mailLog`. Attachments 
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | b        | Body                                   |**Body**: Message                                                                                 |    yes     |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| h        | Mail header                            |**Custom mail header**: Separate multiple header with \r\n                                        |            |
+| h        | Mail header                            |**Custom mail header**: Separate multiple header with \\r\\n                                        |            |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | F        | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
