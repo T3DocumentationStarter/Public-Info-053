@@ -1290,10 +1290,6 @@ Store: *CLIENT* - C
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | r                       | record id. Typically stored in SIP, rarely specified on the URL                                                                          |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
- | keySemId                | always current Semester Id                                                                                                               |
- +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
- | keySemIdUser            | *{{keySemIdUser}}*, may be changed by user                                                                                               |
- +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | HTTP_HOST               | current HTTP HOST                                                                                                                        |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | REMOTE_ADDR             | Client IP address                                                                                                                        |
@@ -1301,10 +1297,6 @@ Store: *CLIENT* - C
  | '$_SERVER[*]'           | All other variables accessable by *$_SERVER[]*. Only the often used have a pre-defined sanitize class.                                   |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | form                    | Unique name of current form                                                                                                              |
- +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
- | ANREDE                  | *{{sex}}* == male >> Sehr geehrter Herr, *{{sex}}* == female  Sehr geehrte Frau                                                          |
- +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
- | EANREDE                 | *{{sex}}* == male >> Dear Mr., *{{sex}}* == female >> Dear Mrs.                                                                          |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. _STORE_TYPO3:
@@ -1376,7 +1368,7 @@ E.g.: ::
 
     fillStoreVar = {{!SELECT p.name, p.email FROM Person AS p WHERE p.id={{pId:S}} }}
 
-* After filling the store, the values can be retrieved via `{{name:v}}` and `{{email:V}}`.
+* After filling the store, the values can be retrieved via `{{name:V}}` and `{{email:V}}`.
 * Be careful by specifying general purpose variables like `id`, `r`, `pageId` and so on. This might conflict with existing variables.
 * `fillStoreVar` can be used in `form-parameter`_ and `fe-parameter-attributes`_
 
@@ -1639,10 +1631,10 @@ results to 9 seconds delay on save. Also be prepared not to receive the expected
   * *ldapBaseDn* =  `ou=Addressbook,dc=example,dc=com`
   * *typeAheadLdapSearch* = `(|(cn=*?*)(mail=*?*))`
   * *ldapAttributes* = `givenName, sn, telephoneNumber, email`
-  * *ldapSearch* = `(mail={{email::l}})`
+  * *ldapSearch* = `(mail={{email:F0:alnumx:l}})`
   * Optional: *ldapUseBindCredentials* = 1
 
-After filling the store, access the content via `{{<attributename>:allbut:L:s}}`.
+After filling the store, access the content via `{{<attributename>:L:allbut:s}}`.
 
 Form
 ====
