@@ -281,10 +281,6 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | REDIRECT_ALL_MAIL_TO        | REDIRECT_ALL_MAIL_TO=john@doe.com               | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_LINK_CLASS_INTERNAL     | CSS_LINK_CLASS_INTERNAL=internal                | CSS class name of links which points to internal tagets                    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_LINK_CLASS_EXTERNAL     | CSS_LINK_CLASS_EXTERNAL=external                | CSS class name of links which points to internal tagets                    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
 | CSS_CLASS_QFQ_CONTAINER     |CSS_CLASS_QFQ_CONTAINER=container                | QFQ with own Bootstrap: 'container'.                                       |
 |                             |                                                 | QFQ already nested in Bootstrap of mainpage: <empty>                       |
 +-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
@@ -416,8 +412,6 @@ Example: *typo3conf/config.qfq.ini*
 	; SQL_LOG_MODE = modify
 	; SHOW_DEBUG_INFO = auto
 	; REDIRECT_ALL_MAIL_TO = john.doe@example.com
-	CSS_LINK_CLASS_INTERNAL = internal
-	CSS_LINK_CLASS_EXT = external
 	; CSS_CLASS_QFQ_CONTAINER =
 	; CSS_CLASS_QFQ_FORM =
 	CSS_CLASS_QFQ_FORM_PILL = qfq-color-grey-1
@@ -3033,12 +3027,12 @@ will be rendered inside the form as a HTML table.
 
 * *sql1*: SQL query to select records. E.g.::
 
-   {{!SELECT a.id AS id, CONCAT(a.street, a.streetnumber) AS a, a.city AS b, a.zip AS c FROM Address AS a}}
+   {{!SELECT addr.id AS id, CONCAT(addr.street, addr.streetnumber) AS a, addr.city AS b, addr.zip AS c FROM Address AS addr}}
 
   * Notice the **exclamation mark** after '{{' - this is necessary to return an array of elements, instead of a single string.
   * Exactly one column **'id'** has to exist; it specifies the primary record for the target form.
     In case the id should not be visible to the user, it has to be named **'_id'**.
-  * Columnname: *[title=]<title>[|[maxLength=]<number>][|width=<number>][|nostrip][|icon][|link][|url][|mailto][|_rowClass][|_rowTooltip]*
+  * Columnname: *[title=]<title>[|[maxLength=]<number>][|nostrip][|icon][|link][|url][|mailto][|_rowClass][|_rowTooltip]*
 
     * If the keyword is used, all parameter are position independent.
     * Parameter are separated by '|'.
@@ -3069,6 +3063,7 @@ will be rendered inside the form as a HTML table.
 
          {{!SELECT id, note1 AS 'Comment', note2 AS 'Comment|50' , note3 AS 'title=Comment|maxLength=100|nostrip', note4 AS '50|Comment',
          'checked.png' AS 'Status|icon', email AS 'mailto', CONCAT(homepage, '|Homepage') AS 'url',
+         CONCAT('d|s|F:', pathFileName) AS 'Download|link',
          ELT(status,'info','warning','danger') AS '_rowClass', help AS '_rowTooltip' ...}}
 
 * *FormElement.parameter*
@@ -3159,7 +3154,7 @@ See also `downloadButton`_ to offer a download of an uploaded file.
     * If for a specific filetype is no mime type available, the definition of file extension(s) is possible. This is **less
       secure**, cause there is no *content* check on the server after the upload.
 
-  * *maxFileSize*: max filesize in bytes (no unit), kilobytes (k/K) or megabytes (m/M) for an uploaded file. Default: 10MB.
+  * *maxFileSize*: max filesize in bytes (no unit), kilobytes (k/K) or megabytes (m/M) for an uploaded file. Default: 10M.
 
   * *fileDestination*: Destination where to copy the file. A good practice is to specify a relative `fileDestination` -
     such an installation (filesystem and database) are moveable.
@@ -3312,7 +3307,7 @@ Table 'Split':
 +--------------+--------------------------------------------------------------------------------------------+
 | xId          | Primary id of the reference record.                                                        |
 +--------------+--------------------------------------------------------------------------------------------+
-| pathFileName | Path/filename referenc to one of the created files                                         |
+| pathFileName | Path/filename reference to one of the created files                                        |
 +--------------+--------------------------------------------------------------------------------------------+
 | created      | Timestamp                                                                                  |
 +--------------+--------------------------------------------------------------------------------------------+
@@ -4821,8 +4816,6 @@ Special column names
 Column: _link
 ^^^^^^^^^^^^^
 
-{{url | display | **i (internal)**, e(external) | **- (same)**,n (new), p (parent), t(top) | **-**, (e(edit), c(copy), n(new), d(delete), i(insert) , f(file)) }}
-
 * Most URLs will be rendered via class link.
 * Column names like `_pagee`, `_mailto`, ... are wrapper to class link.
 * The parameters for link contains a prefix to make them position-independet.
@@ -4834,7 +4827,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |x  |   |Mail          |m:<email>                          |m:info@example.com         |Default link class: email                                                                                                               |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|x  |   |Page          |p:<pageId>                         |p:impressum                |Prepend '?' or '?id=', no hostname qualifier (automatically set by browser), default link class: internal, default value: {{pageId}}    |
+|x  |   |Page          |p:<pageId>                         |p:impressum                |Prepend '?' or '?id=', no hostname qualifier (automatically set by browser), default value: {{pageId}}                                  |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |x  |   |Download      |d:[<exportFilename>]               |d:complete.pdf             |Link points to `api/download.php`. Additional parameter are encoded into a SIP. 'Download' needs an enabled SIP.  See `download`_.      |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -4844,7 +4837,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Button        |b[:0|1|<btn class>]                | b:0, b:1, b:success       |'b', 'b:1': a bootstrap button is created. 'b:0' disable the button. <btn class>: default, primary, success, info, warning,danger       |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |x  |Picture       |P:<filename>                       |P:bullet-red.gif           |Picture '<img src="bullet-red.gif"alt="....">', default link class: internal.                                                           |
+|   |x  |Picture       |P:<filename>                       |P:bullet-red.gif           |Picture '<img src="bullet-red.gif"alt="....">'.                                                                                         |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Edit          |E                                  |E                          |Show 'edit' icon as image                                                                                                               |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -4870,7 +4863,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Alttext       |a:<text>                           |a:Name of person           |a) Alttext for images, b) Message text for `download`_ popup window.                                                                    |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |   |Class         |c:[n|i|e|<text>]                   |c:i                        |CSS class for link. n:no class attribut, i:internal (ext_localconf.php)(default), e:external (ext_localconf.php), <text>: explicit named|
+|   |   |Class         |c:[n|<text>]                       |c:text-muted               |CSS class for link. n:no class attribute, <text>: explicit named                                                                        |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Target        |g:<text>                           |g:_blank                   |target=_blank,_self,_parent,<custom>. Default: no target                                                                                |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -4933,21 +4926,17 @@ Link Examples
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT "u:www.example.com|q:Please confirm" AS _link                  | www.example as link, class=external, See: `question`_                                                                                   |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "u:www.example.com|c:i" AS _link                               | *http://www.example* as link, class=internal                                                                                            |
-+-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT "u:www.example.com|c:nicelink" AS _link                        | *http://www.example* as link, class=nicelink                                                                                            |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "p:form_person|c:e" AS _link                                   | <a class="external" href="?form_person">Text</a>                                                                                        |
+| SELECT "p:form_person&note=Text|t:Person" AS _link                    | <a href="?form_person&note=Text">Person</a>                                                                                             |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "p:form_person&note=Text|t:Person" AS _link                    | <a class="internal" href="?form_person&note=Text">Person</a>                                                                            |
+| SELECT "p:form_person|E" AS _link                                     | <a href="?form_person"><img alttext="Edit" src="typo3conf/ext/qfq/Resources/Public/icons/edit.gif"></a>                                 |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "p:form_person|E" AS _link                                     | <a class="internal" href="?form_person"><img alttext="Edit" src="typo3conf/ext/qfq/Resources/Public/icons/edit.gif"></a>                |
+| SELECT "p:form_person|E|g:_blank" AS _link                            | <a target="_blank" href="?form_person"><img alttext="Edit" src="typo3conf/ext/qfq/Resources/Public/icons/edit.gif"></a>                 |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "p:form_person|E|g:_blank" AS _link                            | <a target="_blank" class="internal" href="?form_person"><img alttext="Edit" src="typo3conf/ext/qfq/Resources/Public/icons/edit.gif"></a>|
+| SELECT "p:form_person|C" AS _link                                     | <a href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>                       |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "p:form_person|C" AS _link                                     | <a class="internal" href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>      |
-+-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "p:form_person|C:green" AS _link                               | <a class="internal" href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>      |
+| SELECT "p:form_person|C:green" AS _link                               | <a href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>                       |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT "U:form=Person&r=123|x|D" as _link                             | <a href="typo3conf/ext/qfq/qfq/api/delete.php?s=badcaffee1234"><span class="glyphicon glyphicon-trash" ></span>"></a>                   |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
@@ -5310,8 +5299,8 @@ The colum name is composed of the string *page* and a trailing character to spec
 |<question>   |If there is a question text given, an alert will be opened. Only if the user clicks on 'ok',     |**Expected "=" to follow "see"**                          |                                                               |
 |             |the link will be called                                                                          |                                                          |                                                               |
 +-------------+-------------------------------------------------------------------------------------------------+----------------------------------------------------------+---------------------------------------------------------------+
-|<class>      |CSS Class for the <a> tag                                                                        |The default class defined for internal links in           |                                                               |
-|             |                                                                                                 |ext_localconf.php (see ...)                               |                                                               |
+|<class>      |CSS Class for the <a> tag                                                                        |                                                          |                                                               |
+|             |                                                                                                 |                                                          |                                                               |
 +-------------+-------------------------------------------------------------------------------------------------+----------------------------------------------------------+---------------------------------------------------------------+
 |<target>     |Parameter for HTML 'target='. F.e.: Opens a new window                                           |empty                                                     |P                                                              |
 +-------------+-------------------------------------------------------------------------------------------------+----------------------------------------------------------+---------------------------------------------------------------+
@@ -6080,7 +6069,7 @@ See `Formatting Examples`_ for examples of how the output can be formatted.
 Formatting Examples
 ^^^^^^^^^^^^^^^^^^^
 
-Formating (i.e. wrapping of data with HTML tags etc.) can be achieved in two different ways:
+Formatting (i.e. wrapping of data with HTML tags etc.) can be achieved in two different ways:
 
 One can add formatting output directly into the SQL by either putting it in a separate column of the output or by using
 concat to concatenate data and formatting output in a single column.
@@ -6223,6 +6212,23 @@ Same as above, but written in the nested notation ::
   }
 
 * Columns starting with a '_' won't be printed but can be accessed as regular columns.
+
+Recent List
+^^^^^^^^^^^
+
+A nice feature is to show a list with last changed records. The following will show the 10 last modified (Form or
+FormElement) forms: ::
+
+	10 {
+	  sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form&r=', f.id, '|t:', f.name,'|o:', GREATEST(MAX(fe.modified), f.modified)) AS _page
+				  FROM Form AS f
+				  LEFT JOIN FormElement AS fe ON fe.formId = f.id
+				  GROUP BY f.id
+				  ORDER BY GREATEST(MAX(fe.modified), f.modified) DESC
+				  LIMIT 10
+	  head = <h3>Recent Forms</h3>
+	  rsep = ,&ensp;
+	}
 
 .. _help:
 

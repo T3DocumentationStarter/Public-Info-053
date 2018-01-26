@@ -37,6 +37,45 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 0.25.10
+---------------
+
+Date: 26.01.2018
+
+Notes
+^^^^^
+
+* PROTOCOL.md: update notes
+* Form / Upload: new option 'downloadButton' - if given renders a download button instead of showing the pathFileName.
+
+Features
+^^^^^^^^
+
+* #5023 / Fabric: Cut, rotate and enhance uploaded images. Update Manual.
+* All FE 'typeahead' fields are set to 'autocomplete="off"'. Respect user setting for 'autocomplete' - if none given (mostly), set it for FE 'typeahead' to 'off'
+* #5295: Upload: check if given QFQ 'maxFileSize' is higher than php.in post_max_size, upload_max_filesize
+* FE.Subrecord: rearranged column order, start columns with uppercase letter.
+* New CSS class 'qfq-full-width-left': especially for buttons to become full width.
+* New CSS class 'qfq-table-100' - 100% width, with auto width per column. FE.subrecord changed to  'qfq-table-100'.
+* #5302 / remove CSS class 'internal / external'
+
+Bug Fixes
+^^^^^^^^^
+
+* #5189 / BCC SendMail Problem - fixed missing double ticks
+* Manual.rst: Update documentation that the default escape type is 'm'. Remove subrecord/list (have been removed long
+  time ago). Fix enumeration problem FE.type=radio `classButton`. Add short note for typeahead.js. Remove never
+  implemented 'keySemdId...', 'ANREDE'. Fixed typo - replace '\' by '\\' on most places (not in code sections).
+  More generic SQL to extract filename from pathFileName. Fixed several phinx syntax errors. Add example for
+  'recent list'-records.
+* Fixed problem with missing 'if note exits' in CREATE TABLE `Split`.
+* #5030 / Manual.rst: Fixed example with XSS vulnerability.
+* #5275 / typeahead.bundle.min.js missing in Manual.rst: fixed.
+* FormEditor: 'typeahead' for column 'name' fixed. Attention: only succeed if DB_1_NAME is the final DB (mostly given).
+* #5048 / Default value NULL in pathFileName breaks uploads.
+* #5028 / Links im FormularEditor zeigen ins Leere (Fehlende Ziel-Anker) - fixed.
+* Make readonly BS radio buttons non-selectable
+
 Version 0.25.9
 --------------
 
