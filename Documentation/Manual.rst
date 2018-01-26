@@ -2364,7 +2364,7 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |value                | text                        |Default value: See `field-value`_                                                                    |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|sql1                 | text                        |SQL query. See individual `FormEelement`. _`sql1`                                                           |
+|sql1                 | text                        |SQL query. See individual `FormEelement`. _`sql1`                                                    |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Parameter            | text                        |Might contain misc parameter. See `fe-parameter-attributes`_                                         |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
@@ -2728,6 +2728,7 @@ Checkboxes can be rendered in mode:
     * `btn-info` (light blue),
     * `btn-warning` (orange),
     * `btn-danger` (red).
+
     With a given *buttonClass*, all buttons (=radios) are rendered horizontal. A value in *FormElement.maxlength* has no effect.
 
 * *No preselection*:
@@ -2898,7 +2899,7 @@ Uploaded images can be cut or rotate via QFQ (via fabric.js). The modified image
 * Valid image file formats are SVG, PNG, JPG, GIF.
 * Invalid or missing filenames results to an empty 'imageCut' element.
 
-* *FormElement.parameter*::
+* *FormElement.parameter*:
 
   * *resizeWidth* = <empty>|[width in pixel] - the final width of the modified image. If empty (or not given), no change.
   * *keepOriginal* = <empty>|[string] - By default: '.save'. If empty (no string given), don't keep the original. If an
@@ -3092,7 +3093,7 @@ will be rendered inside the form as a HTML table.
     * *Constant '&'*: Indicate a 'constant' value. E.g. `&12:xId` or `{{...}}` (all possibilities, incl. further SELECT
       statements) might be used.
 
-  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-table-80'. If given, the default will be overwritten.
+  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-table-100'. If given, the default will be overwritten.
 
 Type: time
 ^^^^^^^^^^
@@ -3194,7 +3195,7 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
     If `downloadButton` ist empty, just shows the regular download glyph.
 
-    Additional attributes might be given like `downloadButton='t:Download|o:check file'. Please check `download`_.
+    Additional attributes might be given like `downloadButton='t:Download|o:check file`. Please check `download`_.
 
   * fileSplit, fileDestinationSplit, tableNameSplit: see split-pdf-upload_
 
@@ -3292,8 +3293,8 @@ page. The split is done via http://www.cityinthesky.co.uk/opensource/pdf2svg/.
  * *FormElement.parameter*:
 
    * *fileSplit*: Activate the splitting process. Only possible value: `fileSplit=svg`.
-   * *fileDestinationSplit*: Target directory and filename pattern for the created & splitted files. E.g.
-     `fileDestinationSplit=fileadmin/protected/{{id:R}}.{{filenameBase}}.%02d.svg.
+   * *fileDestinationSplit*: Target directory and filename pattern for the created & split'ed files. E.g.
+     `fileDestinationSplit=fileadmin/protected/{{id:R}}.{{filenameBase}}.%02d.svg`.
    * *tableNameSplit*: Reference in table 'Split' to the table, which holds the original PDF file.
 
 The splitting happens immediately after the user pressed save.
@@ -5532,7 +5533,7 @@ Send text emails. Every mail will be logged in the table `mailLog`. Attachments 
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | b        | Body                                   |**Body**: Message                                                                                 |    yes     |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| h        | Mail header                            |**Custom mail header**: Separate multiple header with \\r\\n                                        |            |
+| h        | Mail header                            |**Custom mail header**: Separate multiple header with \\r\\n                                      |            |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | F        | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
@@ -5933,7 +5934,7 @@ render the form with name formname and load the record with id id for editing.
 QFQ CSS Classes
 ---------------
 
-* `qfq-table-50`, `qfq-table-80` - release the default width of 100% and specify minwidth=50% resp. 80%.
+* `qfq-table-50`, `qfq-table-80`, `qfq-table-100` - set min-width and column width to 'auto'
 
 * Background Color: `qfq-color-grey-1`, `qfq-color-grey-2`  (table, row, cell)
 * Table: `table`
@@ -5944,6 +5945,10 @@ E.g.::
 
   10.sql = SELECT id, name, firstName, ...
   10.head = <table class='table table-condensed qfq-table-50'>
+
+* `qfq-full-width-left` - makes e.g. a button full width and aligns the text left. ::
+
+    10.sql = SELECT "p:home&r=0|t:Home|c:qfq-full-width-left" AS _pagev
 
 Examples
 --------
