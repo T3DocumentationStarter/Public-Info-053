@@ -2935,7 +2935,7 @@ Type: radio
 
     * *itemList* = `<attribute>` E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue,3:orange*
     * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
-        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange``
+        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
 
   3. Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -3092,7 +3092,7 @@ will be rendered inside the form as a HTML table.
     * *Constant '&'*: Indicate a 'constant' value. E.g. `&12:xId` or `{{...}}` (all possibilities, incl. further SELECT
       statements) might be used.
 
-  * *subrecordTableClass*: Optional. Default: 'table table-hover'. If given, the default will be overwritten.
+  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-table-80'. If given, the default will be overwritten.
 
 Type: time
 ^^^^^^^^^^
@@ -3135,7 +3135,9 @@ and will be processed after saving the primary record and before any action Form
 * *FormElement.value*: By default, the full path of any already uploaded file is shown. To show something different, e.g.
   only the filename, define: ::
 
-	 {{SELECT SUBSTRING_INDEX(pathFileNamePicture, '/', -1) FROM Note WHERE id={{id:R0}} }}
+	 {{SELECT SUBSTRING_INDEX( '{{pathFileName:R}}', '/', -1)  }}
+
+See also `downloadButton`_ to offer a download of an uploaded file.
 
 * *FormElement.parameter*:
 
@@ -3156,7 +3158,7 @@ and will be processed after saving the primary record and before any action Form
     * If for a specific filetype is no mime type available, the definition of file extension(s) is possible. This is **less
       secure**, cause there is no *content* check on the server after the upload.
 
-  * *maxFileSize*: max filesize in bytes for an uploaded file. Default: 10485760 (=10MB)
+  * *maxFileSize*: max filesize in bytes (no unit), kilobytes (k/K) or megabytes (m/M) for an uploaded file. Default: 10MB.
 
   * *fileDestination*: Destination where to copy the file. A good practice is to specify a relative `fileDestination` -
     such an installation (filesystem and database) are moveable.
@@ -3185,9 +3187,16 @@ and will be processed after saving the primary record and before any action Form
 
   * *fileReplace=always*: If `fileDestination` exist - replace it by the new one.
 
-  * fileSplit:
-  * fileDestinationSplit:
-  * tableNameSplit: see split-pdf-upload_
+.. _`downloadButton`:
+
+  * *downloadButton*: If given, shows a button to download the previous uploaded file - instead of the string given in
+    `fe.value`. It's important that `fe.value` points to a readable file on the server.
+
+    If `downloadButton` ist empty, just shows the regular download glyph.
+
+    Additional attributes might be given like `downloadButton='t:Download|o:check file'. Please check `download`_.
+
+  * fileSplit, fileDestinationSplit, tableNameSplit: see split-pdf-upload_
 
 Immediately after the upload finished (before the user press save), the file will be checked on the server for it's
 content or file extension (see 'accept').
@@ -5043,23 +5052,23 @@ Parameter and (element) sources
 
 * *popupMessage*: `a:<text>` - will be displayed in the popup window during download. If the creating/download is fast, the window might disappear quickly.
 
-* *mode*: `m:<mode>`
+* *mode*: `M:<mode>`
 
   * *mode* = <file | pdf | zip> - This parameter is optional and can be skipped in most situations. Mandatory
     for 'zip'.
 
-      * If `m:file`, the mime type is derived dynamically from the specified file. In this mode, only one element source
+      * If `M:file`, the mime type is derived dynamically from the specified file. In this mode, only one element source
         is allowed per download link (no concatenation).
 
       * In case of multiple element sources, only `pdf` or `zip` is supported.
-      * If `m:zip` is used together with `p:...`, `U:...` or `u:..`, those HTML pages will be converted to PDF. Those files
+      * If `M:zip` is used together with `p:...`, `U:...` or `u:..`, those HTML pages will be converted to PDF. Those files
         get generic filenames inside the archive.
       * If not specified, the **default** 'Mode' depends on the number of specified element sources (=file or web page):
 
         * If only one `file` is specifed, the default is `file`.
         * If there is a) a page defined or b) multiple elements, the default is `pdf`.
 
-* *element sources* - for `m:pdf` or `m:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
+* *element sources* - for `M:pdf` or `M:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
 
   * *file*: `F:<pathFileName>` - relative or absolute pathFileName offered for a) download (single), or to be concatenated
     in a PDF or ZIP.
@@ -5095,7 +5104,7 @@ Example `_link`: ::
 	SELECT "d:file.pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
 
 	# single `file`, with mode
-	SELECT "d:file.pdf|m:pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
+	SELECT "d:file.pdf|M:pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
 
 	# three sources: two pages and one file
 	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
