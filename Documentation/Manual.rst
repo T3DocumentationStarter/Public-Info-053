@@ -951,17 +951,15 @@ specific locations in the text will be (automatically by QFQ) replaced by values
 Sanitize class
 --------------
 
-* If a value violates a parameter sanitize class, the value becomes an empty string.
-* Per store there is a default if sanitizing applies and if yes, which class.
+Values in STORE_CLIENT *C* (Client=Browser) and STORE_FORM *F* (Form, HTTP 'post') will be checked against a sanitize class.
+Values from other stores are not checked against any sanitize class.
 
-  * Store *C* (Client=Browser) and store *F* (Form) will be sanitized with 'digit'.
-
+* If a value violates the specific sanitize class, the value becomes `!!<name of sanitize class>!!`. E.g. `!!gigit!!`.
 * All `predefined-variable-names`_ have a specific default sanitize class. For these variables, it's not necessary
-  to specify a sanitize class.
-* All other variables (Store: C, F) get by default the sanitize class defined in the corresponding form. If not defined,
+  to specify an individual sanitize class.
+* All other variables get by default the sanitize class defined in the corresponding `FormElement`. If not defined,
   the default class is 'digit'.
 * A default sanitize class can be overwritten by individual definition: *{{a:C:all}}*
-* If there is a sanitized class specified, it applies to all given stores.
 
 For QFQ variables and FormElements:
 
@@ -1043,8 +1041,8 @@ defining the `escape` modifier `m`.
 **QFQ notice**:
 
 * Variables passed by the client (=Browser) are untrusted and use the default sanitize class 'digit' (if nothing else is
-  specified). If alpha characters are submitted, the content violates `digit` and becomes therefore empty - there is no
-  error message. Best is to always use SIP or digits.
+  specified). If alpha characters are submitted, the content violates `digit` and becomes therefore
+  `!!<name of sanitize class>!!` - there is no error message. Best is to always use SIP or digits.
 
 Get Parameter
 -------------
@@ -2327,10 +2325,12 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _`field-encode`   |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Check Type           | enum('min|max', 'pattern',  | _`field-checkType`                                                                                  |
-|                     | 'number', 'email')          |                                                                                                     |
+|Check Type           | enum('alnumx','digit',      | _`field-checktype`                                                                                  |
+|                     | 'numerical','email',        |                                                                                                     |
+|                     | 'min|max','min|max date',   |                                                                                                     |
+|                     | 'pattern','allbut','all')   |                                                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Check Pattern        | 'regexp'                    |If $checkType=='pattern': pattern to match                                                           |
+|Check Pattern        | 'regexp'                    |_`field-checkpattern`: If $checkType=='pattern': pattern to match                                    |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Order                | string                      | Display order of *FormElements* ('order' is a reserved keyword)  _`field-ord`                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
@@ -2411,13 +2411,13 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | Name                   | Type   | Note                                                                                                     |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-pattern-error     | string | Pattern violation: Text for error message used for all FormElements of current form                      |
+| data-pattern-error     | string | Pattern violation: Text for error message                                                                |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-required-error    | string | Required violation: Text for error message used for all FormElements of current form                     |
+| data-required-error    | string | Required violation: Text for error message                                                               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-match-error       | string | Match violation: Text for error message used for all FormElements of current form                        |
+| data-match-error       | string | Match violation: Text for error message                                                                  |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-error             | string | If none specific is defined: Text for error message used for all FormElements of current form            |
+| data-error             | string | Violation of 'check-type': Text for error message                                                        |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | htmlBefore             | string | HTML Code wrapped before the complete *FormElement*                                                      |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -3190,7 +3190,7 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
     If `downloadButton` ist empty, just shows the regular download glyph.
 
-    Additional attributes might be given like `downloadButton='t:Download|o:check file`. Please check `download`_.
+    Additional attributes might be given like `downloadButton = t:Download|o:check file`. Please check `download`_.
 
   * fileSplit, fileDestinationSplit, tableNameSplit: see split-pdf-upload_
 
@@ -3224,7 +3224,9 @@ Requires: *'upload'-FormElement.name = 'column name'* of an column in the primar
 
 After moving the file to `fileDestination`, the current record/column will be updated to `fileDestination`.
 The database definition of the named column has to be a string variant (varchar, text but not numeric or else).
-On form load, the column value will be displayed as path/filename.
+On form load, the column value will be displayed,
+
+ * as the whole value (pathFileName)
 Deleting an uploaded file in the form (by clicking on the trash near beside) will delete
 the file on the filesystem as well. The column will be updated to an empty string.
 
@@ -5033,12 +5035,9 @@ Parameter and (element) sources
 
   * *exportFilename* = <filename for save as> - Name, offered in the 'File save as' browser dialog. Default: 'output.<ext>'.
 
-    If there is no `exportFilename` defined and `mode=file`, than the original filename is taken.
+    If there is no `exportFilename` defined, then the original filename is taken.
 
-    If the mime type is different from the `exportFilename` extension, then the mime type extension will be added to
-    `exportFilename`. This guarantees that a filemanager will open the file with the correct application.
-
-    The user typically expect meaningful and distinct filenames for different download links.
+    The user typically expects meaningful and distinct filenames for different download links.
 
 * *popupMessage*: `a:<text>` - will be displayed in the popup window during download. If the creating/download is fast, the window might disappear quickly.
 
@@ -6251,11 +6250,13 @@ QFQ specific
 Variable empty: {{...}}
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Specify the required sanitize class. Remember: for STORE_FORM and STORE_CLIENT the default is `digit`. This means if
+Specify the required sanitize class. Remember: for STORE_FORM and STORE_CLIENT the default is sanatize class is `digit`. This means if
 the variable content is a string, this violates the sanitize class and the replaced content will be an empty string!
 
 Form: put the problematic variable or SQL statement in the 'title' or note 'field' of a `FormElement`. This should show
-the content. For SQL statements insert a character before the SQL Keyword to avoid SQL triggering.
+the content. For SQL statements, remove the outer token (e.g. only one curly brace) to avoid SQL triggering: ::
+
+  Person { SELECT ... WHERE id={{buggyVar:alnumx}} }
 
 Error read file config.qfq.ini: syntax error on line xx
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -6268,10 +6269,10 @@ Logging
 General webserver error log
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For apache: /var/log/apache2/error_log
+For apache: `/var/log/apache2/error_log`
 
 Especially if you got a blank page (no rendering at all), this is typically an uncaught PHP error. Check the error message
-and report the bug.
+and report the bug (http://qfq.io > Contact).
 
 Call to undefined function qfq\\mb_internal_encoding()
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''
