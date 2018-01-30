@@ -227,7 +227,7 @@ Setup a *report* to manage all *forms*:
 	10 {
 		# List of Forms: Do not show this list of forms if there is a form given by SIP.
 		# Table header.
-		sql = SELECT CONCAT('{{pageId:T}}&form=form&') as _Pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE  '{{form:SE}}'=''
+		sql = SELECT CONCAT('p:{{pageId:T}}&form=form') as _pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
 		head = <table class="table table-hover qfq-table-50">
 		tail = </table>
 		rbeg = <thead><tr>
@@ -237,7 +237,7 @@ Setup a *report* to manage all *forms*:
 
 		10 {
 			# All forms
-			sql = SELECT CONCAT('{{pageId:T}}&form=form&r=', f.id) as _Pagee, f.id, f.name, f.title, f.tableName, CONCAT('form=form&r=', f.id) as _Paged FROM Form AS f ORDER BY f.name
+			sql = SELECT CONCAT('p:{{pageId:T}}&form=form&r=', f.id) as _pagee, f.id, f.name, f.title, f.tableName, CONCAT('form=form&r=', f.id) as _Paged FROM Form AS f ORDER BY f.name
 			rbeg = <tr>
 			rend = </tr>
 			fbeg = <td>
@@ -5488,8 +5488,8 @@ Column: _sendmail
 
 ::
 
-	t:<TO:email[,email]>|F:<FROM:email>|s:<subject>|b:<body>
-	 [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|F:<REPLY-TO:email>]
+	t:<TO:email[,email]>|f:<FROM:email>|s:<subject>|b:<body>
+	 [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|r:<REPLY-TO:email>]
 	 [|a:<flag autosubmit: on /off>][|g:<grid>][|x:<xId>][|y:<xId2>][|z:<xId3>]
 	 [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
 
@@ -5499,8 +5499,8 @@ Send text emails. Every mail will be logged in the table `mailLog`. Attachments 
 
 ::
 
-    SELECT "t:john@doe.com|F:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
-    SELECT "t:john@doe.com|F:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
+    SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
+    SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
 
 ..
 
@@ -5558,7 +5558,7 @@ Send text emails. Every mail will be logged in the table `mailLog`. Attachments 
 
 ::
 
-    10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available." AS _sendmail
+    10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available." AS _sendmail
 
 ..
 
@@ -5568,8 +5568,8 @@ This will send an email with subject *Latest News* from company@example.com to j
 
 ::
 
-    10.sql = SELECT "t:customer1@example.com,Firstname Lastname <customer2@example.com>, Firstname Lastname <customer3@example.com>|
-                     F:company@example.com|s:Latest News|b:The new version is now available.|r:sales@example.com|A:on|g:101|x:222|c:ceo@example.com|B:backup@example.com" AS _sendmail
+    10.sql = SELECT "t:customer1@example.com,Firstname Lastname <customer2@example.com>, Firstname Lastname <customer3@example.com>| \\
+                     f:company@example.com|s:Latest News|b:The new version is now available.|r:sales@example.com|A:on|g:101|x:222|c:ceo@example.com|B:backup@example.com" AS _sendmail
 
 ..
 
@@ -5610,22 +5610,22 @@ Optional any number of sources can be concatenated to a single PDF file: 'C|F:<f
 Examples in Report::
 
 	# One file attached.
-	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf" AS _sendmail
+	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf" AS _sendmail
 
 	# Two files attached.
-	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf" AS _sendmail
+	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf" AS _sendmail
 
 	# Two files and a webpage (converted to PDF) are attached.
-	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf|p:?id=export&r=123|d:person.pdf" AS _sendmail
+	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf|p:?id=export&r=123|d:person.pdf" AS _sendmail
 
 	# Two webpages (converted to PDF) are attached.
-	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123|d:person123.pdf|p:?id=export&r=234|d:person234.pdf" AS _sendmail
+	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123|d:person123.pdf|p:?id=export&r=234|d:person234.pdf" AS _sendmail
 
 	# One file and two webpages (converted to PDF) are *concatenated* to one PDF and attached.
-	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|C|F:fileadmin/summary.pdf|p:?id=export&r=123|p:?id=export&r=234|d:complete.pdf" AS _sendmail
+	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|C|F:fileadmin/summary.pdf|p:?id=export&r=123|p:?id=export&r=234|d:complete.pdf" AS _sendmail
 
 	# One T3 webpage, protected by a SIP, are attached.
-	10.sql = SELECT "t:john.doe@example.com|F:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123&_sip=1|d:person123.pdf" AS _sendmail
+	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123&_sip=1|d:person123.pdf" AS _sendmail
 
 .. _column_img:
 
