@@ -94,7 +94,7 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-* Bug in sendeEmail: invalid SSL_version specified at /usr/share/perl5/IO/Socket/SSL.pm line 575. Patch for sendEmail (see https://unix.stackexchange.com/a/68952).
+* Bug in sendEmail: invalid SSL_version specified at /usr/share/perl5/IO/Socket/SSL.pm line 575. Patch for sendEmail (see https://unix.stackexchange.com/a/68952).
 
 
 Version 0.25.8
