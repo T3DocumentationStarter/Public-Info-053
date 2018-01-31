@@ -37,6 +37,39 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 0.25.11
+---------------
+
+Date: 31.01.2018
+
+Notes
+^^^^^
+
+* Violating a sanitize class now returns '!!<sanitize class>!!' instead of an empty string.
+
+Features
+^^^^^^^^
+
+* #5022 / Variable violates sanatize class: 'msg' instead of empty string - new identifier "!!<sanitize class>!!"
+* #4813 / Exception during form load: show 'form edit link' if editor is logged in.
+* formEditor.sql: Increas size of Form.title to give more room for SQL statements in.
+* Manual.rst: enhance debug tipps.
+* #5321 / Plain Link - render mode- only url - implemented
+* Add regex101 link to checkPattern FormEditor
+
+Bug Fixes
+^^^^^^^^^
+
+* Fixed some broken help links in formEditor.sql.
+* #5306 / Exception: tt_content_uid wrong - fixed
+* #4303 - Download von doc/docx-Dateien / Download.php - Mime type wird nicht mehr an Dateiname angehängt
+* #5316 / Help on how to send an E-Mail is wrong - several places fixed.
+* #5311 / Error Msg SLQ_RAW != SQL_FINAL: Debug message shows outdated SQL_RAW
+* #5309 / min/max broken for date fields. Add min/max attributes to input and date input tag
+* Fabric now detects 'dirty'
+* Manual.rst: Remove broken link to W3C file upload.
+
+
 Version 0.25.10
 ---------------
 
