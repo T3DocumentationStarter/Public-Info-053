@@ -2448,6 +2448,9 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | dateFormat             | string | yyyy-mm-dd | dd.mm.yyyy                                                                                  |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| decimalFormat          | string | [precision,scale] Limits and formats input to a decimal number with the specified precision and scale.   |
+|                        |        | If no precision and scale are specified, the decimal format is pulled from the table definition.         |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | showSeconds            | string | 0|1 - Shows the seconds on form load. Default: 0                                                         |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | showZero               | string | 0|1 - Empty timestamp: '0'(default) - nothing shown, '1' - the string '0000-00-00 00:00:00' is displayed |
@@ -2788,6 +2791,8 @@ Type: text
   * *hideZero* = 0|1 (optional): `with hideZero=1` a '0' in the value will be replaced by an empty string.
   * *emptyMeansNull* = [0|1] (optional): with `emptyMeansNull` or `emptyMeansNull=1` a NULL value will be written if
     the value is an empty string
+  * *inputType* = number (optional). Typically the HTML tag 'type' will be 'text', 'textarea' or 'number' (detected automatically).
+    If necessary, the HTML tag 'type' might be forced to a specific given value.
 
 .. _`input-typeahead`:
 
@@ -4469,52 +4474,59 @@ HTML output:
 
 .. _`syntax-of-report`:
 
-Syntax of `report`
+Syntax of *report*
 ------------------
 
-    All **root level queries** will be fired in the order specified by 'level' (Integer value).
+All **root level queries** will be fired in the order specified by 'level' (Integer value).
 
-    For **each** row of a query (this means *all* queries), all subqueries will be fired once.
+For **each** row of a query (this means *all* queries), all subqueries will be fired once.
 
-    *   E.g. if the outer query selects 5 rows, and a nested query select 3 rows, than the total number of rows are 5 x 3 = 15 rows.
+* E.g. if the outer query selects 5 rows, and a nested query select 3 rows, than the total number of rows are 5 x 3 = 15 rows.
 
-    There is a set of **variables** that will get replaced before the SQL-Query gets executed:
+There is a set of **variables** that will get replaced before the SQL-Query gets executed:
 
-        Variables from specific stores: {{<name>[:<store/s>[:...]]}}
+``{{<name>[:<store/s>[:...]]}}``
+  Variables from specific stores.
 
-        STORE_RECORD is automatically merged with the existing STORE_RECORD content and the current row. Use the STORE_RECORD
-        to access outer level values.
+``{{<name>:R}}`` - use case of the above generic definition.
+  STORE_RECORD is automatically merged with a) the existing STORE_RECORD content and b) the *current row*. Use the STORE_RECORD
+  to access outer and/or previous level values.
+  In case of previous level values: only the one of the last record is available.
+  Always access variables without an optional leading '_' - it's removed before the variable is copied to STORE_RECORD.
 
-        Column values of a given row: {{<level>.<columnname>}}
+``{{<level>.<columnname>}}``
+  Similar to  ``{{<name>:R}}`` but more specific. There is no sanitize class, escape mode or default value.
 
-        Global variables: {{global.<name>}}
+``{{<level>.line.count}}`` - Current row index
+  This variable is specific, as it will be replaced before the query is fired in case of ``<level>`` is an outer/previous
+  level or it will be replaced after a query is fired in case ``<level>`` is the current level.
 
-        Current row index: {{<level>.line.count}}
+``{{<level>.line.total}}``
+  Total rows (MySQL ``num_rows`` for *SELECT* and *SHOW*, MySQL ``affected_rows`` for *UPDATE* and *INSERT*.
 
-        Total rows (num_rows for SELECT and SHOW, affected_rows for UPDATE and INSERT): {{<level>.line.total}}
+``{{<level>.line.insertId}}``
+  Last insert id for *INSERT*.
 
-        Last insert id for INSERT: {{<level>.line.insertId}}
 
-        See :ref:`variables` for a full list of all available variables.
+See :ref:`variables` for a full list of all available variables.
 
-    Be aware that line.count / line.total have to be known before the query is fired. E.g. `10.sql = SELECT {{10.line.count}}, ... WHERE {{10.line.count}} = ...`
-    won't work as expected. `{{10.line.count}}` can't be replaced before the query is fired, but will be replaced during processing the result!
+Different types of SQL queries are possible: SELECT, INSERT, UPDATE, DELETE, SHOW, REPLACE
 
-    Different types of SQL queries are possible: SELECT, INSERT, UPDATE, DELETE, SHOW
+Only SELECT and SHOW queries will fire subqueries.
 
-    Only SELECT and SHOW queries will fire subqueries.
+Processing of the resulting rows and columns:
 
-    Processing of the resulting rows and columns:
+	* In general, all columns of all rows will be printed out sequentially.
+	* On a per column base, printing of columns can be suppressed by starting the columnname with an underscore '_'. E.g.
+	  `SELECT id AS _id`.
 
-    * In general, all columns of all rows will be printed out sequentially.
+     This might be useful to store values, which will be used later on in another query via the `{{id:R}}` or
+     `{{level.columnname}}` variable. To suppress printing of a column, use a underscore as column name prefix. E.g.
+     `SELECT id AS _id`
 
-    * On a per column base, printing of columns can be suppressed by starting the columnname with an underscore '_'. E.g. `SELECT id AS _id`.
-      This might be useful to store values, which will be used later on in another query via the `{{id:R}}` or `{{level.columnname}}` variable. To suppress printing of a column, use a
-      underscore as column name prefix. E.g. `SELECT id AS _id`
+*Reserved column names* have a special meaning and will be processed in a special way. See `Processing of columns in the SQL result`_ for details.
 
-    Reserved column names have a special meaning and will be processed in a special way. See `Processing of columns in the SQL result`_ for details.
-
-    There are extensive ways to wrap columns and rows automatically. See :ref:`wrapping-rows-and-columns`
+There are extensive ways to wrap columns and rows. See :ref:`wrapping-rows-and-columns`
 
 Debug the bodytext
 ------------------
@@ -5924,8 +5936,13 @@ QFQ CSS Classes
 ---------------
 
 * `qfq-table-50`, `qfq-table-80`, `qfq-table-100` - set min-width and column width to 'auto'
-
 * Background Color: `qfq-color-grey-1`, `qfq-color-grey-2`  (table, row, cell)
+* `qfq-100`: Makes an element 'width: 100%'.
+* `qfq-left`: Text align left.
+
+Bootstrap
+^^^^^^^^^
+
 * Table: `table`
 * Table > hover: `table-hover`
 * Table > condensed: `table-condensed`
@@ -5935,9 +5952,9 @@ E.g.::
   10.sql = SELECT id, name, firstName, ...
   10.head = <table class='table table-condensed qfq-table-50'>
 
-* `qfq-full-width-left` - makes e.g. a button full width and aligns the text left. ::
+* `qfq-100`, `qfq-left` - makes e.g. a button full width and aligns the text left. ::
 
-    10.sql = SELECT "p:home&r=0|t:Home|c:qfq-full-width-left" AS _pagev
+    10.sql = SELECT "p:home&r=0|t:Home|c:qfq-100 qfq-left" AS _pagev
 
 Examples
 --------
