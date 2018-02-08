@@ -2453,6 +2453,9 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | showSeconds            | string | 0|1 - Shows the seconds on form load. Default: 0                                                         |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| timeIsOptional         | string | 0|1 - Used for datetime input. 0 (default): Time is required - 1: Entering a time is optional            |
+|                        |        | (defaults to 00:00:00 if none entered).                                                                  |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | showZero               | string | 0|1 - Empty timestamp: '0'(default) - nothing shown, '1' - the string '0000-00-00 00:00:00' is displayed |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | retype                 | string | See `input-text`_                                                                                        |
@@ -3490,7 +3493,7 @@ Type: sendmail
    * processing `afterSave` action `FormElements`.
 
 
-* *FormElement.value*: Body of the email.
+* *FormElement.value*: Body of the email. See also: `html-formatting`_
 
 * *FormElement.parameter*:
 
@@ -5532,7 +5535,7 @@ Send text emails. Every mail will be logged in the table `mailLog`. Attachments 
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | s        | Subject                                |**Subject**: Subject of the email                                                                 |    yes     |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| b        | Body                                   |**Body**: Message                                                                                 |    yes     |
+| b        | Body                                   |**Body**: Message - see also: `html-formatting`_                                                  |    yes     |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | h        | Mail header                            |**Custom mail header**: Separate multiple header with \\r\\n                                      |            |
 +----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
@@ -5591,6 +5594,13 @@ using a realname for customer2 and customer3 and suppress generating of OoO answ
 Additional the CEO as well as backup will receive the mail via CC and BCC.
 
 For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
+
+.. _html-formatting:
+
+**Mail Body HTML Formatting**
+
+In order to send an email with HTML formatting, such as bold text or bullet lists, simply start the email body with <html>.
+The subsequent contents will be interpreted as HTML and is rendered correctly by most email programs.
 
 .. _attachment:
 
