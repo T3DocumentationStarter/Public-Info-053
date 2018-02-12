@@ -63,14 +63,16 @@ For the `download`_ function, the programs `pdftk` and `file` are necessary to c
 Preparation for Ubuntu 14.04::
 
 	sudo apt-get install php5-mysqlnd php5-intl
-	sudo apt-get install pdftk file                # for file upload and PDF
+	sudo apt-get install pdftk file                  # for file upload and PDF
+	sudo apt-get install inkscape graphicsmagick     # to render thumbnails
 	sudo php5enmod mysqlnd
 	sudo service apache2 restart
 
 Preparation for Ubuntu 16.04::
 
 	sudo apt install php7.0-intl
-	sudo apt install pdftk libxrender1 file pdf2svg       # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf), PDF split
+	sudo apt install pdftk libxrender1 file pdf2svg  # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf), PDF split
+	sudo apt install inkscape graphicsmagick         # to render thumbnails
 
 .. _wkhtml:
 
@@ -151,7 +153,15 @@ via commandline options. A basic HTML email support is implemented.
 The latest version is v1.56, which has at least one bug. That one is patched in the QFQ internal version v1.56p1 (see
 QFQ GIT sources in directory 'patches/sendEmail.patch').
 
-The Typo3 sendmail eco-system is not used at all.
+The Typo3 sendmail eco-system is not used at all by QFQ.
+
+Thumbnail
+^^^^^^^^^
+
+Thumbnails will be rendered via GraphicsMagick (http://www.graphicsmagick.org/) 'convert' and 'inkscape' (https://inkscape.org).
+'inkscape' is only used for '.svg' files.
+
+The Typo3 grafic eco-system is not used at all by QFQ.
 
 Setup
 -----
@@ -250,151 +260,129 @@ Setup a *report* to manage all *forms*:
 config.qfq.ini
 --------------
 
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| Keyword                     | Example                                         | Description                                                                |
-+=============================+=================================================+============================================================================+
-| DB_<n>_USER                 | DB_1_USER=qfqUser                               | Credentials configured in MySQL                                            |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_<n>_PASSWORD             | DB_1_PASSWORD=1234567890                        | Credentials configured in MySQL                                            |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_<n>_SERVER               | DB_1_SERVER=localhost                           | Hostname of MySQL Server                                                   |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_<n>_NAME                 | DB_1_NAME=qfq_db                                | Database name                                                              |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_INIT                     | DB_INIT=set names utf8                          | Global init for using the database.                                        |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_INDEX_DATA               | DB_INDEX_DATA = 1                               | Optional. Default: 1.                                                      |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_INDEX_QFQ                | DB_INDEX_QFQ = 1                                | Optional. Default: 1.                                                      |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SQL_LOG                     | SQL_LOG=../../sql.log                           | Filename to log SQL commands: relative to <ext_dir> or absolute.           |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SQL_LOG_MODE                | SQL_LOG_MODE=modify                             | *all*: every statement will be logged - this might a lot.                  |
-|                             |                                                 | *modify*: log only statements who change data.                             |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| MAIL_LOG                    | SQL_LOG=../../mail.log                          | Filename to log `sendEmail` commands: relative to <ext_dir> or absolute.   |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SEND_E_MAIL_OPTIONS         | SEND_E_MAIL_OPTIONS="-o tls=yes"                | General options. Check: http://caspian.dotconf.net/menu/Software/SendEmail |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SHOW_DEBUG_INFO             | SHOW_DEBUG_INFO=auto                            | FE - Possible values: yes|no|auto|download. For 'auto': If a BE User is    |
-|                             |                                                 | logged in, a debug information will be shown on the FE.                    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| REDIRECT_ALL_MAIL_TO        | REDIRECT_ALL_MAIL_TO=john@doe.com               | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_CLASS_QFQ_CONTAINER     |CSS_CLASS_QFQ_CONTAINER=container                | QFQ with own Bootstrap: 'container'.                                       |
-|                             |                                                 | QFQ already nested in Bootstrap of mainpage: <empty>                       |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_CLASS_QFQ_FORM          | CSS_CLASS_QFQ_FORM=qfq-color-base               | Wrap around QFQ 'Form'                                                     |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_CLASS_QFQ_FORM_PILL     |CSS_CLASS_QFQ_FORM_PILL=qfq-color-grey-1         | Wrap around title bar for pills: CSS Class, typically a background color   |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_CLASS_QFQ_FORM_BODY     |CSS_CLASS_QFQ_FORM_BODY=qfq-color-grey-2         | Wrap around formelements: CSS Class, typically a background color          |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DATE_FORMAT                 | DATE_FORMAT= yyyy-mm-dd                         | Possible options: yyyy-mm-dd, dd.mm.yyyy                                   |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_DATA_PATTERN_ERROR     |FORM_DATA_PATTERN_ERROR=please check pa.         | Customizable error message used in validator.js. 'pattern' violation       |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_DATA_REQUIRED_ERROR    |FORM_DATA_REQUIRED_ERROR=missing value           | Customizable error message used in validator.js. 'required' fields         |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_DATA_MATCH_ERROR       |FORM_DATA_MATCH_ERROR=type error                 | Customizable error message used in validator.js. 'match' retype mismatch   |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_DATA_ERROR             |FORM_DATA_ERROR=generic error                    | Customizable error message used in validator.js. 'no specific' given       |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_BS_COLUMNS             | FORM_BS_COLUMNS=12                              | The whole form will be wrapped in 'col-md-??'. Default is 12 for 100%      |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_BS_LABEL_COLUMNS       | FORM_BS_LABEL_COLUMNS = 3                       | Default number of BS columns for the 'label'-column                        |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_BS_INPUT_COLUMNS       | FORM_BS_INPUT_COLUMNS = 6                       | Default number of BS columns for the 'input'-column                        |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_BS_NOTE_COLUMNS        | FORM_BS_NOTE_COLUMNS = 3                        | Default number of BS columns for the 'note'-column                         |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_BUTTON_ON_CHANGE_CLASS | FORM_BUTTON_ON_CHANGE_CLASS=alert-info btn-info | Color for save button after modification                                   |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| BASE_URL_PRINT              | BASE_URL_PRINT=http://example.com               | URL where wkhtmltopdf will fetch the HTML (no parameter, those comes later)|
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| WKHTMLTOPDF                 | WKHTMLTOPDF=/usr/bin/wkhtmltopdf                | Binary where to find wkhtmltopdf.                                          |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| EDIT_FORM_PAGE              | EDIT_FORM_PAGE = form                           | T3 Pagealias to edit a form.                                               |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| LDAP_1_RDN                  | LDAP_1_RDN='ou=Admin,ou=example,dc=com'         | Credentials for non-anonymous LDAP access. At the moment only one set of   |
-+-----------------------------+-------------------------------------------------+ crendentials is supported.                                                 |
-| LDAP_1_PASSWORD             | LDAP_1_PASSWORD=mySecurePassword                |                                                                            |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| ESCAPE_TYPE_DEFAULT         | ESCAPE_TYPE_DEFAULT=m                           | All variables `{{...}}` get this escape class by default.                  |
-|                             |                                                 | See `variable-escape`_.                                                    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password| If empty: no check. All named variables will rendered as INPUT elements    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SECURITY_ATTACK_DELAY       | SECURITY_ATTACK_DELAY = 5                       | If an attack is detected, sleep 'x' seconds and exit PHP process           |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SECURITY_SHOW_MESSAGE       | SECURITY_SHOW_MESSAGE = true                    | If an attack is detected, show a message                                   |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SECURITY_GET_MAX_LENGTH     | SECURITY_GET_MAX_LENGTH = 50                    | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
-|                             |                                                 | `ExceptionMaxLength`_                                                      |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| GFX_EXTRA_BUTTON_INFO_INLINE| <img src="info.png">                            | Image for `extraButtonInfo`_ (inline)                                      |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| GFX_EXTRA_BUTTON_INFO_BELOW | <img src="info.png">                            | Image for `extraButtonInfo`_ (below)                                       |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| EXTRA_BUTTON_INFO_POSITION  | SYSTEM_EXTRA_BUTTON_INFO_POSITION=below         | 'auto' (default) or 'below'. See `extraButtonInfo`_                        |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| EXTRA_BUTTON_INFO_CLASS     | SYSTEM_EXTRA_BUTTON_INFO_CLASS=pull-right       | '' (default) or 'pull-right'. See `extraButtonInfo`_                       |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SAVE_BUTTON_TEXT            | SAVE_BUTTON_TEXT =                              | Default text on the form save button. Typically none.                      |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SAVE_BUTTON_TOOLTIP         | SAVE_BUTTON_TOOLTIP = save                      | Default tooltip on the form save button.                                   |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SAVE_BUTTON_CLASS           | SAVE_BUTTON_CLASS = btn btn-default navbar-btn  | Default Bootstrap CSS class for buttons on top of the form                 |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| SAVE_BUTTON_GLYPH_ICON      | SAVE_BUTTON_GLYPH_ICON = glyphicon-ok           | Default Icon for the form save button                                      |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CLOSE_BUTTON_TEXT           | CLOSE_BUTTON_TEXT =                             | Default text on the form close button. Typically none.                     |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CLOSE_BUTTON_TOOLTIP        | CLOSE_BUTTON_TOOLTIP = close                    | Default tooltip on the form close button.                                  |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CLOSE_BUTTON_CLASS          | CLOSE_BUTTON_CLASS = btn btn-default navbar-btn | Default Bootstrap CSS class for buttons on top of the form                 |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| CLOSE_BUTTON_GLYPH_ICON     | CLOSE_BUTTON_GLYPH_ICON = glyphicon-remove      | Default Icon for the form close button                                     |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DELETE_BUTTON_TEXT          | DELETE_BUTTON_TEXT =                            | Default text on the form delete button. Typically none.                    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DELETE_BUTTON_TOOLTIP       | DELETE_BUTTON_TOOLTIP = delete                  | Default tooltip on the form delete button.                                 |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DELETE_BUTTON_CLASS         | DELETE_BUTTON_CLASS = btn btn-default navbar-btn| Default Bootstrap CSS class for buttons on top of the form                 |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DELETE_BUTTON_GLYPH_ICON    | DELETE_BUTTON_GLYPH_ICON = glyphicon-trash      | Default Icon for the form delete button                                    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| NEW_BUTTON_TEXT             | NEW_BUTTON_TEXT =                               | Default text on the form new button. Typically none.                       |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| NEW_BUTTON_TOOLTIP          | NEW_BUTTON_TOOLTIP = new                        | Default tooltip on the form new button.                                    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| NEW_BUTTON_CLASS            | NEW_BUTTON_CLASS = btn btn-default navbar-btn   | Default Bootstrap CSS class for buttons on top of the form                 |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| NEW_BUTTON_GLYPH_ICON       | NEW_BUTTON_GLYPH_ICON = glyphicon-plus          | Default Icon for the form new button                                       |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DB_UPDATE                   | DB_UPDATE = auto                                | 'auto': apply DB Updates only if there is a newer version.                 |
-|                             |                                                 | 'always': apply DB Updates always, especially play formEditor.sql every    |
-|                             |                                                 | time QFQ is called - *not* recommended!                                    |
-|                             |                                                 | 'never': never apply DB Updates.                                           |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DIRTY_RECORD_TIMEOUT_SECONDS| DIRTY_RECORD_TIMEOUT_SECONDS = 900              | Timeout for record locking. After this time, a record will be replaced     |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...      | Link to the online documentation of QFQ. Every QFQ installation also       |
-|                             |                                                 | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FILL_STORE_SYSTEM_BY_SQL    | FILL_STORE_SYSTEM_BY_SQL = {{!SELECT s.id AS ...| Specific values read from the database to fill the system store during QFQ |
-|                             |                                                 | load. See `fillStoreSystemBySql`_ for a usecase.                           |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_LANGUAGE_A_ID          | FORM_LANGUAGE_A__ID = 1                         | In Typo3 configured pageLanguage id. The number after the 'L' parameter.   |
-| FORM_LANGUAGE_B_ID          |                                                 |                                                                            |
-| FORM_LANGUAGE_C_ID          |                                                 |                                                                            |
-| FORM_LANGUAGE_D_ID          |                                                 |                                                                            |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_LANGUAGE_A_LABEL       | FORM_LANGUAGE_A_LABEL = english                 | Label shown in *Form editor*, on the 'basic' tab.                          |
-| FORM_LANGUAGE_B_LABEL       |                                                 |                                                                            |
-| FORM_LANGUAGE_C_LABEL       |                                                 |                                                                            |
-| FORM_LANGUAGE_D_LABEL       |                                                 |                                                                            |
-+-----------------------------+-------------------------------------------------+----------------------------------------------------------------------------+
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Keyword                     | Example                                               | Description                                                                |
++=============================+=======================================================+============================================================================+
+| DB_INIT                     | DB_INIT=set names utf8                                | Global init for using the database.                                        |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DB_<n>_USER                 | DB_1_USER=qfqUser                                     | Credentials configured in MySQL                                            |
+| DB_<n>_PASSWORD             | DB_1_PASSWORD=1234567890                              | Credentials configured in MySQL                                            |
+| DB_<n>_SERVER               | DB_1_SERVER=localhost                                 | Hostname of MySQL Server                                                   |
+| DB_<n>_NAME                 | DB_1_NAME=qfq_db                                      | Database name                                                              |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DB_INDEX_DATA               | DB_INDEX_DATA = 1                                     | Optional. Default: 1.                                                      |
+| DB_INDEX_QFQ                | DB_INDEX_QFQ = 1                                      | Optional. Default: 1.                                                      |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| SQL_LOG                     | SQL_LOG=../../sql.log                                 | Filename to log SQL commands: relative to <ext_dir> or absolute.           |
+| SQL_LOG_MODE                | SQL_LOG_MODE=modify                                   | *all*: every statement will be logged - this might a lot.                  |
+|                             |                                                       | *modify*: log only statements who change data.                             |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| MAIL_LOG                    | SQL_LOG=../../mail.log                                | Filename to log `sendEmail` commands: relative to <ext_dir> or absolute.   |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| SEND_E_MAIL_OPTIONS         | SEND_E_MAIL_OPTIONS="-o tls=yes"                      | General options. Check: http://caspian.dotconf.net/menu/Software/SendEmail |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| SHOW_DEBUG_INFO             | SHOW_DEBUG_INFO=auto                                  | FE - Possible values: yes|no|auto|download. For 'auto': If a BE User is    |
+|                             |                                                       | logged in, a debug information will be shown on the FE.                    |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| REDIRECT_ALL_MAIL_TO        | REDIRECT_ALL_MAIL_TO=john@doe.com                     | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| CSS_CLASS_QFQ_CONTAINER     |CSS_CLASS_QFQ_CONTAINER=container                      | QFQ with own Bootstrap: 'container'.                                       |
+|                             |                                                       | QFQ already nested in Bootstrap of mainpage: <empty>                       |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| CSS_CLASS_QFQ_FORM          | CSS_CLASS_QFQ_FORM=qfq-color-base                     | Wrap around QFQ 'Form'                                                     |
+| CSS_CLASS_QFQ_FORM_PILL     |CSS_CLASS_QFQ_FORM_PILL=qfq-color-grey-1               | Wrap around title bar for pills: CSS Class, typically a background color   |
+| CSS_CLASS_QFQ_FORM_BODY     |CSS_CLASS_QFQ_FORM_BODY=qfq-color-grey-2               | Wrap around formelements: CSS Class, typically a background color          |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DATE_FORMAT                 | DATE_FORMAT= yyyy-mm-dd                               | Possible options: yyyy-mm-dd, dd.mm.yyyy                                   |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| FORM_DATA_PATTERN_ERROR     |FORM_DATA_PATTERN_ERROR=please check pa.               | Customizable error message used in validator.js. 'pattern' violation       |
+| FORM_DATA_REQUIRED_ERROR    |FORM_DATA_REQUIRED_ERROR=missing value                 | Customizable error message used in validator.js. 'required' fields         |
+| FORM_DATA_MATCH_ERROR       |FORM_DATA_MATCH_ERROR=type error                       | Customizable error message used in validator.js. 'match' retype mismatch   |
+| FORM_DATA_ERROR             |FORM_DATA_ERROR=generic error                          | Customizable error message used in validator.js. 'no specific' given       |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| FORM_BS_COLUMNS             | FORM_BS_COLUMNS=12                                    | The whole form will be wrapped in 'col-md-??'. Default is 12 for 100%      |
+| FORM_BS_LABEL_COLUMNS       | FORM_BS_LABEL_COLUMNS = 3                             | Default number of BS columns for the 'label'-column                        |
+| FORM_BS_INPUT_COLUMNS       | FORM_BS_INPUT_COLUMNS = 6                             | Default number of BS columns for the 'input'-column                        |
+| FORM_BS_NOTE_COLUMNS        | FORM_BS_NOTE_COLUMNS = 3                              | Default number of BS columns for the 'note'-column                         |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| FORM_BUTTON_ON_CHANGE_CLASS | FORM_BUTTON_ON_CHANGE_CLASS=alert-info btn-info       | Color for save button after modification                                   |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| BASE_URL_PRINT              | BASE_URL_PRINT=http://example.com                     | URL where wkhtmltopdf will fetch the HTML (no parameter, those comes later)|
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| WKHTMLTOPDF                 | WKHTMLTOPDF=/usr/bin/wkhtmltopdf                      | Binary where to find wkhtmltopdf.                                          |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| EDIT_FORM_PAGE              | EDIT_FORM_PAGE = form                                 | T3 Pagealias to edit a form.                                               |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| LDAP_1_RDN                  | LDAP_1_RDN='ou=Admin,ou=example,dc=com'               | Credentials for non-anonymous LDAP access. At the moment only one set of   |
+| LDAP_1_PASSWORD             | LDAP_1_PASSWORD=mySecurePassword                      |                                                                            |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| ESCAPE_TYPE_DEFAULT         | ESCAPE_TYPE_DEFAULT=m                                 | All variables `{{...}}` get this escape class by default.                  |
+|                             |                                                       | See `variable-escape`_.                                                    |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password      | If empty: no check. All named variables will rendered as INPUT elements    |
+| SECURITY_ATTACK_DELAY       | SECURITY_ATTACK_DELAY = 5                             | If an attack is detected, sleep 'x' seconds and exit PHP process           |
+| SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password      | If empty: no check. All named variables will rendered as INPUT elements    |
+| SECURITY_SHOW_MESSAGE       | SECURITY_SHOW_MESSAGE = true                          | If an attack is detected, show a message                                   |
+| SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password      | If empty: no check. All named variables will rendered as INPUT elements    |
+| SECURITY_GET_MAX_LENGTH     | SECURITY_GET_MAX_LENGTH = 50                          | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
+|                             |                                                       | `ExceptionMaxLength`_                                                      |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| GFX_EXTRA_BUTTON_INFO_INLINE| <img src="info.png">                                  | Image for `extraButtonInfo`_ (inline)                                      |
+| GFX_EXTRA_BUTTON_INFO_BELOW | <img src="info.png">                                  | Image for `extraButtonInfo`_ (below)                                       |
+| EXTRA_BUTTON_INFO_POSITION  | SYSTEM_EXTRA_BUTTON_INFO_POSITION=below               | 'auto' (default) or 'below'. See `extraButtonInfo`_                        |
+| EXTRA_BUTTON_INFO_CLASS     | SYSTEM_EXTRA_BUTTON_INFO_CLASS=pull-right             | '' (default) or 'pull-right'. See `extraButtonInfo`_                       |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| SAVE_BUTTON_TEXT            | SAVE_BUTTON_TEXT =                                    | Default text on the form save button. Typically none.                      |
+| SAVE_BUTTON_TOOLTIP         | SAVE_BUTTON_TOOLTIP = save                            | Default tooltip on the form save button.                                   |
+| SAVE_BUTTON_CLASS           | SAVE_BUTTON_CLASS = btn btn-default navbar-btn        | Default Bootstrap CSS class for buttons on top of the form                 |
+| SAVE_BUTTON_GLYPH_ICON      | SAVE_BUTTON_GLYPH_ICON = glyphicon-ok                 | Default Icon for the form save button                                      |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| CLOSE_BUTTON_TEXT           | CLOSE_BUTTON_TEXT =                                   | Default text on the form close button. Typically none.                     |
+| CLOSE_BUTTON_TOOLTIP        | CLOSE_BUTTON_TOOLTIP = close                          | Default tooltip on the form close button.                                  |
+| CLOSE_BUTTON_CLASS          | CLOSE_BUTTON_CLASS = btn btn-default navbar-btn       | Default Bootstrap CSS class for buttons on top of the form                 |
+| CLOSE_BUTTON_GLYPH_ICON     | CLOSE_BUTTON_GLYPH_ICON = glyphicon-remove            | Default Icon for the form close button                                     |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DELETE_BUTTON_TEXT          | DELETE_BUTTON_TEXT =                                  | Default text on the form delete button. Typically none.                    |
+| DELETE_BUTTON_TOOLTIP       | DELETE_BUTTON_TOOLTIP = delete                        | Default tooltip on the form delete button.                                 |
+| DELETE_BUTTON_CLASS         | DELETE_BUTTON_CLASS = btn btn-default navbar-btn      | Default Bootstrap CSS class for buttons on top of the form                 |
+| DELETE_BUTTON_GLYPH_ICON    | DELETE_BUTTON_GLYPH_ICON = glyphicon-trash            | Default Icon for the form delete button                                    |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| NEW_BUTTON_TEXT             | NEW_BUTTON_TEXT =                                     | Default text on the form new button. Typically none.                       |
+| NEW_BUTTON_TOOLTIP          | NEW_BUTTON_TOOLTIP = new                              | Default tooltip on the form new button.                                    |
+| NEW_BUTTON_CLASS            | NEW_BUTTON_CLASS = btn btn-default navbar-btn         | Default Bootstrap CSS class for buttons on top of the form                 |
+| NEW_BUTTON_GLYPH_ICON       | NEW_BUTTON_GLYPH_ICON = glyphicon-plus                | Default Icon for the form new button                                       |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DB_UPDATE                   | DB_UPDATE = auto                                      | 'auto': apply DB Updates only if there is a newer version.                 |
+|                             |                                                       | 'always': apply DB Updates always, especially play formEditor.sql every    |
+|                             |                                                       | time QFQ is called - *not* recommended!                                    |
+|                             |                                                       | 'never': never apply DB Updates.                                           |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DIRTY_RECORD_TIMEOUT_SECONDS| DIRTY_RECORD_TIMEOUT_SECONDS = 900                    | Timeout for record locking. After this time, a record will be replaced     |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...            | Link to the online documentation of QFQ. Every QFQ installation also       |
+|                             |                                                       | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| FILL_STORE_SYSTEM_BY_SQL    | FILL_STORE_SYSTEM_BY_SQL = {{!SELECT s.id AS ...      | Specific values read from the database to fill the system store during QFQ |
+|                             |                                                       | load. See `fillStoreSystemBySql`_ for a usecase.                           |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| FORM_LANGUAGE_A_ID          | FORM_LANGUAGE_A__ID = 1                               | In Typo3 configured pageLanguage id. The number after the 'L' parameter.   |
+| FORM_LANGUAGE_B_ID          |                                                       |                                                                            |
+| FORM_LANGUAGE_C_ID          |                                                       |                                                                            |
+| FORM_LANGUAGE_D_ID          |                                                       |                                                                            |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| FORM_LANGUAGE_A_LABEL       | FORM_LANGUAGE_A_LABEL = english                       | Label shown in *Form editor*, on the 'basic' tab.                          |
+| FORM_LANGUAGE_B_LABEL       |                                                       |                                                                            |
+| FORM_LANGUAGE_C_LABEL       |                                                       |                                                                            |
+| FORM_LANGUAGE_D_LABEL       |                                                       |                                                                            |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| enterAsSubmit               | enterAsSubmit = 1                                     | 0: off, 1: Pressing *enter* in a form means *save* and *close*             |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| thumbnailDirSecure          | thumbnailDirSecure = fileadmin/protected/qfqThumbnail | Important: secure this directory against direct access.                    |
+| thumbnailDirPublic          | thumbnailDirPublic = typo3temp/qfqThumbnail           | Both thumbnail directories will be created if not existing.                |
+| cmdInkscape                  | cmdInkscape = inkscape                                | If inkscape is not available, specify an empty string.                     |
+| cmdConvert                  | cmdConvert = convert                                  | GraphicsMagics 'convert' is recommended.                                   |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+
 
 Example: *typo3conf/config.qfq.ini*
 
@@ -483,6 +471,13 @@ Example: *typo3conf/config.qfq.ini*
 	;GFX_EXTRA_BUTTON_INFO_BELOW = <img src='info.png'>
 	;EXTRA_BUTTON_INFO_POSITION = auto | below
 	;EXTRA_BUTTON_INFO_CLASS = pull-right
+
+	; Attention: be sure that 'fileadmin/protected' is really locked down by a webserver directive.
+	;   See https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html#secure-direct-fileaccess
+	; thumbnailDirSecure = fileadmin/protected/qfqThumbnail
+	; thumbnailDirPublic = typo3temp/qfqThumbnail
+	; cmdInkscape = inkscape
+	; cmdConvert = convert
 
 .. _`CustomVariables`:
 
@@ -951,13 +946,11 @@ specific locations in the text will be (automatically by QFQ) replaced by values
 Sanitize class
 --------------
 
-Values in STORE_CLIENT *C* (Client=Browser) and STORE_FORM *F* (Form, HTTP 'post') will be checked against a sanitize class.
-Values from other stores are not checked against any sanitize class.
+Values in STORE_CLIENT *C* (Client=Browser) and STORE_FORM *F* (Form, HTTP 'post') are checked against a
+sanitize class. Values from other stores are not checked against any sanitize class.
 
 * If a value violates the specific sanitize class, the value becomes `!!<name of sanitize class>!!`. E.g. `!!gigit!!`.
-* All `predefined-variable-names`_ have a specific default sanitize class. For these variables, it's not necessary
-  to specify an individual sanitize class.
-* All other variables get by default the sanitize class defined in the corresponding `FormElement`. If not defined,
+* Variables get by default the sanitize class defined in the corresponding `FormElement`. If not defined,
   the default class is 'digit'.
 * A default sanitize class can be overwritten by individual definition: *{{a:C:all}}*
 
@@ -981,10 +974,26 @@ For QFQ variables and FormElements:
 Only in FormElement:
 
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **auto**         | Form |       | Only supported for FormElements. Most suitable checktype is dynamically evaluated based |
+|                  |      |       | native column definition, the FormElement type, and other info. See below for details.  |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
 | **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}                                         |
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
 | **pattern**      | Form |       | Compares the value against a regexp.                                                    |
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
+
+
+Rules for CheckType Auto (by priority):
+
+* TypeAheadSQL or TypeAheadLDAP defined: **alnumx**
+* Table definition
+	* integer type: **digit**
+	* floating point number: **numerical**
+* FE Type
+	* 'password', 'note': **all**
+	* 'editor', 'text' and encode = 'specialchar': **all**
+* None of the above: **alnumx**
+
 
 .. _`variable-escape`:
 
@@ -1181,15 +1190,10 @@ Only variables that are known in a specified store can be substituted.
   * Best: Data submitted via SIP never leaves the server, cannot be spoofed or altered by the user.
   * SIPs can _only_ be defined by using *Report*. Inside of *Report* use columns 'Link' (with attribute 's'), 'page?' or 'Page?'.
 
-.. _predefined-variable-names:
-
-Predefined variable names
--------------------------
-
 .. _STORE_FORM:
 
 Store: *FORM* - F
-^^^^^^^^^^^^^^^^^
+-----------------
 
 * Sanitized: *yes*
 * Represents the values in the form, typically before saving them.
@@ -1208,7 +1212,7 @@ Store: *FORM* - F
 .. _STORE_SIP:
 
 Store: *SIP* - S
-^^^^^^^^^^^^^^^^
+----------------
 
 * Sanitized: *no*
 * Filled automatically by creating links. E.g.:
@@ -1235,7 +1239,8 @@ Store: *SIP* - S
 .. _STORE_RECORD:
 
 Store: *RECORD* - R
-^^^^^^^^^^^^^^^^^^^
+-------------------
+
 
 * Sanitized: *no*
 * Current record loaded in Form.
@@ -1250,7 +1255,8 @@ Store: *RECORD* - R
 .. _STORE_BEFORE:
 
 Store: *BEFORE* - B
-^^^^^^^^^^^^^^^^^^^
+-------------------
+
 
 * Sanitized: *no*
 * Current record loaded in Form without any modification.
@@ -1267,7 +1273,7 @@ This store is handy to compare new and old values of a form.
 .. _STORE_CLIENT:
 
 Store: *CLIENT* - C
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 * Sanitized: *yes*
 
@@ -1290,7 +1296,7 @@ Store: *CLIENT* - C
 .. _STORE_TYPO3:
 
 Store: *TYPO3* (Bodytext) - T
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
 * Sanitized: *no*
 
@@ -1331,7 +1337,7 @@ Store: *TYPO3* (Bodytext) - T
 .. _STORE_VARS:
 
 Store: *VARS* - V
-^^^^^^^^^^^^^^^^^
+-----------------
 
 * Sanitized: *no*
 
@@ -1364,7 +1370,7 @@ E.g.: ::
 .. _STORE_LDAP:
 
 Store: *LDAP* - L
-^^^^^^^^^^^^^^^^^
+-----------------
 
 * Sanitized: *yes*
 * See also :ref:`LDAP`:
@@ -1380,7 +1386,7 @@ Store: *LDAP* - L
 .. _STORE_SYSTEM:
 
 Store: *SYSTEM* - Y
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 * Sanitized: *no*
 
@@ -1949,8 +1955,6 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | classBody                   | string | HTML div with given class, surrounding all *FormElement*.                                                |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| submitButtonText            | string | Show save button, with the <submitButtonText> at the bottom of the form.                                 |
-+-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | extraDeleteForm             | string | Name of a form which specifies how to delete the primary record and optional slave records.              |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | data-pattern-error          | string | Pattern violation: Text for error message used for all FormElements of current form.                     |
@@ -1989,6 +1993,10 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | mode                        | string | The value `readonly` will activate a global readonly mode of the form - the user can't change any data.  |
 |                             |        | See :ref:`form-mode-global`                                                                              |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| enterAsSubmit               | digit  | 0: off, 1: Pressing *enter* in a form means *save* and *close*. Takes default from `config.qfq.ini`_.    |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| submitButtonText            | string | Show a save button at the bottom of the form, with <submitButtonText> . See `submitButtonText`_.         |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | saveButtonActive            | -      | Make the 'save'-button active on *Form* load (instead of waiting for the first user change).             |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2034,6 +2042,8 @@ Parameter
   * maxVisiblePill = 5
   * class = container-fluid
   * classBody = qfq-form-right
+
+.. _submitButtonText:
 
 submitButtonText
 ''''''''''''''''
@@ -2321,9 +2331,10 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _`field-encode`   |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Check Type           | enum('alnumx','digit',      | _`field-checktype`                                                                                  |
-|                     | 'numerical','email',        |                                                                                                     |
-|                     | 'pattern','allbut','all')   |                                                                                                     |
+|Check Type           | enum('auto', 'alnumx',      | _`sanitize-class`                                                                                   |
+|                     | 'digit', 'numerical',       |                                                                                                     |
+|                     | 'email', 'pattern',         |                                                                                                     |
+|                     | 'allbut', 'all')            |                                                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Check Pattern        | 'regexp'                    |_`field-checkpattern`: If $checkType=='pattern': pattern to match                                    |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
@@ -2886,9 +2897,9 @@ An image, specified by `FormElement.parameter`: imageSource={{pathFileName}}, wi
 form load both, the image and an optional already given JSON fabric.js data string, will be displayed. The original image
 file is not modified.
 
-* *FormElement.parameter*::
+* *FormElement.parameter*:
 
-  * *imageSource*: Background image - imageSource={{pathFileName2}}
+  * *imageSource* ={{pathFileName2}}     -  Background image.
 
 By using the the `FormElement` `annotate`, the JS code `fabric.min.js` and `qfq.fabric.min.js` has to be included.
 See setup-css-js_.
@@ -3155,7 +3166,7 @@ See also `downloadButton`_ to offer a download of an uploaded file.
     * Different browser respect the given definitions in different ways. Typically the 'file choose' dialog offer:
 
       * the specified mime type (some browers only show 'custom', if more than one mime type is given),
-      * the option 'All files' (the user is always free to **try** to upload other filetypes),
+      * the option 'All files' (the user is always free to **try** to upload other filetypes) - but the server won't accept them,
       * the 'file choose' dialog only offers files of the selected (in the dialog) type.
 
     * If for a specific filetype is no mime type available, the definition of file extension(s) is possible. This is **less
@@ -4775,7 +4786,9 @@ Processing of columns in the SQL result
 ---------------------------------------
 
 * The content of all columns of all rows will be printed sequentially, without separator.
-* Rows with `Special column names`_  will be processed in a special way.
+* Rows with `special-column-names`_  will be processed in a special way.
+
+.. _special-column-names:
 
 Special column names
 --------------------
@@ -4819,6 +4832,8 @@ Special column names
 | _striptags             |HTML Tags will be stripped.                                                                                                                                                                  |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _htmlentities          |Characters will be encoded to their HTML entity representation.                                                                                                                              |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _thumbnail             |Create thumbnails on the fly. See `column-thumbnail`_.                                                                                                                                                                |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _+???                  |The content will be wrapped in the tag '???'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                                |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -4870,6 +4885,10 @@ Column: _link
 |   |x  |Bullet        |B:[<color>]                        |B:green                    |Show bullet with '<color>'. Colors: blue, gray, green, pink, red, yellow. Default Color: green.                                         |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Check         |C:[<color>]                        |C:green                    |Show checked with '<color>'. Colors: blue, gray, green, pink, red, yellow. Default Color: green.                                        |
++---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
+|   |x  |Thumbnail     |T:<pathFilename>                   |T:fileadmin/file.pdf       |Creates a thumbnail on the fly. Size is specified via 'W'. See `column-thumbnail`_                                                      |
++---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
+|   |   |Dimension     |W:[width]x[height]                 |W:50x , W:x60 , W:50x60    |Defines the pixel size of thumbnail.  See `column-thumbnail`_                                                                           |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |URL Params    |U:<key1>=<value1>[&<keyN>=<valueN>]|U:a=value1&b=value2&c=...  |Any number of additional Params. Links to forms: U:form=Person&r=1234. Used to create 'record delete'-links.                            |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -5506,10 +5525,19 @@ Column: _sendmail
 
 	t:<TO:email[,email]>|f:<FROM:email>|s:<subject>|b:<body>
 	 [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|r:<REPLY-TO:email>]
-	 [|a:<flag autosubmit: on /off>][|g:<grid>][|x:<xId>][|y:<xId2>][|z:<xId3>]
+	 [|A:<flag autosubmit: on/off>][|g:<grId>][|x:<xId>][|y:<xId2>][|z:<xId3>][|h:<mail header>]
+	 [|e:<subject encode: encode/decode/none>][E:<body encode: encode/decode/none>]
 	 [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
 
-Send text emails. Every mail will be logged in the table `mailLog`. Attachments are supported.
+The following parameters can also be written as complete words for ease of use:
+
+::
+
+	to:<email[,email]>|from:<email>|subject:<subject>|body:<body>
+	 [|cc:<email[,email]]>[|bcc:<email[,email]]>[|reply-to:<email>]
+	 [|autosubmit:<on/off>][|grid:<grid>][|xid:<xId>][|xid2:<xId2>][|xid3:<xId3>][|header:<mail header>]
+
+Send emails. Every mail will be logged in the table `mailLog`. Attachments are supported.
 
 **Syntax**
 
@@ -5520,50 +5548,63 @@ Send text emails. Every mail will be logged in the table `mailLog`. Attachments 
 
 ..
 
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-|**Token** | **Parameter**                          |**Description**                                                                                   |**Required**|
-+==========+========================================+==================================================================================================+============+
-| f        | email                                  |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| t        | email[,email]                          |**TO**: Comma separated list of receiver email addresses. Optional: `realname <john@doe.com>`     |    yes     |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| c        | email[,email]                          |**CC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| B        | email[,email]                          |**BCC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'    |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| r        | REPLY-TO:email                         |**Reply-to**: Email address to reply to (if different from sender)                                |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| s        | Subject                                |**Subject**: Subject of the email                                                                 |    yes     |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| b        | Body                                   |**Body**: Message - see also: `html-formatting`_                                                  |    yes     |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| h        | Mail header                            |**Custom mail header**: Separate multiple header with \\r\\n                                      |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| F        | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| u        | Attach created PDF of a given URL      |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| p        | Attach created PDF of a given T3 URL   |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| d        | Filename of the attachment             |**Attachment**: Useful for URL to PDF converted attachments. Repeatable.                          |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| C        | Concat multiple F|p|u| together        |**Attachment**: All following (until the next 'C') 'F|p|u' concatenated to one attachment.        |            |
-|          |                                        | Repeatable.                                                                                      |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| A        | flagAutoSubmit  'on' / 'off'           |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies             |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| g        | grId                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| x        | xId                                    |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| y        | xId2                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| z        | xId3                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| e        | encode|decode|none                     |**Subject**: will be htmlspecialchar() encoded, decoded (default) or none (untouched)             |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| E        | encode|decode|none                     |**Body**: will be htmlspecialchar() encoded, decoded (default) or none (untouched).               |            |
-+----------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+|**Token**   | **Parameter**                          |**Description**                                                                                   |**Required**|
++============+========================================+==================================================================================================+============+
+| f          | email                                  |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
+| from       |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| t          | email[,email]                          |**TO**: Comma separated list of receiver email addresses. Optional: `realname <john@doe.com>`     |    yes     |
+| to         |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| c          | email[,email]                          |**CC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
+| cc         |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| B          | email[,email]                          |**BCC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'    |            |
+| bcc        |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| r          | REPLY-TO:email                         |**Reply-to**: Email address to reply to (if different from sender)                                |            |
+| reply-to   |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| s          | Subject                                |**Subject**: Subject of the email                                                                 |    yes     |
+| subject    |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| b          | Body                                   |**Body**: Message - see also: `html-formatting`_                                                  |    yes     |
+| body       |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| h          | Mail header                            |**Custom mail header**: Separate multiple header with \\r\\n                                      |            |
+| header     |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| F          | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| u          | Attach created PDF of a given URL      |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| p          | Attach created PDF of a given T3 URL   |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| d          | Filename of the attachment             |**Attachment**: Useful for URL to PDF converted attachments. Repeatable.                          |            |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| C          | Concat multiple F|p|u| together        |**Attachment**: All following (until the next 'C') 'F|p|u' concatenated to one attachment.        |            |
+|            |                                        | Repeatable.                                                                                      |            |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| A          | flagAutoSubmit  'on' / 'off'           |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies             |            |
+| autosubmit |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| g          | grId                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
+| grid       |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| x          | xId                                    |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
+| xid        |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| y          | xId2                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
+| xid2       |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| z          | xId3                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
+| xid3       |                                        |                                                                                                  |    yes     |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| e          | encode|decode|none                     |**Subject**: will be htmlspecialchar() encoded, decoded (default) or none (untouched)             |            |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| E          | encode|decode|none                     |**Body**: will be htmlspecialchar() encoded, decoded (default) or none (untouched).               |            |
++------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 
 * **e|E**: By default, QFQ stores values 'htmlspecialchars()' encoded. If such values have to send by email, the html entities are
   unwanted. Therefore the default setting for 'subject' und 'body' is to decode the values via 'htmlspecialchars_decode()'.
@@ -5793,7 +5834,79 @@ A limited set of attributes is supported: ::
 
 		SELECT "complete.pdf|Download PDF|fileadmin/test1.pdf|fileadmin/test2.pdf|id=export&r=1" AS _Pdf
 
-..
+
+.. _column-thumbnail:
+
+Column: _thumbnail
+^^^^^^^^^^^^^^^^^^
+
++-------+-------------------------------------------------+-------------------------------------------------------------+
+| Token | Example                                         | Comment                                                     |
++=======+=================================================+=============================================================+
+| T     | T:fileadmin/file3.pdf                           | File render a thumbnail                                     |
++-------+-------------------------------------------------+-------------------------------------------------------------+
+| W     | W:200x, W:x100, W:200x100                       | Dimension of the thumbnail: '<width>x<height>. Both         |
+|       |                                                 | parameter are otional. If non is given the default is W:150x|
++-------+-------------------------------------------------+-------------------------------------------------------------+
+| s     | s:1, s:0                                        | Optional. Default: `s:1`. If SIP is enabled the rendered URL|
+|       |                                                 | is a link via api/download.php. Else a direct pathfilename  |
++-------+-------------------------------------------------+-------------------------------------------------------------+
+
+A thumbnail of the file `T:<pathFilename>` will be rendered and saved with the given pixel size as specified via
+`W:<dimension>`. The file is only rendered once and will be rerendered, if the source file is newer than the thumbnail
+or if the thumbnail dimension changes.
+
+The thumbnail pathFilename is a MD5 hash of the pathFilename plus the dimension.
+
+From multi page files like PDFs, the first page is used.
+All file formats, which GraphicsMagick 'convert' (http://www.graphicsmagick.org/formats.html) supports, can be
+used. Office file formats are not supported. Due to speed and quality reasons, SVG files will be converted by inkscape.
+If a file format is not known, QFQ tries to show a corresponding file type image provided by Typo3 - such an image ist not
+scaled.
+
+In `config.qfq.ini`_ the exact location of `convert` and `inkscape` can be configured (optional) as well as the directory
+names for the cached thumbnails.
+
+Dimension
+'''''''''
+
+GraphicsMagick support various settings to force the thumbnail size. See http://www.graphicsmagick.org/GraphicsMagick.html#details-geometry.
+
+Cleaning
+''''''''
+
+By default, the thumbnail directories are never cleaned. It's a good idea to install a cronjob which purges all files
+older than 1 year: ::
+
+	find /path/to/files -type f -mtime +365 -delete
+
+Pre render
+''''''''''
+
+A way to *pre render* thumbnails, is a periodically called (hidden) T3 page, which iterates over all new uploaded files and
+triggers the rendering via column `_thumbnail`.
+
+Thumbnail: secure
+'''''''''''''''''
+
+Mode 'secure' is activated via enabling SIP (`s:1`, default). The thumbnail is saved under the path `thumbnailDirSecure`
+as configured in `config.qfq.ini`_.
+
+The secure path needs to be protected against direct file access by the webmaster / webserver configuration too.
+
+QFQ returns a HTML 'img'-tag: ::
+
+	<img src="api/download.php?s=badcaffee1234">
+
+Thumbnail: public
+'''''''''''''''''
+
+Mode 'public' has to be explicit activated by specifying `s:0`. The thumbnail is saved under the path `thumbnailDirPublic`
+as configured in `config.qfq.ini`_.
+
+QFQ returns a HTML 'img'-tag: ::
+
+  <img src="{{thumbnailDirPublic:Y}}/<md5 hash>.png">
 
 .. _column_F:
 
@@ -5806,7 +5919,6 @@ Challenge 1
 Due to the limitations of MySQL, reserved column names can't be further concatenated. Assume you want to display an image:
 
 ::
-
 
     # This is valid:
     10.sql = SELECT concat("/static/directory/", p.foto) AS _img FROM person AS p WHERE ...
