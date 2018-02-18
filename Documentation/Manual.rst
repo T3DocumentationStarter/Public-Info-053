@@ -25,7 +25,7 @@ General
 * Project homepage: https://qfq.io
 * Latest releases: https://w3.math.uzh.ch/qfq/
 * Development: https://git.math.uzh.ch/typo3/qfq
-
+* Slack: https://qfq-io.slack.com/
 
 .. _installation:
 
@@ -163,6 +163,8 @@ Thumbnails will be rendered via GraphicsMagick (http://www.graphicsmagick.org/) 
 
 The Typo3 grafic eco-system is not used at all by QFQ.
 
+Usage: `column-thumbnail`_.
+
 Setup
 -----
 
@@ -217,6 +219,7 @@ Setup CSS & JS
       file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
 	}
 
+
 .. _form-editor:
 
 FormEditor
@@ -233,6 +236,9 @@ Setup a *report* to manage all *forms*:
 
 	# If there is a form given by SIP: show
 	form={{form:SE}}
+
+	# Only needed if QFQ uses more than one database.
+	dbIndex = {{DB_INDEX_QFQ:Y}}
 
 	10 {
 		# List of Forms: Do not show this list of forms if there is a form given by SIP.
@@ -265,6 +271,11 @@ config.qfq.ini
 +=============================+=======================================================+============================================================================+
 | DB_INIT                     | DB_INIT=set names utf8                                | Global init for using the database.                                        |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DB_UPDATE                   | DB_UPDATE = auto                                      | 'auto': apply DB Updates only if there is a newer version.                 |
+|                             |                                                       | 'always': apply DB Updates always, especially play formEditor.sql every    |
+|                             |                                                       | time QFQ is called - *not* recommended!                                    |
+|                             |                                                       | 'never': never apply DB Updates.                                           |
++-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | DB_<n>_USER                 | DB_1_USER=qfqUser                                     | Credentials configured in MySQL                                            |
 | DB_<n>_PASSWORD             | DB_1_PASSWORD=1234567890                              | Credentials configured in MySQL                                            |
 | DB_<n>_SERVER               | DB_1_SERVER=localhost                                 | Hostname of MySQL Server                                                   |
@@ -286,19 +297,19 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | REDIRECT_ALL_MAIL_TO        | REDIRECT_ALL_MAIL_TO=john@doe.com                     | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_CLASS_QFQ_CONTAINER     |CSS_CLASS_QFQ_CONTAINER=container                      | QFQ with own Bootstrap: 'container'.                                       |
+| CSS_CLASS_QFQ_CONTAINER     | CSS_CLASS_QFQ_CONTAINER=container                     | QFQ with own Bootstrap: 'container'.                                       |
 |                             |                                                       | QFQ already nested in Bootstrap of mainpage: <empty>                       |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_CLASS_QFQ_FORM          | CSS_CLASS_QFQ_FORM=qfq-color-base                     | Wrap around QFQ 'Form'                                                     |
-| CSS_CLASS_QFQ_FORM_PILL     |CSS_CLASS_QFQ_FORM_PILL=qfq-color-grey-1               | Wrap around title bar for pills: CSS Class, typically a background color   |
-| CSS_CLASS_QFQ_FORM_BODY     |CSS_CLASS_QFQ_FORM_BODY=qfq-color-grey-2               | Wrap around formelements: CSS Class, typically a background color          |
+| CSS_CLASS_QFQ_FORM          | CSS_CLASS_QFQ_FORM=qfq-color-base                     | Wrap around QFQ 'Form'.                                                    |
+| CSS_CLASS_QFQ_FORM_PILL     | CSS_CLASS_QFQ_FORM_PILL=qfq-color-grey-1              | Wrap around title bar for pills: CSS Class, typically a background color.  |
+| CSS_CLASS_QFQ_FORM_BODY     | CSS_CLASS_QFQ_FORM_BODY=qfq-color-grey-2              | Wrap around FormElements: CSS Class, typically a background color.         |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | DATE_FORMAT                 | DATE_FORMAT= yyyy-mm-dd                               | Possible options: yyyy-mm-dd, dd.mm.yyyy                                   |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_DATA_PATTERN_ERROR     |FORM_DATA_PATTERN_ERROR=please check pa.               | Customizable error message used in validator.js. 'pattern' violation       |
-| FORM_DATA_REQUIRED_ERROR    |FORM_DATA_REQUIRED_ERROR=missing value                 | Customizable error message used in validator.js. 'required' fields         |
-| FORM_DATA_MATCH_ERROR       |FORM_DATA_MATCH_ERROR=type error                       | Customizable error message used in validator.js. 'match' retype mismatch   |
-| FORM_DATA_ERROR             |FORM_DATA_ERROR=generic error                          | Customizable error message used in validator.js. 'no specific' given       |
+| FORM_DATA_PATTERN_ERROR     | FORM_DATA_PATTERN_ERROR=please check pa.              | Customizable error message used in validator.js. 'pattern' violation       |
+| FORM_DATA_REQUIRED_ERROR    | FORM_DATA_REQUIRED_ERROR=missing value                | Customizable error message used in validator.js. 'required' fields         |
+| FORM_DATA_MATCH_ERROR       | FORM_DATA_MATCH_ERROR=type error                      | Customizable error message used in validator.js. 'match' retype mismatch   |
+| FORM_DATA_ERROR             | FORM_DATA_ERROR=generic error                         | Customizable error message used in validator.js. 'no specific' given       |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | FORM_BS_COLUMNS             | FORM_BS_COLUMNS=12                                    | The whole form will be wrapped in 'col-md-??'. Default is 12 for 100%      |
 | FORM_BS_LABEL_COLUMNS       | FORM_BS_LABEL_COLUMNS = 3                             | Default number of BS columns for the 'label'-column                        |
@@ -352,11 +363,6 @@ config.qfq.ini
 | NEW_BUTTON_CLASS            | NEW_BUTTON_CLASS = btn btn-default navbar-btn         | Default Bootstrap CSS class for buttons on top of the form                 |
 | NEW_BUTTON_GLYPH_ICON       | NEW_BUTTON_GLYPH_ICON = glyphicon-plus                | Default Icon for the form new button                                       |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DB_UPDATE                   | DB_UPDATE = auto                                      | 'auto': apply DB Updates only if there is a newer version.                 |
-|                             |                                                       | 'always': apply DB Updates always, especially play formEditor.sql every    |
-|                             |                                                       | time QFQ is called - *not* recommended!                                    |
-|                             |                                                       | 'never': never apply DB Updates.                                           |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | DIRTY_RECORD_TIMEOUT_SECONDS| DIRTY_RECORD_TIMEOUT_SECONDS = 900                    | Timeout for record locking. After this time, a record will be replaced     |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...            | Link to the online documentation of QFQ. Every QFQ installation also       |
@@ -379,7 +385,7 @@ config.qfq.ini
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | thumbnailDirSecure          | thumbnailDirSecure = fileadmin/protected/qfqThumbnail | Important: secure this directory against direct access.                    |
 | thumbnailDirPublic          | thumbnailDirPublic = typo3temp/qfqThumbnail           | Both thumbnail directories will be created if not existing.                |
-| cmdInkscape                  | cmdInkscape = inkscape                                | If inkscape is not available, specify an empty string.                     |
+| cmdInkscape                 | cmdInkscape = inkscape                                | If inkscape is not available, specify an empty string.                     |
 | cmdConvert                  | cmdConvert = convert                                  | GraphicsMagics 'convert' is recommended.                                   |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 
@@ -388,96 +394,143 @@ Example: *typo3conf/config.qfq.ini*
 
 ::
 
-	; To get internal default values, inactivate the option by commenting (= ';') it.
-	DB_1_USER = qfqUser
-	DB_1_SERVER = localhost
-	DB_1_PASSWORD = 12345678
-	DB_1_NAME = qfq_db
-	DB_INIT = set names utf8
+	; QFQ configuration
+	;
+	; Save this file as: <Documentroot>/typo3conf/config.qfq.ini
+
+	; Configure own URL, where `wkhtmltopdf` fetches pages and produces PDFs
+	BASE_URL_PRINT = http://url.my/
+	; WKHTMLTOPDF = /opt/wkhtmltox/bin/wkhtmltopdf
+
+	; DB_INIT = set names utf8
+
+	; auto | always | never
+	; DB_UPDATE = auto
+
 	; DB_INDEX_DATA = 1
 	; DB_INDEX_QFQ = 1
-	; SQL_LOG = sql.log
+
+	DB_1_USER = <DBUSER>
+	DB_1_SERVER = <DBSERVER>
+	DB_1_PASSWORD = <DBPW>
+	DB_1_NAME = <DB>
+
+	; DB_2_USER = <DBUSER>
+	; DB_2_SERVER = <DBSERVER>
+	; DB_2_PASSWORD = <DBPW>
+	; DB_2_NAME = <DB>
+
+	; '../../sql.log' = <T3 Install directory>/typo3conf/sql.log
+	; SQL_LOG = ../../sql.log
+
+	; all|modify|error|none
 	; SQL_LOG_MODE = modify
+
+	; MAIL_LOG = ../../mail.log
+	; SEND_E_MAIL_OPTIONS = "-o ... "  - check http://caspian.dotconf.net/menu/Software/SendEmail
+
+	; [auto|yes|no][,download]. 'auto': if BE User is logged in the value will be replaced by 'yes', else 'no'. Additional choose 'download'.
 	; SHOW_DEBUG_INFO = auto
+
 	; REDIRECT_ALL_MAIL_TO = john.doe@example.com
+
+	; QFQ with own Bootstrap: 'container'. QFQ already nested in Bootstrap of mainpage: <empty>
 	; CSS_CLASS_QFQ_CONTAINER =
+
+	; Default background color, specified via CSS class
 	; CSS_CLASS_QFQ_FORM =
-	CSS_CLASS_QFQ_FORM_PILL = qfq-color-grey-1
-	CSS_CLASS_QFQ_FORM_BODY = qfq-color-grey-2
-	; DATE_FORMAT= yyyy-mm-dd
+	; CSS_CLASS_QFQ_FORM_PILL = qfq-color-grey-1
+	; CSS_CLASS_QFQ_FORM_BODY = qfq-color-grey-2
 
-	; TECHNICAL CONTACT = john@doe.com
+	; yyyy-mm-dd, dd.mm.yyyy
+	; DATE_FORMAT = yyyy-mm-dd
 
+	; Access via {{TECHNICAL_CONTACT:Y}}
+	; TECHNICAL_CONTACT = john@doe.com
+
+	;  validator.js: data-pattern-error="", data-required-error="", data-match-error="", data-error=""
 	; FORM_DATA_PATTERN_ERROR =
 	; FORM_DATA_REQUIRED_ERROR =
 	; FORM_DATA_MATCH_ERROR =
 	; FORM_DATA_ERROR =
 
+	;  Default width of whole form
 	; FORM_BS_COLUMNS = 12
+
+	;  Default size for Bootstrap Form Elements
 	; FORM_BS_LABEL_COLUMNS = 3
 	; FORM_BS_INPUT_COLUMNS = 6
 	; FORM_BS_NOTE_COLUMNS = 3
 
-	BASE_URL_PRINT=http://example.com/
-	WKHTMLTOPDF=/usr/bin/wkhtmltopdf
-
 	; EDIT_FORM_PAGE = form
 
-	; LDAP_1_RDN='ou=Admin,dc=example,dc=com'
-	; LDAP_1_PASSWORD=mySecurePassword
+	; LDAP_1_RDN =
+	; LDAP_1_PASSWORD =
 
 	; ESCAPE_TYPE_DEFAULT=m
+
 	; SECURITY_VARS_HONEYPOT=email,username,password
 	; SECURITY_ATTACK_DELAY=5
 	; SECURITY_SHOW_MESSAGE=true
 	; SECURITY_GET_MAX_LENGTH=50
 
-	;SAVE_BUTTON_TEXT =
-	;SAVE_BUTTON_TOOLTIP = save
-	;SAVE_BUTTON_CLASS = btn btn-default navbar-btn
-	;SAVE_BUTTON_GLYPH_ICON = glyphicon-ok
+	; GFX_EXTRA_BUTTON_INFO_INLINE = <img src="file.png">
+	; GFX_EXTRA_BUTTON_INFO_BELOW = <img src="file.png">
+	; EXTRA_BUTTON_INFO_POSITION = auto | below
+	; EXTRA_BUTTON_INFO_POSITION_CLASS = pull-right
 
-	;CLOSE_BUTTON_TEXT =
-	;CLOSE_BUTTON_TOOLTIP = close
-	;CLOSE_BUTTON_CLASS = btn btn-default navbar-btn
-	;CLOSE_BUTTON_GLYPH_ICON = glyphicon-remove
+	; SAVE_BUTTON_TEXT =
+	; SAVE_BUTTON_TOOLTIP = save
+	; SAVE_BUTTON_CLASS = btn btn-default navbar-btn
+	; SAVE_BUTTON_GLYPH_ICON = glyphicon-ok
 
-	;DELETE_BUTTON_TEXT =
-	;DELETE_BUTTON_TOOLTIP = delete
-	;DELETE_BUTTON_CLASS = btn btn-default navbar-btn
-	;DELETE_BUTTON_GLYPH_ICON = glyphicon-trash
+	; CLOSE_BUTTON_TEXT =
+	; CLOSE_BUTTON_TOOLTIP = close
+	; CLOSE_BUTTON_CLASS = btn btn-default navbar-btn
+	; CLOSE_BUTTON_GLYPH_ICON = glyphicon-remove
 
-	;NEW_BUTTON_TEXT =
-	;NEW_BUTTON_TOOLTIP = new
-	;NEW_BUTTON_CLASS = btn btn-default navbar-btn
-	;NEW_BUTTON_GLYPH_ICON = glyphicon-plus
+	; DELETE_BUTTON_TEXT =
+	; DELETE_BUTTON_TOOLTIP = delete
+	; DELETE_BUTTON_CLASS = btn btn-default navbar-btn
+	; DELETE_BUTTON_GLYPH_ICON = glyphicon-trash
 
-	; auto | always | never
-	;DB_UPDATE = auto
+	; NEW_BUTTON_TEXT =
+	; NEW_BUTTON_TOOLTIP = new
+	; NEW_BUTTON_CLASS = btn btn-default navbar-btn
+	; NEW_BUTTON_GLYPH_ICON = glyphicon-plus
 
-	;RECORD_LOCK_TIMEOUT_SECONDS = 900
+	; RECORD_LOCK_TIMEOUT_SECONDS = 900
 
 	; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
-	;DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
+	; DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
 
-	;FILL_STORE_SYSTEM_BY_SQL_1 = 'SELECT s.id AS periodId FROM Period AS s WHERE s.start<=NOW() ORDER BY s.start DESC LIMIT 1'
-	; Important: only define an error message, if QFQ should stop running in case of an error or not exact 1 record.
-	;FILL_STORE_SYSTEM_BY_SQL_ERROR_MSG_1 = No current period found
+	; FILL_STORE_SYSTEM_BY_SQL_1 = "SELECT id AS _periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1"
+	; Important: only define an error message, if QFQ should stop running in case of an SQL error or not exact 1 record.
+	; FILL_STORE_SYSTEM_BY_SQL_ERROR_MSG_1 = No current period found
 
-	;FORM_LANGUAGE_A_ID = 1
-	;FORM_LANGUAGE_A_LABEL = english
+	; FORM_LANGUAGE_A_ID =       E.g. FORM_LANGUAGE_A_ID = 1
+	; FORM_LANGUAGE_A_LABEL =    E.g. FORM_LANGUAGE_A_ID = English
 
-	;GFX_EXTRA_BUTTON_INFO_INLINE = <img src='info.png'>
-	;GFX_EXTRA_BUTTON_INFO_BELOW = <img src='info.png'>
-	;EXTRA_BUTTON_INFO_POSITION = auto | below
-	;EXTRA_BUTTON_INFO_CLASS = pull-right
+	; FORM_LANGUAGE_B_ID =       E.g. FORM_LANGUAGE_B_ID = 2
+	; FORM_LANGUAGE_B_LABEL =    E.g. FORM_LANGUAGE_B_ID = French
+
+	; FORM_LANGUAGE_C_ID =       E.g. FORM_LANGUAGE_C_ID = 3
+	; FORM_LANGUAGE_C_LABEL =    E.g. FORM_LANGUAGE_C_ID = Spain
+
+	; FORM_LANGUAGE_D_ID =       E.g. FORM_LANGUAGE_D_ID = 4
+	; FORM_LANGUAGE_D_LABEL =    E.g. FORM_LANGUAGE_D_ID = Chinese
+
+	; Pressing the 'enter' key is equal to save and close
+	; enterAsSubmit = 1
 
 	; Attention: be sure that 'fileadmin/protected' is really locked down by a webserver directive.
 	;   See https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html#secure-direct-fileaccess
+	;
 	; thumbnailDirSecure = fileadmin/protected/qfqThumbnail
 	; thumbnailDirPublic = typo3temp/qfqThumbnail
 	; cmdInkscape = inkscape
 	; cmdConvert = convert
+
 
 .. _`CustomVariables`:
 
@@ -694,13 +747,55 @@ QFQ Keywords (Bodytext)
  | sqlLogMode        | Overwrites config.qfq.ini: `SQL_LOG_MODE`_ . Only affects `Report`, not `Form`. |
  +-------------------+---------------------------------------------------------------------------------+
 
-Databases
----------
+.. _`qfq-database`:
 
-A Typo3 / QFQ Installation needs at least two databases. One for the Typo3 installation and one for QFQ.
+QFQ Database
+------------
 
-QFQ itself can be separated in 'QFQ system' and 'QFQ data' databases, if necessary (than at least three databases are needed).
-Furthermore a `Form` can operate on any additional database, specified per `Form`.parameter.dbIndex and configured via `config.qfq.ini`_.
+Recommended setup for Typo3 & QFQ Installation is with *two* databases. One for the Typo3 installation and one for QFQ.
+A good practice is to name both databases equal, appending the suffix '_t3' and '_db'.
+
+When QFQ is called, it checks for QFQ system tables. If they do not exist or have a lower version than the installed qfq
+version, the system tables will be automatically installed or updated.
+
+.. _`system-tables`:
+
+System tables
+^^^^^^^^^^^^^
+
++-------------+------------+------------+
+| Name        | Use        | Database   |
++=============+============+============+
+| Clipboard   | Temporary  | QFQ        |
++-------------+------------+------------+
+| Cron        | Persistent | QFQ        |
++-------------+------------+------------+
+| Dirty       | Temporary  | QFQ | Data |
++-------------+------------+------------+
+| Form        | Persistent | QFQ        |
++-------------+------------+------------+
+| FormElement | Persistent | QFQ        |
++-------------+------------+------------+
+| MailLog     | Persistent | QFQ | Data |
++-------------+------------+------------+
+| Period      | Persistent | Data       |
++-------------+------------+------------+
+| Split       | Persistent | Data       |
++-------------+------------+------------+
+
+* Check Bug #5459 - support of system tables in different DBs not supported.
+
+Multi Databases
+^^^^^^^^^^^^^^^
+
+QFQ itself can be separated in 'QFQ system' (see `system-tables`_) and 'QFQ data' databases. This might be useful
+for one central data database and multiple Typo3 QFQ installations. E.g. there are three departments and all work on the
+same data database, but use different QFQ versions. Than it's helpful to have separate QFQ databases.
+
+Furthermore a `Form` can operate on specified additional database, specified per `Form`.parameter.dbIndex and configured
+via `config.qfq.ini`_.
+
+Note:
 
 * Option 'A' is the most simple and commonly used.
 * Option 'B' separate the T3 and QFQ databases on two database hosts.
@@ -727,7 +822,7 @@ In `config.qfq.ini`_ mutliple database credentials can be prepared. Mandatory is
 `DB_1_USER`, `DB_1_SERVER`, `DB_1_PASSWORD`, `DB_1_NAME`. The number '1' indicates the `dbIndex`. Increment the number
 to specify further database credential setups.
 
-Often the `DB_1_xxx` is identically to the used Typo3 database credentials.
+Typically the `DB_1_xxx` is identically to the used Typo3 database *credentials* (not database).
 
 If not explicit specified, 'QFQ system' and 'QFQ database' will use the same database with the same credentials (setup 'A').
 
@@ -737,7 +832,7 @@ To define separate 'QFQ data' and 'QFQ system', in `config.qfq.ini`_ define  `DB
 	DB_INDEX_DATA = 1
 	DB_INDEX_QFQ = 2
 
-To let a form operate (show, load and save) on a different database, use `Form.parameter.dbIndexData` (see `form-parameter`_).
+To operate a form (show, load and save) on a different database, use `Form.parameter.dbIndex` (see `form-parameter`_).
 
 Different QFQ versions, shared database
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1495,7 +1590,7 @@ To decide which Parameter should be placed on *Form.parameter* and which on *For
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadLimit              | 20 (default)                     | Result will be limited to this number of entries              | x    | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| typeAheadPedantic           | typeAheadPedantic                | Activate 'pedantic' mode - only valid keys are allowed        | x    | x           | TA       |
+| typeAheadPedantic           | typeAheadPedantic=0              | Turn off 'pedantic' mode - allow any values (see below)       | x    | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadMinLength          | 2 (default)                      | Minimum number of characters before starting the search       | x    | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
@@ -1545,14 +1640,17 @@ the user types something.
 Pedantic
 ^^^^^^^^
 
-In case the typed value (technically this is the value of the *id*, latest in the moment when loosing the focus) have
-to be a valid (= exist on the LDAP server), the *typeAheadPedantic* mode can be activated.
-If the user typed something and that is not a valid *id*, the client (=browser) will delete the input when loosing the focus.
-To identify the exact *id*, an additional search filter is necessary: `ypeAheadLdapSearchPrefetch` - see next topic.
+The *typeAheadPedantic* mode ensures that the typed value (technically this is the value of the *id*, latest in the moment
+when loosing the focus) is valid (= exists on the LDAP server or is defined in `typeAheadSql`).
+If the user typed something and that is not a valid *id*, the client (=browser) will delete the input when losing the focus.
+To identify the exact *id*, an additional search filter is necessary: `typeAheadLdapSearchPrefetch` - see next topic.
+
+*typeAheadPedantic* is active by default when *typeAheadLdap* or *typeAheadSql* is defined, but can be turned off with
+*typeAheadPedantic=0*.
 
 * *Form.parameter* or *FormElement.parameter*:
 
-  * *typeAheadPedantic*
+  * *typeAheadPedantic=0*
 
 Prefetch
 ^^^^^^^^
@@ -1673,6 +1771,10 @@ General
     * On form load, the specified record (<tablename>.id= <r>) will be loaded and displayed.
     * Saving the form will update the existing record.
     * E.g.: `http://example.com/index.php?id=home&form=Person&r=123`
+
+  * Providing additional parameter:
+
+    Often, it is necessary to store additional, for the user not visible, parameter in a record. See `form-magic`_.
 
 * Display a form:
 
@@ -1943,7 +2045,7 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | Name                        | Type   | Description                                                                                              |
 +=============================+========+==========================================================================================================+
-| dbIndexData                 | int    | Database credential index, given via `config.qfq.ini`_ to let the current `Form` operate on the database.|
+| dbIndex                     | int    | Database credential index, given via `config.qfq.ini`_ to let the current `Form` operate on the database.|
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | bsColumns                   | int    | Wrap the whole form in '<div class="col-md-??">                                                          |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2331,7 +2433,7 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _`field-encode`   |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Check Type           | enum('auto', 'alnumx',      | _`sanitize-class`                                                                                   |
+|Check Type           | enum('auto', 'alnumx',      | See: `sanitize-class`_                                                                              |
 |                     | 'digit', 'numerical',       |                                                                                                     |
 |                     | 'email', 'pattern',         |                                                                                                     |
 |                     | 'allbut', 'all')            |                                                                                                     |
@@ -2778,7 +2880,9 @@ Type: datetime
 Type: extra
 ^^^^^^^^^^^
 
-* Element is not shown in the browser.
+* The element is not transferred to the the browser.
+* The element behaves like, and can be used as, a HTML hidden input element - with the advantage that the element never
+  leaves the server and therefore can't be manipulated by a user.
 * The element can be used to define / precalculate values for a column, which do not already exist as a native *FormElement*.
 * The element is build / computed on form load and saved alongside with the SIP parameter of the current form.
 * Access the value without specifying any store (default store priority is sufficient).
@@ -3558,6 +3662,57 @@ See also `copy-form`_.
   * *recordSourceTable* - Optional: table from where the records will be copied. Default: <recordDestinationTable>
   * *recordDestinationTable* - table where the new records will be copied to.
   * *translateIdColumn* - columnname to update references of newly created id's.
+
+.. _form-magic:
+
+Form Magic
+----------
+
+Parameter
+^^^^^^^^^
+
+* Table column `id`: QFQ expect that each table, which will be loaded in a form, contains an autoincrement column of name `id`.
+  It's not necessary to create a FormElement `id` in a form - but it won't disturb.
+
+* Parameter (one or more) in the SIP url, which exist as a column in the form table (SIP parameter name is equal to a table column name),
+  will be automatically saved in the record. This acts as 'hidden magic'.
+
+  Example: A slave record (e.g. an address of a person) has to be assigned to a master record (a person). Just give the
+  `pId` in the link who calls the address form. The following creates a 'new' button for an address for all persons, and
+  the pId will be automatically saved in the address table: ::
+
+		SELECT CONCAT('{{pageAlias:T}}&form=address&r=0&pId=', p.id) AS _pagen FROM Person AS p
+
+  Such parameter, which the form expects to be in the SIP url, should be specified in Form.permitNew and/or Form.permitEdit.
+  It's only a check for the webmaster, not to forgot a parameter in a SIP url.
+
+* FormElement.type = subrecord
+
+  Subrecord's will automatically create `new`, `edit` and `delete` links. To inject parameter in those automatically created
+  links, use `FormElement.parameter.detail` . See `subrecord-option`.
+
+
+* FormElement.type = extra
+
+  If a table column should be saved with a specific value, and the value should not be shown to the user, the FE.type='extra'
+  will do the job. The value could be static or calculated on the fly. Often it's easier to specify such a parameter/value
+  in the SIP url, but if the form is called from multiple places, an `extra` element is more suitable.
+
+Variables
+^^^^^^^^^
+
+* Form.parameter.fillStoreVar / FormElement.parameter.fillStoreVar
+
+  A SQL statement will fill STORE_VARS. Such values can be used during form load and/or save.
+
+Action
+^^^^^^
+
+* Action FE
+
+  Via `FormElement.parameter.requiredList` an element can be enabled / disabled, depending of a user provided input
+  in one of the specified required FEs.
+
 
 .. _multi-language-form:
 
@@ -4833,7 +4988,7 @@ Special column names
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _htmlentities          |Characters will be encoded to their HTML entity representation.                                                                                                                              |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _thumbnail             |Create thumbnails on the fly. See `column-thumbnail`_.                                                                                                                                                                |
+| _thumbnail             |Create thumbnails on the fly. See `column-thumbnail`_.                                                                                                                                       |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _+???                  |The content will be wrapped in the tag '???'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                                |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -5840,32 +5995,53 @@ A limited set of attributes is supported: ::
 Column: _thumbnail
 ^^^^^^^^^^^^^^^^^^
 
-+-------+-------------------------------------------------+-------------------------------------------------------------+
-| Token | Example                                         | Comment                                                     |
-+=======+=================================================+=============================================================+
-| T     | T:fileadmin/file3.pdf                           | File render a thumbnail                                     |
-+-------+-------------------------------------------------+-------------------------------------------------------------+
-| W     | W:200x, W:x100, W:200x100                       | Dimension of the thumbnail: '<width>x<height>. Both         |
-|       |                                                 | parameter are otional. If non is given the default is W:150x|
-+-------+-------------------------------------------------+-------------------------------------------------------------+
-| s     | s:1, s:0                                        | Optional. Default: `s:1`. If SIP is enabled the rendered URL|
-|       |                                                 | is a link via api/download.php. Else a direct pathfilename  |
-+-------+-------------------------------------------------+-------------------------------------------------------------+
-
 A thumbnail of the file `T:<pathFilename>` will be rendered and saved with the given pixel size as specified via
-`W:<dimension>`. The file is only rendered once and will be rerendered, if the source file is newer than the thumbnail
-or if the thumbnail dimension changes.
+`W:<dimension>`. The file is only rendered once and subsequent access is delivered via a local cache. The will be
+rendered again, if the source file is newer than the thumbnail or if the thumbnail dimension changes.
 
-The thumbnail pathFilename is a MD5 hash of the pathFilename plus the dimension.
+The thumbnail pathFilename is a MD5 hash of the pathFilename plus the dimension information.
 
-From multi page files like PDFs, the first page is used.
+From multi page files like PDFs, the first page is used as the thumbnail.
 All file formats, which GraphicsMagick 'convert' (http://www.graphicsmagick.org/formats.html) supports, can be
 used. Office file formats are not supported. Due to speed and quality reasons, SVG files will be converted by inkscape.
-If a file format is not known, QFQ tries to show a corresponding file type image provided by Typo3 - such an image ist not
+If a file format is not known, QFQ tries to show a corresponding file type image provided by Typo3 - such an image is not
 scaled.
 
 In `config.qfq.ini`_ the exact location of `convert` and `inkscape` can be configured (optional) as well as the directory
 names for the cached thumbnails.
+
++-------+--------------------------------+----------------------------------------------------------------------------+
+| Token | Example                        | Comment                                                                    |
++=======+================================+============================================================================+
+| T     | T:fileadmin/file3.pdf          | File render a thumbnail                                                    |
++-------+--------------------------------+----------------------------------------------------------------------------+
+| W     | W:200x, W:x100, W:200x100      | Dimension of the thumbnail: '<width>x<height>. Both                        |
+|       |                                | parameter are otional. If non is given the default is W:150x               |
++-------+--------------------------------+----------------------------------------------------------------------------+
+| s     | s:1, s:0                       | Optional. Default: `s:1`. If SIP is enabled, the rendered URL              |
+|       |                                | is a link via `api/download.php?..`. Else a direct pathFilename.           |
++-------+--------------------------------+----------------------------------------------------------------------------+
+| r     | r:7                            | Render Mode. Default 'r:0'. With 'r:7' only the url will be delivered.     |
++-------+--------------------------------+----------------------------------------------------------------------------+
+
+The render mode '7' is useful, if the URL of the thumbnail have to be used in another way than the provided html-'<img>'
+tag. Something like `<body style="background-image:url(bgimage.jpg)">` could be solved with
+`SELECT "<body style="background-image:url(", 'T:fileadmin/file3.pdf' AS _thumbnail, ')">'`
+
+Example: ::
+
+	# SIP protected, IMG tag, thumbnail width 150px
+	10.sql = SELECT 'T:fileadmin/file3.pdf' AS _thumbnail
+
+	# SIP protected, IMG tag, thumbnail width 50px
+	20.sql = SELECT 'T:fileadmin/file3.pdf|W:50x' AS _thumbnail
+
+	# No SIP protection, IMG tag, thumbnail width 150px
+	30.sql = SELECT 'T:fileadmin/file3.pdf|s:0' AS _thumbnail
+
+	# SIP protected, only the URL to the image, thumbnail width 150px
+	40.sql = SELECT 'T:fileadmin/file3.pdf|s:1|r:7' AS _thumbnail
+
 
 Dimension
 '''''''''
@@ -5880,8 +6056,13 @@ older than 1 year: ::
 
 	find /path/to/files -type f -mtime +365 -delete
 
-Pre render
-''''''''''
+Render
+''''''
+
+`Public` thumbnails are rendered at the time when the T3 QFQ record is executed. `Secure` thumbnails are rendered when the
+'download.php?s=...' is called. The difference is, that the 'public' thumbnails blocks the page load until all thumbnails
+are rendered, instead the `secure` thumbnails are loaded asynchonous via the browser - the main page is already delivered to
+browser, all thumbnails appearing after a time.
 
 A way to *pre render* thumbnails, is a periodically called (hidden) T3 page, which iterates over all new uploaded files and
 triggers the rendering via column `_thumbnail`.
@@ -5908,151 +6089,7 @@ QFQ returns a HTML 'img'-tag: ::
 
   <img src="{{thumbnailDirPublic:Y}}/<md5 hash>.png">
 
-.. _column_F:
-
-Column: _F
-^^^^^^^^^^
-
-Challenge 1
-'''''''''''
-
-Due to the limitations of MySQL, reserved column names can't be further concatenated. Assume you want to display an image:
-
-::
-
-    # This is valid:
-    10.sql = SELECT concat("/static/directory/", p.foto) AS _img FROM person AS p WHERE ...
-
-    # Returns:
-    <img src=...>
-
-..
-
-
-
-Now assume you want to wrap the image in a div tag:
-
-::
-
-
-    # This is valid:
-    10.sql = SELECT "<div>", CONCAT("/static/directory/", p.foto) AS _img, "</div>" FROM person AS p WHERE ...
-
-    # Returns:
-    <div><img src=...></div>
-
-..
-
-
-
-The example above works fine - however, as soon as you want to use *field wrappers*, things get messy:
-
-::
-
-
-    # This is valid:
-    10.sql = SELECT "<div>", CONCAT("/static/directory/", p.foto) AS _img, "</div>" FROM person AS p WHERE ...
-    10.fbeg = <td>
-    10.fend = </td>
-
-    # Returns:
-    <td><div></td><td><img src=...></td><td></div></td>
-
-..
-
-
-
-To achieve the desired result, one might want to try something like this:
-
-::
-
-
-    # This is NOT valid:
-    10.sql = SELECT CONCAT("<div>", concat("/static/directory/", p.foto) AS _img, "</div>") FROM person AS p WHERE ...
-    10.fbeg = <td>
-    10.fend = </td>
-
-    # Returns a MySQL error because nesting concat() -functions is not allowed
-
-..
-
-
-
-Challenge 2
-'''''''''''
-
-Assume you have multiple columns with reserved names in the same query and want to use one of them in a later query:
-
-::
-
-
-    10.sql = SELECT CONCAT("/static/directory/", g.picture) AS _img, CONCAT("/static/preview/", g.thumbnail) AS _img FROM gallery AS g WHERE ...
-
-    20.sql = SELECT "{{10.img}}", d.text FROM description AS d ...
-
-..
-
-
-
-The example above will fail because there are two img columns which can not be distinguished.
-
-Solution
-''''''''
-
-The reserved column 'F'(=Format) can be used to
-
-*   further wrap columns with a reserved name
-
-*   assign an arbitrary name to a column built through a reserved name to make it accessible in later queries.
-
-Solution for *#Challenge_1*:
-
-::
-
-
-    10.sql = SELECT CONCAT("Q:img|T:div") AS wrappedImg FROM person AS p WHERE ...
-    10.fbeg = <td>
-    10.fend = </td>
-
-    # Returns:
-    <td><div><img src=...></div></td>
-
-..
-
-
-
-Solution for *#Challenge_2*:
-
-::
-
-
-    10.sql = SELECT CONCAT("Q:img|V:mypic") AS wrappedImg FROM person AS p WHERE ...
-
-    20.sql = SELECT "{{10.mypic}}" ...
-
-..
-
-
-
-+-------------+--------------------------------------------------------------------+--------+
-|**Parameter**|**Description**                                                     |Required|
-+=============+====================================================================+========+
-|Q            |Any of the *reserved column names*                                  |        |
-+-------------+--------------------------------------------------------------------+--------+
-|Z            |Process the column but don't display it                             |        |
-+-------------+--------------------------------------------------------------------+--------+
-|X            |Strip tags / Remove all tags                                        |        |
-+-------------+--------------------------------------------------------------------+--------+
-|T            |Wrap the column with the defined tag. F.e.: T:tdcolspan="2"         |        |
-+-------------+--------------------------------------------------------------------+--------+
-|V            |Define an unambiguous variable name for this colum. F.e.: V:someName|        |
-+-------------+--------------------------------------------------------------------+--------+
-|*            |Add all the parameters required for the column defined with Q:      |        |
-+-------------+--------------------------------------------------------------------+--------+
-
-
-The above example builds a link to pageB - refer to the :ref:`column-link`-manual for details. The link tells page B to
-render the form with name formname and load the record with id id for editing.
+Typical
 
 QFQ CSS Classes
 ---------------

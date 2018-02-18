@@ -34,8 +34,68 @@ Features
 ^^^^^^^^
 
 Bug Fixes
+
 ^^^^^^^^^
 
+
+Version 0.25.12
+---------------
+
+Date: 18.02.2018
+
+Notes
+^^^^^
+
+* New
+
+  * FE.parameter:
+
+    * timeIsOptional
+    * enterAsSubmit
+
+  * FE.checkType: Auto
+  * Thumbnail rendering. Public or secure.
+
+* Update
+
+  * Multi DB Support: Form & Report
+
+Features
+^^^^^^^^
+
+* #5064 / Throw user form exception on invalid date.
+* #5308 / TimeIsOptional parameter.
+* #5318 / Allow sendmail speaking word token, adjust documentation and fix some typos.
+* #5347 / Error Message (Exception): BS colored box for report error messages. Hide technical informations, show it on click.
+* #5392 / Violate message with expected date format.
+* #5414 / Add checkType Auto, refactor setDefault methods, add smart detection of defaults, extend documentation and rules.
+* #3470 / Enter As Submit= on/off - implemented.
+* #4437 / violate sanitize message.
+* #4542 / input-type-decimal' into 'master'.
+* #5298 / Update docs for HTML mails.
+* #5333 / Thumbnail: implementation.
+* #5425 / Thumbnail: render mode 7 - implemented, rewrite - secure thumbnails are now rendered on first access, not when 'AS _thumbnail' is called.
+* Implemented $dbIndex for Report.
+* Implemeted two new STORE_SYSTEM variables: '_dbNameData' and '_dbNameQfq' - those will be automatically filled qfq during instantiation QuickFormQuery(). They can be used in Report to easily access the needed DB.
+* Increased Formelement.label from 255 to 511
+* Make DB_INIT in config.qfq.ini set by default.
+* Notes how to optimize PDF thumbnailing.
+* Reformat manual for config.qfq.ini. Copy config.qfq.example.ini to MANUAL.rst. Migrate config defaults from setIfNotSet() to array_merge().
+* Security: hide $SQL in error messages to regular user.
+* New FE.parameter 'inputType'. Can optional be given by webmaster. Additional, the 'type="number"' will be automatically set, if the column is of type 'int' or if 'min' and 'max' is numerically.
+
+Bug Fixes
+^^^^^^^^^
+
+* #3192 / Fill STORE_RECORD before loading table title.
+* #5285 / Make typeAheadPedantic the default.
+* #5348 / Exception/Report: level key missing.
+* #5367 / Error Report: reworked alerts, updated css for alerts, 'full level' missing, content too much escaped: Fixed too much escaping. Form / FormElement Links in error messages now with BS Buttons..
+* #5382 / Double quotes in tooltips are now escaped with &quot;.
+* #5390 / input validation decimal broken. fixed.
+* #5430 / Add unique ID to each radio button for dynamic update.
+* Form: 'FormElement' > 'Container' - relied on '{{formId:S}}' even if the FE record already exist - fixed.
+* Subrecord Title - now wrapped with <label class='control-label'>.
 
 Version 0.25.11
 ---------------
@@ -62,7 +122,7 @@ Bug Fixes
 
 * Fixed some broken help links in formEditor.sql.
 * #5306 / Exception: tt_content_uid wrong - fixed
-* #4303 - Download von doc/docx-Dateien / Download.php - Mime type wird nicht mehr an Dateiname angehängt
+* #4303 / Download von doc/docx-Dateien / Download.php - Mime type wird nicht mehr an Dateiname angehängt
 * #5316 / Help on how to send an E-Mail is wrong - several places fixed.
 * #5311 / Error Msg SLQ_RAW != SQL_FINAL: Debug message shows outdated SQL_RAW
 * #5309 / min/max broken for date fields. Add min/max attributes to input and date input tag
@@ -86,7 +146,7 @@ Features
 
 * #5023 / Fabric: Cut, rotate and enhance uploaded images. Update Manual.
 * All FE 'typeahead' fields are set to 'autocomplete="off"'. Respect user setting for 'autocomplete' - if none given (mostly), set it for FE 'typeahead' to 'off'
-* #5295: Upload: check if given QFQ 'maxFileSize' is higher than php.in post_max_size, upload_max_filesize
+* #5295 / Upload: check if given QFQ 'maxFileSize' is higher than php.in post_max_size, upload_max_filesize
 * FE.Subrecord: rearranged column order, start columns with uppercase letter.
 * New CSS class 'qfq-full-width-left': especially for buttons to become full width.
 * New CSS class 'qfq-table-100' - 100% width, with auto width per column. FE.subrecord changed to  'qfq-table-100'.
@@ -183,13 +243,13 @@ Bigger changes in update form after save/dynamic update.
 Bug Fixes
 ^^^^^^^^^
 
-* #4865: Pill Dynamic Updates Show / Hide
+* #4865 / Pill Dynamic Updates Show / Hide
 * #5031 / Missing details in DbException: New definition of SYSTEM_SHOW_DEBUG_INFO: even after config.qfq.ini is parsed
    and SIP Infos has been read - if there is no BE User logged in, the value stays on 'auto' (earlier it has been replaced
    to 'no'). Staying on 'auto' keeps the information that replacing is still open and not replaced means 'no'-BE User logged in.
-* #5016 Loose checkbox value on save - Dirty workaround - better solution necessary.
-* #5017 - STORE_RECORD used in FormElement and via '#!report' - save & restore STORE_RECORD.
-* #5004 FormElement with state 'ReadOnly' will be saved with empty value - existing values will be overwritten - fixed.
+* #5016 / Loose checkbox value on save - Dirty workaround - better solution necessary.
+* #5017 / STORE_RECORD used in FormElement and via '#!report' - save & restore STORE_RECORD.
+* #5004 / FormElement with state 'ReadOnly' will be saved with empty value - existing values will be overwritten - fixed.
 * 'element-update' for type 'UPLOAD seems to make trouble. Exclude it like 'SELECT'
 
 
@@ -221,7 +281,7 @@ Notes
 Features
 ^^^^^^^^
 
-* #2948 /altsql, shead, stail - new directives in Report.
+* #2948 / altsql, shead, stail - new directives in Report.
 * #4255 / Attachments fuer 'Email'. Static files can be attached to mails.
 
 Bug Fixes
@@ -254,7 +314,7 @@ Features
 * Report / sendmail: control via token.
 * #4967 / config.qfq.ini: Rename 'VAR_ADD_BY_SQL' to 'FILL_STORE_SYSTEM_BY_SQL_1'. Handle up to 3 FILL_STORE_SYSTEM_SQL_x.
   Implement an optional error message together with a full stop.
-* #4766: Set STORE_RECORD in Report per row.
+* #4766 / Set STORE_RECORD in Report per row.
 
 Bug Fixes
 ^^^^^^^^^
@@ -282,13 +342,13 @@ Features
 * Default Escape Type changed from 's' to 'm'. DatabaseUpdateData.php: removed the DB update from last commit - not necessary.
   Config.php: New default 'm' Evaluate.php: Respect EscapeTypeDefault in form definition.
   QuickFormQuery.php: Replace 'EscapeTypeDefault' in form defintion very early.
-* #4049 - QFQ Variables '{{...}}' might now contain a default value.
+* #4049 / QFQ Variables '{{...}}' might now contain a default value.
 * If 'pageAlias:T' is empty, take 'pageId:T'.
 
 Bug Fixes
 ^^^^^^^^^
 
-* #4836 - Multiple entries in table after several clicks on save. Created a saveInProgress Variable
+* #4836 / Multiple entries in table after several clicks on save. Created a saveInProgress Variable
 * Replaced latest project homepage URL in Manual.rst
 * Fix example SQL for periodId in config.qfq.ini in Manual.rst
 * Remove multiple header 'RELEASE' - there has to be only one.
@@ -301,8 +361,8 @@ Date: 3.11.2017
 Bug Fixes
 ^^^^^^^^^
 
-* #4857 - broken (stale) download: multiple 'u:..' or 'u:...'
-* #4212 - Broken JSON on response to save new record 'Unknown index' fixed by isset()
+* #4857 / broken (stale) download: multiple 'u:..' or 'u:...'
+* #4212 / Broken JSON on response to save new record 'Unknown index' fixed by isset()
 
 Version 0.25.0
 --------------
@@ -319,7 +379,7 @@ Notes
 
 Features
 ^^^^^^^^
-* #4720 - Separate database handles for QFQ 'form' and QFQ 'data' - 'Form' might  now load/save from forign database/host/user.
+* #4720 / Separate database handles for QFQ 'form' and QFQ 'data' - 'Form' might  now load/save from forign database/host/user.
 
 
 Version 0.24.0
@@ -423,7 +483,7 @@ Features
 
 * #4431 / FE.type=note: QFQ Report Syntax in 'FE.value' and 'FE.note'
 * #4456 / formModeGlobal=requiredOff - Switches FormElement.mode=required to 'show' for all FE of the current Form.
-* Feature #4356 / Form: required parameter - split between 'New' & 'Edit'
+* #4356 / Form: required parameter - split between 'New' & 'Edit'
 
 Version 0.20.0
 --------------
@@ -448,7 +508,7 @@ Bug Fixes
 * #4396 / FE: Justify DATE and TIME in case it's DATETIME on a non primary table.
 * #2414 / Deaktivieren von Option 'new' bei subrecord hat keine Folge
 * #4426 / Subrecord: mode=hidden - still shown
-* #4425/ Subrecords: Table head is not wrapped in <thead>
+* #4425 / Subrecords: Table head is not wrapped in <thead>
 * #4331 / SQL Statement 'REPLACE' not fired - Keyword missing in list of SQL Keywords
 
 
@@ -615,7 +675,7 @@ Bug Fixes
 ^^^^^^^^^
 
 * #3953 / Radio buttons: Auswahl nicht angezeigt, wenn per itemList definiert
-* Feature #3982 / Filename Sanatize: remove spaces. Filename not properbly enclosed by double ticks.
+* #3982 / Filename Sanatize: remove spaces. Filename not properbly enclosed by double ticks.
 
 Version 0.18.6
 --------------
@@ -623,7 +683,7 @@ Version 0.18.6
 Features
 ^^^^^^^^
 
-* Feature #3460 / Report: new column types '_striptags, '_htmlentities', '_+Tag'
+* #3460 / Report: new column types '_striptags, '_htmlentities', '_+Tag'
 
 Version 0.18.5
 --------------
@@ -638,9 +698,9 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-* Bug #3912 / templateGroup: max. 5 instances are saved.
+* #3912 / templateGroup: max. 5 instances are saved.
 * Manual.rst: Fixed missing '{{' and '%' in examples.
-* Bug #3925 / templateGroup / non primary / delete records: only one at a time
+* #3925 / templateGroup / non primary / delete records: only one at a time
 * Makefile: Artifactory builds fails at chromedriver - temporary remove npm install of chromedriver
 
 Version 0.18.4
@@ -648,7 +708,8 @@ Version 0.18.4
 
 Bug Fixes
 ^^^^^^^^^
-* Bug #3910 / 'submitButtonText' not shown
+
+* #3910 / 'submitButtonText' not shown
 
 Version 0.18.3b
 ---------------
@@ -656,12 +717,12 @@ Version 0.18.3b
 Features
 ^^^^^^^^
 
-* Feature #3906 / Mark required inputs with an asterik
+* #3906 / Mark required inputs with an asterik
 
 Bug Fixes
 ^^^^^^^^^
 
-* Bug #3903 / Copy/Paste form: references inside a record are not updated at all
+* #3903 / Copy/Paste form: references inside a record are not updated at all
 
 Version 0.18.3a
 ---------------
@@ -696,15 +757,15 @@ Version 0.18.2
 Changes
 ^^^^^^^
 
-* Feature #3891 / Dynamic Update: Multiple Elements in a row - single show/hide - First implementation: Show / Hide via dynamicUpdate for a second element, wrapped in an own 'col-md' div.
+* #3891 / Dynamic Update: Multiple Elements in a row - single show/hide - First implementation: Show / Hide via dynamicUpdate for a second element, wrapped in an own 'col-md' div.
 
 Bug Fixes
 ^^^^^^^^^
 
-* Bug #3875 / FormElement 'extra': Fehler bei neuen Records.
-* Bug #3647 / Dynamic Update: Multiple Elements in a row not updated properly.
-* Bug #3890 / upload-FormElement: mode 'hide' without effect
-* Bug #3876 / upload-FormElement: verschwindet bei dynamicUpdate.
+* #3875 / FormElement 'extra': Fehler bei neuen Records.
+* #3647 / Dynamic Update: Multiple Elements in a row not updated properly.
+* #3890 / upload-FormElement: mode 'hide' without effect
+* #3876 / upload-FormElement: verschwindet bei dynamicUpdate.
 
 Version 0.18.1
 --------------
@@ -756,7 +817,7 @@ Features
 
 * #3568 / Form: fuer alle Buttons (save, close, new, delete) eine optionale class & text konfigurierbar.
 * #3569 / Input Optional '0' unterdruecken.
-* #3863: New config var 'DB_UPDATE' in config.qfq.ini.
+* #3863 / New config var 'DB_UPDATE' in config.qfq.ini.
 
 Bug Fixes
 ^^^^^^^^^
@@ -931,7 +992,7 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
- * Fix #3419 / typeAheadSql: Array with only one column or non standard columnnames are not handeld properbly.
+ * #3419 / typeAheadSql: Array with only one column or non standard columnnames are not handeld properbly.
    Detection of missing LIMIT implemented.
  * #3425 / Form.parameter, FormElement.parameter: comment handling, trailing & leading spaces
     Manual.rst: commented handling of 'comment character' and 'escaping of leading/trailing spaces'
@@ -939,9 +1000,9 @@ Bug Fixes
  * Evaluate.php: parse all F|FE.parameter via handleEscapeSpaceComment(). A leading '#' or ' ' might be escaped by '\'.
  * Saving 'extra' FE in STORE_SIP has been done with inappropiate FE_NAME. Correct is the pure FE_NAME, without any
    extension like recordId. Unessary and broken decoding removed.
- * #3426 | Dynamic Update: Inputs loose the new content and shows the old value
+ * #3426 / Dynamic Update: Inputs loose the new content and shows the old value
  * Through fix #2064 the FE.checkType has not been used anymore. This is fixed now.
- * #3433 | templateGroup on primary Record: Values of removed copies are not deleted. The new implementation creates empty
+ * #3433 / templateGroup on primary Record: Values of removed copies are not deleted. The new implementation creates empty
    fake instances of all copies of templateGroup FormElements. Those are empty. Before save, the submitted form values
    will be expanded with the empty fake templateGroup FormElements and such empty values will be saved.
 
@@ -977,7 +1038,7 @@ Features
  * Load foreign values in templatGroups - saving is not implemented yet.
  * Manual: Added howto prevent <p>-wrap in TinyMCE
  * TemplateGroup: Add button now disabled if max. number of copies reached.
- * #3414/QuickFormQuery.php: wrap whole form in 'col-md-XX' - User controls the width of an QFQ form.
+ * #3414 / QuickFormQuery.php: wrap whole form in 'col-md-XX' - User controls the width of an QFQ form.
 
 Bug Fixes
 ^^^^^^^^^
@@ -991,7 +1052,7 @@ Bug Fixes
    moment this is the only way to transmit any error messages.
  * formEditor.sql: removed all 'maxLength' string values for 'Form' and 'FormElement' forms.
  * Save button becomes active if a templateGroup copy is removed.
- * #3413 Form ohne Pill hat kein padding am Rand. Fix: if there are no pills, an additinal col-md-12 will be rendered.
+ * #3413 / Form ohne Pill hat kein padding am Rand. Fix: if there are no pills, an additinal col-md-12 will be rendered.
 
 
 Version 0.13
@@ -1029,7 +1090,7 @@ Features
  * Check and error report if 'php_intl' is missing.
  * New Checktype 'allow numerical'.
  * Documentation: example for 'radio' with no pre selection.
- * #3063, Radios and checkboxes optional rendered in Bootstrap layout.
+ * #3063 / Radios and checkboxes optional rendered in Bootstrap layout.
  * Added 'help-box with-errors'-DIV after radios and checkboxes.
  * Respect attribute `data-class-on-change` on save buttons.
 
@@ -1043,8 +1104,8 @@ Bug Fixes
 
    * Fixed setting of STORE_SYSTEM / showDebugInfo during API call.
 
- * #2081, #3180 Form: Label & note - update via `DynamicUpdate`
- * #3253, if there is no STORE_TYPO3 (calls through .../api/ like save, delete, load): use SIP / CLIENT_TYPO3VARS.
+ * #2081, #3180 / Form: Label & note - update via `DynamicUpdate`
+ * #3253 / if there is no STORE_TYPO3 (calls through .../api/ like save, delete, load): use SIP / CLIENT_TYPO3VARS.
  * qfq-bs.css:
 
    * Alignment of checkboxes and radios optimized.
@@ -1111,14 +1172,14 @@ Features
  * New FormElement (type= 'container') added: 'templateGroup'
    * FormElement.parameter.tgAddClass | tgAddText | tgRemoveClass | tgRemoveText | tgClass
    * FormElement.maxSize: max number of duplicates
-   * #3230 templateGroup: margin between copies. 'tgClass' implemented.
+   * #3230 / templateGroup: margin between copies. 'tgClass' implemented.
  * Native FormElements:
    * FormElement.parameter.htlmlBefore|htmlAfter - add the specified HTML code before or after the element (outside of any wrapping)
-   * #3224, #3231 Html Tag <hr> als FormElement. >> htmlBefore | htmlAfter.
+   * #3224, #3231 / Html Tag <hr> als FormElement. >> htmlBefore | htmlAfter.
    * FormElement.parameter.wrapLabel | wrapInput | wrapAfter | wrapRow - if specified, any default wrapping is omitted.
    * FormElement.bsNoteColumns | bsInputColumns | bsNoteColumns - a '0' will suppress the whole rendering of the item.
    * FormElement.rowLabelInputNote - switch on/off rendering of the corresponding system wrapping items.
- * #3232 Define custom 'on-change' color - used for the save button: Form.parameter.buttonOnChangeClass=...
+ * #3232 / Define custom 'on-change' color - used for the save button: Form.parameter.buttonOnChangeClass=...
  * Form.parameter & FormElement.parameter: Lines starting with '#' are treated as comments and will not be parsed.
 
 Bug fixes
@@ -1203,17 +1264,17 @@ Bug fixes
  * UsersManual/index.rst: Startet FAQ section.
  * config.qfq.example.ini: Added comment where to save config.qfq.ini.
  * UsersManual/index.rst: Rewrite of 'action'-FormElement definition.
- * #2739: beforeDelete / afterDelete.
+ * #2739 / beforeDelete / afterDelete.
  * PROTOCOL.md: update 'delete' description.
  * delete.php: fixed unwanted loose of MSG_CONTENT.
  * Report.php: Fixed double '&&' in building UrlParam.
  * FormAction.php: In case of 'AFTER_DELETE', do not try to load primary record - that one is already deleted.
  * Sip.php: Do not skip SIP_TARGET_URL as parameter for the SIP.
- * #3001 Report: delete implementieren.
+ * #3001 / Report: delete implementieren.
  * Index.rst, Constants.php: reverted parameter '_table' in delete links back to 'table' - Reason: 'form' needs to be 'form' (instead of '_form') due to many used places already.
  * Sip.php: move SIP_TARGET_URL back to stored inside SIP - it's necessary for 'delete'-links.
  * Report.php, Constants.php: Remove code to handle unecessary 'p:' tag for delete links.
  * Link.php: Check paged / Paged that the parameter r, table and form are given in the right combination.
  * Link.php, Report.php: New '_link' token 'x'. '_paged' and '_Paged' are rendered via Link() class, Link() class now supports delete links.
  * QuickFormQuery.php: for modeForm='Form Delete' the 'required param' are not respected - this makes sense, cause these parameters typically filled in newly created records.
- * Fixed: #3076 Delete Button bei Subrecords erzeugt sporadisch Javascript Exceptions (Webkit: Chrome / Vivaldi) - kein loeschen moeglich.
+ * #3076 / Delete Button bei Subrecords erzeugt sporadisch Javascript Exceptions (Webkit: Chrome / Vivaldi) - kein loeschen moeglich.
