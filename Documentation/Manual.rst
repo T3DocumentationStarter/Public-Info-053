@@ -281,8 +281,8 @@ config.qfq.ini
 | DB_<n>_SERVER               | DB_1_SERVER=localhost                                 | Hostname of MySQL Server                                                   |
 | DB_<n>_NAME                 | DB_1_NAME=qfq_db                                      | Database name                                                              |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DB_INDEX_DATA               | DB_INDEX_DATA = 1                                     | Optional. Default: 1.                                                      |
-| DB_INDEX_QFQ                | DB_INDEX_QFQ = 1                                      | Optional. Default: 1.                                                      |
+| DB_INDEX_DATA               | DB_INDEX_DATA = 1                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameData:Y}}   |
+| DB_INDEX_QFQ                | DB_INDEX_QFQ = 1                                      | Optional. Default: 1. Retrieve the current setting via {{_dbNameQfq:Y}}    |
 +-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | SQL_LOG                     | SQL_LOG=../../sql.log                                 | Filename to log SQL commands: relative to <ext_dir> or absolute.           |
 | SQL_LOG_MODE                | SQL_LOG_MODE=modify                                   | *all*: every statement will be logged - this might a lot.                  |
@@ -531,6 +531,13 @@ Example: *typo3conf/config.qfq.ini*
 	; cmdInkscape = inkscape
 	; cmdConvert = convert
 
+After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
+
++----------------+--------------------------------------------------------------------------+
+| _dbNameData    | Can be used to dynamically access the current selected database          |
++----------------+--------------------------------------------------------------------------+
+| _dbNameQfq     | Can be used to dynamically access the current selected database          |
++----------------+--------------------------------------------------------------------------+
 
 .. _`CustomVariables`:
 
@@ -1036,6 +1043,9 @@ Very specific: Also, it's possible that the content of a variable is again (incl
 is sometimes used in text templates, where the template is retrieved from a record and
 specific locations in the text will be (automatically by QFQ) replaced by values from other sources.
 
+General note: using this type of variables is only the second choice. First choice is `{{column:R}}` (see
+`access-column-values`_) - using the STORE_RECORD is more portable cause no renumbering is needed if the level keys change.
+
 .. _`sanitize-class`:
 
 Sanitize class
@@ -1338,7 +1348,8 @@ Store: *RECORD* - R
 
 
 * Sanitized: *no*
-* Current record loaded in Form.
+* *Form*: Current record.
+* *Report*: See `access-column-values`_
 * If r=0, all values are empty.
 
  +------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -4657,11 +4668,7 @@ There is a set of **variables** that will get replaced before the SQL-Query gets
 ``{{<name>[:<store/s>[:...]]}}``
   Variables from specific stores.
 
-``{{<name>:R}}`` - use case of the above generic definition.
-  STORE_RECORD is automatically merged with a) the existing STORE_RECORD content and b) the *current row*. Use the STORE_RECORD
-  to access outer and/or previous level values.
-  In case of previous level values: only the one of the last record is available.
-  Always access variables without an optional leading '_' - it's removed before the variable is copied to STORE_RECORD.
+``{{<name>:R}}`` - use case of the above generic definition. See also `access-column-values`_.
 
 ``{{<level>.<columnname>}}``
   Similar to  ``{{<name>:R}}`` but more specific. There is no sanitize class, escape mode or default value.
@@ -4690,10 +4697,11 @@ Processing of the resulting rows and columns:
 	  `SELECT id AS _id`.
 
      This might be useful to store values, which will be used later on in another query via the `{{id:R}}` or
-     `{{level.columnname}}` variable. To suppress printing of a column, use a underscore as column name prefix. E.g.
+     `{{<level>.columnname}}` variable. To suppress printing of a column, use a underscore as column name prefix. E.g.
      `SELECT id AS _id`
 
-*Reserved column names* have a special meaning and will be processed in a special way. See `Processing of columns in the SQL result`_ for details.
+*Reserved column names* have a special meaning and will be processed in a special way. See
+`Processing of columns in the SQL result`_ for details.
 
 There are extensive ways to wrap columns and rows. See :ref:`wrapping-rows-and-columns`
 
@@ -4720,7 +4728,7 @@ See the example below:
 ::
 
     10.sql = SELECT id AS _pId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
-    10.rsep = <br />
+    10.rsep = <br>
 
     10.10.sql = SELECT CONCAT(postal_code, " ", city) FROM address WHERE pId = {{10.pId}}
     10.10.rbeg = (
@@ -4757,7 +4765,7 @@ Example::
 
     20.sql = SELECT 'a warm welcome'
                'some additional', 'columns'
-               FROM smartTable
+               FROM anotherable
                WHERE id>100
 
     20.head = <h3>
@@ -4766,7 +4774,7 @@ Example::
 Join mode: SQL
 ''''''''''''''
 
-This is the default. All lines are joined with a space in between. E.g.: ::
+This is the default. All lines are joined with a *space* in between. E.g.: ::
 
     10.sql = SELECT 'hello world'
                FROM mastertable
@@ -4778,8 +4786,8 @@ Notice the space between "...world'" and "FROM ...".
 Join mode: strip whitespace
 '''''''''''''''''''''''''''
 
-Ending a line with a '\\' forces the removing off all leading and trailing whitespaces in that line and do not insert an
-extra space in between. E.g.: ::
+Ending a line with a '\\' strips all leading and trailing whitespaces of that line joins the line directly (no extra
+space in between). E.g.: ::
 
     10.sql = SELECT 'hello world', 'd:final.pdf \
                                     |p:id=export  \
@@ -4813,6 +4821,20 @@ This is equal to: ::
   10.sql = SELECT ...
   10.5.sql = SELECT ...
   10.5.head = ...
+
+Leading / trailing spaces
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, leading or trailing whitespaces are removed from strings behind '='. E.g. 'rend =  test ' becomes 'test' for
+rend. To prevent any leading or trailing spaces, surround them by using single or double ticks. Example: ::
+
+	10.sql = SELECT name FROM Person
+	10.rsep = ' '
+	10.head = "Names: "
+
+
+Braces character for nesting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 By default, curly braces '{}' are used for nesting. Alternatively angle braces '<>', round braces '()' or square
 braces '[]' are also possible. To define the braces to use, the **first line** of the bodytext has to be a comment line and the
@@ -4886,7 +4908,7 @@ Example STORE_RECORD: ::
 
 The line '10.10' will output 'dummy' in cases where there is at least one corresponding address.
 If there are no addresses (all persons) it reports the person id.
-If there is at least one address, it reports 'dummy', cause that's the last stored content. This behaviour might change in the future.
+If there is at least one address, it reports 'dummy', cause that's the last stored content.
 
 Example 'Level Key': ::
 
@@ -4935,7 +4957,7 @@ Wrapping rows and columns: Level keys
 
 Order and nesting of queries, will be defined with a typoscript-like syntax: level.sublevel1.subsublevel2. ...
 Each 'level' directive needs a final key, e.g: 20.30.10. **sql**. A key **sql** is necessary in order to process a level.
-All `QFQ Keywords (Bodytext)`_.
+See all `QFQ Keywords (Bodytext)`_.
 
 Processing of columns in the SQL result
 ---------------------------------------
@@ -5321,8 +5343,8 @@ Example `_pdf`, `_zip`: ::
 Use the `--print-media-type` as wkhtml option to access the page with media type 'printer'. Depending on the website
 configuration this switches off navigation and background images.
 
-Rendering 'official' look-alike PDF letters
-'''''''''''''''''''''''''''''''''''''''''''
+Rendering PDF letters
+'''''''''''''''''''''
 
 `wkhtmltopdf`, with the header and footer options, can be used to render multi page PDF letters (repeating header,
 pagination) in combination with dynamic content. Such PDFs might look-alike official letters, together with logo and signature.
@@ -6173,7 +6195,7 @@ Result:
 ::
 
 
-    10.sql = SELECT "Hello World<br />"
+    10.sql = SELECT "Hello World<br>"
     20.sql = SELECT "Say hello"
 
 ..
@@ -6258,8 +6280,8 @@ Two columns
 ::
 
 
-    # Add the formating information as a coloum
-    10.sql = SELECT p.firstName, " " , p.lastName, "'<br /'>" FROM exp_person AS p
+    # Add the formatting information as a coloum
+    10.sql = SELECT p.firstName, " " , p.lastName, "<br>" FROM exp_person AS p
 
 ..
 
@@ -6284,8 +6306,8 @@ One column 'rend'
 ::
 
 
-    10.sql = SELECT p.name FROM exp_person AS p
-    10.rend = <br />
+    10.sql = SELECT p.firstName, " " , p.lastName FROM exp_person AS p
+    10.rend = <br>
 
 ..
 
@@ -6314,10 +6336,7 @@ More HTML
 
 ..
 
-Result:
-
-::
-
+Result: ::
 
     o Billie Holiday
     o Elvis Presley
@@ -6337,19 +6356,19 @@ The same as above, but with braces::
 Two queries: ::
 
     10.sql = SELECT p.name FROM exp_person AS p
-    10.rend = <br />
+    10.rend = <br>
     20.sql = SELECT a.street FROM exp_address AS a
-    20.rend = <br />
+    20.rend = <br>
 
 Two queries: nested ::
 
     # outer query
     10.sql = SELECT p.name FROM exp_person AS p
-    10.rend = <br />
+    10.rend = <br>
 
     # inner query
     10.10.sql = SELECT a.street FROM exp_address AS a
-    10.10.rend = <br />
+    10.10.rend = <br>
 
 * For every record of '10', all records of 10.10 will be printed.
 
@@ -6357,35 +6376,50 @@ Two queries: nested with variables ::
 
     # outer query
     10.sql = SELECT p.id, p.name FROM exp_person AS p
-    10.rend = <br />
+    10.rend = <br>
 
     # inner query
     10.10.sql = SELECT a.street FROM exp_address AS a WHERE a.pId='{{10.id}}'
-    10.10.rend = <br />
+    10.10.rend = <br>
 
 * For every record of '10', all assigned records of 10.10 will be printed.
 
 Two queries: nested with hidden variables in a table ::
 
     10.sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
-    10.rend = <br />
+    10.rend = <br>
 
     # inner query
     10.10.sql = SELECT a.street FROM exp_address AS a WHERE a.pId='{{10.pId}}'
-    10.10.rend = <br />
+    10.10.rend = <br>
 
 Same as above, but written in the nested notation ::
 
   10 {
     sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
-    rend = <br />
+    rend = <br>
 
     10 {
     # inner query
       sql = SELECT a.street FROM exp_address AS a WHERE a.pId='{{10.pId}}'
-      rend = <br />
+      rend = <br>
     }
   }
+
+Best practice *recommendation* for using parameter - see `access-column-values`_
+
+  10 {
+    sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
+    rend = <br>
+
+    10 {
+    # inner query
+      sql = SELECT a.street FROM exp_address AS a WHERE a.pId='{{pId:R}}'
+      rend = <br>
+    }
+  }
+
+
 
 * Columns starting with a '_' won't be printed but can be accessed as regular columns.
 
