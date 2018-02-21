@@ -792,8 +792,10 @@ System tables
 
 * Check Bug #5459 - support of system tables in different DBs not supported.
 
-Multi Databases
-^^^^^^^^^^^^^^^
+.. _`multi-database`:
+
+Multi Database
+^^^^^^^^^^^^^^
 
 Base: T3 & QFQ
 ''''''''''''''
@@ -1039,20 +1041,55 @@ SQL variables
   * INSERT, UPDATE, DELETE, REPLACE, TRUNCATE
   * SHOW, DESCRIBE, EXPLAIN, SET
 
-* A SQL Statement might contain parameters, including additional SQL statements. Inner SQL queries will be executed first.
+* A SQL Statement might contain variables, including additional SQL statements. Inner SQL queries will be executed first.
 * All variables will be substituted one by one from inner to outer.
 * The number of variables inside an input field or a SQL statement is not limited.
-* A resultset of a SQL statement will be imploded over all: concat all columns of a row, concat all rows - there is no glue string.
 
-* Example::
+Result: string
+''''''''''''''
+
+A result of a SQL statement will be imploded over all: concat all columns of a row, concat all rows - there is no
+glue string.
+
+Result: row
+'''''''''''
+
+A few functionalities needs more than a returned string, instead separate columns are necessary. To indicate an array
+result, specify those with an '!': ::
+
+   {{!SELECT ...}}
+
+This manual will specify the individual QFQ elements, who needs an array instead of a string. It's an error to return
+a string where an array is needed and vice versa.
+
+Database index
+''''''''''''''
+
+To access different databases in a `multi-database`_  setup, the database index can be specified after the opening curly
+braces. ::
+
+	{{[1]SELECT ... }}
+
+For using the DB_INDEX_DATA and DB_INDEX_QFQ (`config.qfq.ini`_), it's a good practice to specify the variable name
+instead of the numeric index. ::
+
+   {{[{{DB_INDEX_DATA:Y}}]SELECT ...}}
+
+If no dbIndex is given, `{{DB_INDEX_DATA:Y}}` is used.
+
+Example
+'''''''
+
+::
 
   {{SELECT id, name FROM Person}}
   {{SELECT id, name, IF({{feUser:T0}}=0,'Yes','No')  FROM Person WHERE id={{r:S}} }}
   {{SELECT id, city FROM Address AS adr WHERE adr.accId={{SELECT id FROM Account AS acc WHERE acc.name={{feUser:T0}} }} }}
+  {{!SELECT id, name FROM Person}}
+  {{[2]SELECT id, name FROM Form}}
+  {{[{{DB_INDEX_QFQ:Y}}]SELECT id, name FROM Form}}
 
-* Special case for `SELECT` input fields and FormElement.type=action `sqlValidate`. To deliver a result array specify an '!' before the SELECT: ::
 
-   {{!SELECT ...}}
 
 
 .. _`column-variables`:
