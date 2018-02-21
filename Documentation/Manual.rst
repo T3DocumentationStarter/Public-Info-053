@@ -795,12 +795,51 @@ System tables
 Multi Databases
 ^^^^^^^^^^^^^^^
 
-QFQ itself can be separated in 'QFQ system' (see `system-tables`_) and 'QFQ data' databases. This might be useful
-for one central data database and multiple Typo3 QFQ installations. E.g. there are three departments and all work on the
-same data database, but use different QFQ versions. Than it's helpful to have separate QFQ databases.
+Base: T3 & QFQ
+''''''''''''''
 
-Furthermore a `Form` can operate on specified additional database, specified per `Form`.parameter.dbIndex and configured
-via `config.qfq.ini`_.
+QFQ typically interacts with one database, the QFQ database. The database used by Typo3 is typically a separate one.
+Theoretically it might be the same (never tested), but it's strongly recommended to use a separated QFQ database to have
+ no problems on Typo3 updates and to have a clean separation between Typo3 and QFQ
+
+QFQ: System & Data
+''''''''''''''''''
+
+QFQ itself can be separated in 'QFQ system' (see `system-tables`_) and 'QFQ data' databases (>=1). The 'QFQ system' stores
+the forms, record locking, log tables and so on - `QFQ data` is for the rest.
+
+A `Multi Database` setup is given, if 'QFQ system' is different from 'QFQ data'.
+
+Data: Data1, Data2, ..., Data n
+'''''''''''''''''''''''''''''''
+
+Every database needs to be configured via `config.qfq.ini`_ with it's own `index`.
+
+`QFQ data` might switch between different 'data'-databases. In `config.qfq.ini` one main `QFQ data` index will be specified
+in `DB_INDEX_QFQ`. If specific forms or reports should use a different database than that, `dbIndex` might change
+`DB_INDEX_DATA` temporarily.
+
+`dbIndex`: A `Report` (field `dbIndex`) as well as a `Form` (field `parameter`.`dbIndex`) can operate on a specific database.
+
+
+A `Form` will:
+
+* load the own definition from `DB_INDEX_QFQ` (table `Form` and `FormElement`),
+* loads and save data from/in `DB_INDEX_DATA` (config.qfq.in) / `dbIndex` (form.parameter.dbIndex),
+* retrieve extra information via `dbIndexExtra` - this is useful to offer information from a database and save them in a
+different one.
+
+The simplest setup, QFQ system & data in the same database, needs no DB_INDEX_QFQ / DB_INDEX_DATA definition in
+`config.qfq.ini` or one or both of them set to '1'
+
+To separate QFQ system and data, DB_INDEX_QFQ and DB_INDEX_DATA will have different indexes.
+
+
+A Multi Database setup might be useful for:
+
+* several independent Typo3 QFQ installations (each have it's own form repository) and one central database, or
+* one QFQ installation which should display / load /save records from different databases, or
+* a combination of the above two.
 
 Note:
 
@@ -829,23 +868,14 @@ In `config.qfq.ini`_ mutliple database credentials can be prepared. Mandatory is
 `DB_1_USER`, `DB_1_SERVER`, `DB_1_PASSWORD`, `DB_1_NAME`. The number '1' indicates the `dbIndex`. Increment the number
 to specify further database credential setups.
 
-Typically the `DB_1_xxx` is identically to the used Typo3 database *credentials* (not database).
+Typically the credentials for `DB_1`  also have access to the T3 database.
 
-If not explicit specified, 'QFQ system' and 'QFQ database' will use the same database with the same credentials (setup 'A').
-
-To define separate 'QFQ data' and 'QFQ system', in `config.qfq.ini`_ define  `DB_1_USER`, ... (e.g. 'QFQ data') and `DB_2_USER`,
-... (e.g. 'QFQ system') and specify the assignment::
-
-	DB_INDEX_DATA = 1
-	DB_INDEX_QFQ = 2
-
-To operate a form (show, load and save) on a different database, use `Form.parameter.dbIndex` (see `form-parameter`_).
 
 Different QFQ versions, shared database
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When using different QFQ versions and a shared 'QFQ data'-database, there is some risk of conflicting
-'QFQ system' tables. Best is to always use the same QFQ version on all instances.
+'QFQ system' tables. Best is to always use the same QFQ version on all instances ot use a Multi Database setup.
 
 .. _debug:
 
@@ -4755,7 +4785,7 @@ be appended to the last keyword line. 'Keyword' lines are detected on:
 
  * <level>.<keyword> =
  * {
- * <level>[.<level] {
+ * <level>[.<sub level] {
 
 Example::
 
@@ -4910,7 +4940,7 @@ The line '10.10' will output 'dummy' in cases where there is at least one corres
 If there are no addresses (all persons) it reports the person id.
 If there is at least one address, it reports 'dummy', cause that's the last stored content.
 
-Example 'Level Key': ::
+Example 'level': ::
 
   10.sql= SELECT p.id AS _pId, p.name FROM Person AS p
   10.5.sql = SELECT adr.city, 'dummy' AS _pId FROM Address AS adr WHERE adr.pId={{10.pId}}
@@ -4918,7 +4948,7 @@ Example 'Level Key': ::
   10.10.sql = SELECT '{{10.pId}}'
 
 
-Notes to the level level:
+Notes to the level:
 
 +-------------+------------------------------------------------------------------------------------------------------------------------+
 | Levels      |A report is divided into levels. The Example has levels *10*, *20*, *30*, *30.5*, *30.5.1*, *50*                        |
@@ -4952,8 +4982,8 @@ Report Example 1: ::
 
 .. _wrapping-rows-and-columns:
 
-Wrapping rows and columns: Level keys
--------------------------------------
+Wrapping rows and columns: Level
+--------------------------------
 
 Order and nesting of queries, will be defined with a typoscript-like syntax: level.sublevel1.subsublevel2. ...
 Each 'level' directive needs a final key, e.g: 20.30.10. **sql**. A key **sql** is necessary in order to process a level.
@@ -6272,7 +6302,7 @@ Formatting (i.e. wrapping of data with HTML tags etc.) can be achieved in two di
 One can add formatting output directly into the SQL by either putting it in a separate column of the output or by using
 concat to concatenate data and formatting output in a single column.
 
-One can use ?level keys to define formatting information that will be put before/after/between all rows/columns of the
+One can use 'level' keys to define formatting information that will be put before/after/between all rows/columns of the
 actual levels result.
 
 Two columns
