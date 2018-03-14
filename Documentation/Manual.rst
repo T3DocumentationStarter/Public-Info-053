@@ -237,7 +237,7 @@ Setup a *report* to manage all *forms*:
 	# If there is a form given by SIP: show
 	form={{form:SE}}
 
-	# Only needed if QFQ uses more than one database.
+	# In case DB_INDEX_QFQ is different from DB_INDEX_DATA, set DB_INDEX_QFQ.
 	dbIndex = {{DB_INDEX_QFQ:Y}}
 
 	10 {
@@ -802,7 +802,7 @@ Base: T3 & QFQ
 
 QFQ typically interacts with one database, the QFQ database. The database used by Typo3 is typically a separate one.
 Theoretically it might be the same (never tested), but it's strongly recommended to use a separated QFQ database to have
- no problems on Typo3 updates and to have a clean separation between Typo3 and QFQ
+no problems on Typo3 updates and to have a clean separation between Typo3 and QFQ
 
 QFQ: System & Data
 ''''''''''''''''''
@@ -829,7 +829,7 @@ A `Form` will:
 * load the own definition from `DB_INDEX_QFQ` (table `Form` and `FormElement`),
 * loads and save data from/in `DB_INDEX_DATA` (config.qfq.in) / `dbIndex` (form.parameter.dbIndex),
 * retrieve extra information via `dbIndexExtra` - this is useful to offer information from a database and save them in a
-different one.
+  different one.
 
 The simplest setup, QFQ system & data in the same database, needs no DB_INDEX_QFQ / DB_INDEX_DATA definition in
 `config.qfq.ini` or one or both of them set to '1'
@@ -960,12 +960,13 @@ File: `config.qfq.ini`_
 Variable
 ========
 
-Most elements of a Form, FormElement or Report might contain (QFQ) variables. Such variables are surrounded by
-double curly braces. Three different types of functionality are provided. Access to:
+Variables in QFQ are surrounded by double curly braces. Four different types of variable substitution functionality is
+provided. Access to:
 
 * `store-variables`_
 * `sql-variables`_
-* `column-variables`_
+* `row-column-variables`_
+* `link-column-variables`_
 
 Some examples, including nesting::
 
@@ -979,7 +980,7 @@ Some examples, including nesting::
   #---------------------------------------------
   {{SELECT name FROM person WHERE id=1234}}
 
-  # Columns
+  # Row columns
   #---------------------------------------------
   {{10.pId}}
   {{10.20.pId}}
@@ -990,6 +991,8 @@ Some examples, including nesting::
   {{SELECT name FROM person WHERE id={{key1:C:alnumx}} }} # explained below
   {{SELECT name FROM person WHERE id={{SELECT id FROM pf LIMIT 1}} }} # it's more efficient to use only one query
 
+  # Link Columns
+  {{p:form=Person&r=1|t:Edit Person|E|s AS link}}
 
 Leading and trailing spaces inside curly braces are removed.
 
@@ -1077,6 +1080,7 @@ instead of the numeric index. ::
 
 If no dbIndex is given, `{{DB_INDEX_DATA:Y}}` is used.
 
+
 Example
 '''''''
 
@@ -1089,13 +1093,10 @@ Example
   {{[2]SELECT id, name FROM Form}}
   {{[{{DB_INDEX_QFQ:Y}}]SELECT id, name FROM Form}}
 
+.. _`row-column-variables`:
 
-
-
-.. _`column-variables`:
-
-Column variables
-^^^^^^^^^^^^^^^^
+Row column variables
+^^^^^^^^^^^^^^^^^^^^
 
 Syntax:  *{{<level>.<column>}}*
 
@@ -1112,6 +1113,27 @@ specific locations in the text will be (automatically by QFQ) replaced by values
 
 General note: using this type of variables is only the second choice. First choice is `{{column:R}}` (see
 `access-column-values`_) - using the STORE_RECORD is more portable cause no renumbering is needed if the level keys change.
+
+
+.. _`link-column-variables`:
+
+Link column variables
+^^^^^^^^^^^^^^^^^^^^^
+
+These variables return a link, completely rendered in HTML. The syntax and all features of `column-link`_ are available.
+The following code will render a 'new person' button::
+
+	{{p:form&form=Person|s|N|t:new person AS link}}
+
+For better reading, the format string might be wrapped in single or double quotes (this ist optional): ::
+
+	{{"p:form&form=Person|s|N|t:new person" AS link}}
+
+These variables are especially helpful in:
+
+* `report`, to create create links or buttons outside of a SQL statement. E.g. in `head`, `rbeg`, ...
+* `form`, to create links and buttons in labels or notes.
+
 
 .. _`sanitize-class`:
 
@@ -1419,11 +1441,17 @@ Store: *RECORD* - R
 * *Report*: See `access-column-values`_
 * If r=0, all values are empty.
 
- +------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------+
- | Name                   | Explanation                                                                                                                                      |
- +========================+==================================================================================================================================================+
- | <column name>          | Name of a column of the primary table (as defined in the current form). To get, exactly and only, the specified form *FormElement*: *{{pId:R}}*  |
- +------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------+
+ +------------------------+-------------------------------------------------------------------------------------------------------------------------+
+ | Name                   | Type     | Explanation                                                                                                  |
+ +========================+==========+==============================================================================================================+
+ | <column name>          | Form     | Name of a column of the primary table (as defined in the current form). Example: *{{pId:R}}*                 |
+ +------------------------+----------+--------------------------------------------------------------------------------------------------------------+
+ | <column name>          | Report   | Name of a column of a previous fired SQL query. Example: *{{pId:R}}*                                         |
+ +------------------------+----------+--------------------------------------------------------------------------------------------------------------+
+ | &<column name>         | Report   | Name of a column of a previous fired SQL query, typically used by columns with a `special-column-names`_.    |
+ |                        | (final)  | Final value. Example: '{{link:R}}' returns 'p:home&form=Person|s|b:success|t:Edit'.                          |
+ |                        |          | Whereas '{{&link:R}}' returns '<span class="btn btn-success"><a href="?home&s=badcaffee1234">Edit</a></span> |
+ +------------------------+----------+--------------------------------------------------------------------------------------------------------------+
 
 .. _STORE_BEFORE:
 
@@ -1521,7 +1549,17 @@ Store: *VARS* - V
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | slaveId                 | see *FormElement* `action`                                                                                                                 |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+
+.. _`store_vars_form_element_upload`:
+
+* FormElement 'upload':
+
+ +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+ | Name                    | Explanation                                                                                                                                |
+ +=========================+============================================================================================================================================+
  | filename                | Original filename of an uploaded file via an 'upload'-FormElement. Valid only during processing of the current 'upload'-formElement.       |
+ +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+ | filenameOnly            | Like filename, but without path.                                                                                                           |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | filenameBase            | Like `filename`, but without an optional extension. E.g. filename='image.png' comes to filenameBase='image'                                |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1529,6 +1567,11 @@ Store: *VARS* - V
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | fileDestination         | Destination (path & filename) for an uploaded file. Defined in an 'upload'-FormElement.parameter. Valid: same as 'filename'.               |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+ | fileSize                | Size of the uploaded file.                                                                                                                 |
+ +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+ | mimeType                | Mimetype of the uploaded file.                                                                                                             |
+ +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
+
 
 The directive `fillStoreVar` will fill the store VARS with custom values. Existing Store VARS values will be merged together with them.
 E.g.: ::
@@ -1734,12 +1777,13 @@ Prefetch
 ^^^^^^^^
 
 After 'form load' with an existing record, the user epects to see the previous saved data. In case there is an *id* to
-*value* translation, the *value* does not exist in the database, instead it has to be fetched again dynamically from the
-LDAP server. A precise LDAP query has to be defined to force this:
+*value* translation, the *value* does not exist in the database, instead it has to be fetched again dynamically.
+A precise LDAP or SQL query has to be defined to force this:
 
 * *Form.parameter* or *FormElement.parameter*:
 
   * *typeAheadLdapSearchPrefetch* = `(mail=?)`
+  * *typeAheadSqlPrefetch* = `SELECT firstName, ' ', lastName FROM person WHERE id = ?`
 
 This situation also applies in *pedantic* mode to verify the user input after each change.
 
@@ -2659,6 +2703,7 @@ See also at specific *FormElement* definitions.
 | typeAheadLimit         | string | See `input-typeahead`_                                                                                   |
 | typeAheadMinLength     | string |                                                                                                          |
 | typeAheadSql           | string |                                                                                                          |
+| typeAheadSqlPrefetch   | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | editor-plugins         | string | See `input-editor`_                                                                                      |
 | editor-toolbar         | string |                                                                                                          |
@@ -3027,6 +3072,11 @@ SQL
     * The value, typed by the user, will be replaced on all places where a `?` appears.
     * All `?` will be automatically surrounded by '%'. Therefore wildcard search is implemented: `... LIKE '%<?>%' ...`
 
+  * *typeAheadSqlPrefetch* = `SELECT firstName, ' ', lastName FROM person WHERE id = ?`
+
+    * If the query returns several results, only the first one is returned and displayed.
+    * If the query selects multiple columns, the columns are concatenated.
+
 LDAP
 ;;;;
 
@@ -3322,7 +3372,7 @@ current record, either to finalize the upload and/or to delete a previous upload
 The FormElement behaves like a
 
 * 'native FormElement' (showing controls/text on the form) as well as an
-* 'action FormElement' by fireing queries and doing some additional actions during form save.
+* 'action FormElement' by firing queries and doing some additional actions during form save.
 
 Inside the *Form editor* it's shown as a 'native FormElement'.
 During saving the current record, it behaves like an action FormElement
@@ -3331,7 +3381,8 @@ and will be processed after saving the primary record and before any action Form
 * *FormElement.value*: By default, the full path of any already uploaded file is shown. To show something different, e.g.
   only the filename, define: ::
 
-	 {{SELECT SUBSTRING_INDEX( '{{pathFileName:R}}', '/', -1)  }}
+	 a) {{filenameBase:V}}
+	 b) {{SELECT SUBSTRING_INDEX( '{{pathFileName:R}}', '/', -1)  }}
 
 See also `downloadButton`_ to offer a download of an uploaded file.
 
@@ -3363,6 +3414,8 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
         fileDestination={{SELECT 'fileadmin/user/pictures/', p.name, '-{{filename}}' FROM Person AS p WHERE p.id={{id:R0}} }}
 
+      * Several more variants of the filename and also mimetype and filesize are available. See `store_vars_form_element_upload`_.
+
       * The original filename will be sanitized: only '<alnum>', '.' and '_' characters are allowed. German 'umlaut' will
         be replaced by 'ae', 'ue', 'oe'. All non valid characters will be replaced by '_'.
 
@@ -3379,18 +3432,32 @@ See also `downloadButton`_ to offer a download of an uploaded file.
       by an attacker. Therefore it's recommended to use a `fileDestination`-directory, which is secured against script
       execution (even if the file has been uploaded, the webserver won't execute it) - see `SecureDirectFileAccess`_.
 
-  * *slaveId*, *sqlBefore*, *sqlInsert*, *sqlUpdate*, *sqlDelete*, *sqlUpdate*, *sqlAfter*: Only used in :ref:`Upload advanced mode`.
+  * *sqlBefore*,  *sqlAfter*: available in :ref:`Upload simple mode`  and :ref:`Upload advanced mode`.
+  * *slaveId*,  *sqlInsert*, *sqlUpdate*, *sqlDelete*, *sqlUpdate*: available only in :ref:`Upload advanced mode`.
+
+  * `fileSize` / `mimeType`
+
+    * In :ref:`Upload simple mode` the information of `fileSize` and `mimeType` will be automatically updated on the current
+      record, if table columns `fileSize` and/or `mimeType` exist.
+
+      * If there are more than one Upload FormElement in a form, the automatically update for `fileSize` and/or `mimeType`
+        are not useful - the columns only handle
+
+    * In :ref:`Upload advanced mode`  the `fileSize` and / or `mimeType`  have to be updated with an explicit SQL statement::
+
+        sqlAfter = {{UPDATE Data SET mimeType='{{mimeType:V}}', fileSize={{fileSize:V}} WHERE id={{id:R}} }}
 
   * *fileReplace=always*: If `fileDestination` exist - replace it by the new one.
+
 
 .. _`downloadButton`:
 
   * *downloadButton*: If given, shows a button to download the previous uploaded file - instead of the string given in
     `fe.value`. It's important that `fe.value` points to a readable file on the server.
 
-    If `downloadButton` ist empty, just shows the regular download glyph.
-
-    Additional attributes might be given like `downloadButton = t:Download|o:check file`. Please check `download`_.
+    * If `downloadButton` ist empty, just shows the regular download glyph.
+    * To just show the filename: `downloadButton = t:{{filenameOnly:V}}`
+    * Additional attributes might be given like `downloadButton = t:Download|o:check file`. Please check `download`_.
 
   * fileSplit, fileDestinationSplit, tableNameSplit: see split-pdf-upload_
 
@@ -3400,7 +3467,6 @@ content or file extension (see 'accept').
 The maximum size is defined by the minimum of `upload_max_filesize`, `post_max_size` and `memory_limit` (PHP script) in the php.ini.
 
 In case of broken uploads, please also check `max_input_time` in php.ini.
-
 
 Deleting a record and the referenced file
 '''''''''''''''''''''''''''''''''''''''''
@@ -4832,7 +4898,7 @@ Example::
 
     20.sql = SELECT 'a warm welcome'
                'some additional', 'columns'
-               FROM anotherable
+               FROM another_table
                WHERE id>100
 
     20.head = <h3>
@@ -4966,6 +5032,16 @@ Columns of the upper / outer level result can be accessed via variables in two w
 
 The STORE_RECORD will always be merged with previous content. The Level Keys are unique.
 
+Multiple columns, with the same column name, can't be accessed individually. Only the last column is available.
+
+Retrieving the *final* value of `special-column-names`_ is possible via '{{&<column>:R}}. Example: ::
+
+  10.sql = SELECT 'p:home&form=Person|s|b:success|t:Edit' AS _link
+  10.20.sql = SELECT '{{link:R}}', '{{&link:R}}'
+
+The first column of row `10.20` returns 'p:home&form=Person|s|b:success|t:Edit',the second column returns
+'<span class="btn btn-success"><a href="?home&s=badcaffee1234">Edit</a></span>'.
+
 Example STORE_RECORD: ::
 
   10.sql= SELECT p.id AS _pId, p.name FROM Person AS p
@@ -5077,6 +5153,10 @@ Special column names
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _htmlentities          |Characters will be encoded to their HTML entity representation.                                                                                                                              |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _fileSize              |Show file size of a given file                                                                                                                                                               |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _mimeType              |Show mime type of a given file                                                                                                                                                               |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _thumbnail             |Create thumbnails on the fly. See `column-thumbnail`_.                                                                                                                                       |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _+???                  |The content will be wrapped in the tag '???'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                                |
@@ -5108,7 +5188,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Render        |r:<mode>                           |r:3                        |See: `render-mode`_, Default: 0                                                                                                         |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |   |Button        |b[:0|1|<btn class>]                | b:0, b:1, b:success       |'b', 'b:1': a bootstrap button is created. 'b:0' disable the button. <btn class>: default, primary, success, info, warning,danger       |
+|   |   |Button        | b[:0|1|<btn class>]               | b:0, b:1, b:success       |'b', 'b:1': a bootstrap button is created. 'b:0' disable the button. <btn class>: default, primary, success, info, warning,danger       |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Picture       |P:<filename>                       |P:bullet-red.gif           |Picture '<img src="bullet-red.gif"alt="....">'.                                                                                         |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -6473,7 +6553,7 @@ Same as above, but written in the nested notation ::
     }
   }
 
-Best practice *recommendation* for using parameter - see `access-column-values`_
+Best practice *recommendation* for using parameter - see `access-column-values`_ ::
 
   10 {
     sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
@@ -6506,6 +6586,78 @@ FormElement) forms: ::
 	  head = <h3>Recent Forms</h3>
 	  rsep = ,&ensp;
 	}
+
+.. _`system`:
+
+SYSTEM
+======
+
+.. _`autocron`:
+
+Auto Cron
+---------
+
+The `autocron` service fires periodically jobs like `send a mail` or `open a webpage`.
+
+* The frequency can be configured.
+* Minimal time distance is 1 minute.
+* Per job: if a job's runs and the receives the next trigger, the running job will be completed first.
+* Per job: if more than one trigger arrives during a run, only one trigger will be processed.
+* If the system misses a run, it will be played as soon as the system is online again.
+* Running and processed jobs can easily be monitored.
+
+Setup
+^^^^^
+
+Setup a cron entry, typically as the webserver user ('www-data' on debian): ::
+
+  * * * * * /usr/bin/php /var/www/html/typo3conf/ext/qfq/qfq/external/autocron.php
+
+Create / edit `autocron` jobs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create a T3 page with a QFQ record. Such page should be access restricted and is only needed to edit `autocron` jobs: ::
+
+	form={{form:S}}
+
+	10 {
+		 # List of Forms: Do not show this list of forms if there is a form given by SIP.
+		# Table header.
+		sql = SELECT CONCAT('{{pageId:T}}&form=cron') as Pagen, 'id', 'Enable', 'Next run','Frequency','Comment','Last run','Status' FROM (SELECT 1) AS fake WHERE  '{{form:SE}}'=''
+		head = <table class='table table-hover qfq-table-50'>
+		tail = </table>
+		rbeg = <thead><tr>
+		rend = </tr></thead>
+		fbeg = <th>
+		fend = </th>
+
+	10 {
+		# All Cron Jobs
+		sql = SELECT CONCAT('{{pageId:T}}&form=cron&r=', c.id) AS _Pagee, c.id,
+				  IF(c.status='enable','green','gray') AS _bullet,
+				  IF(c.nextrun=0,"", DATE_FORMAT(c.nextrun, "%d.%m.%y %H:%i:%s")),
+				  c.frequency,
+				  c.comment,
+				  IF(c.lastrun=0,"", DATE_FORMAT(c.lastrun,"%d.%m.%y %H:%i:%s")),
+				  LEFT(c.laststatus,40),
+				  CONCAT('form=cron&r=', c.id) AS _Paged
+				 FROM Cron AS c
+				 ORDER BY c.id
+
+		rbeg = <tr>
+		rend = </tr>
+		fbeg = <td>
+		fend = </td>
+		}
+	}
+
+
+
+
+
+
+
+
 
 .. _help:
 

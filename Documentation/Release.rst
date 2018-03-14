@@ -34,9 +34,58 @@ Features
 ^^^^^^^^
 
 Bug Fixes
-
 ^^^^^^^^^
 
+
+Version 0.25.14
+---------------
+
+Date: 14.03.2018
+
+Notes
+^^^^^
+
+Features
+^^^^^^^^
+
+* Change notification from 'save: success' to 'Save' and 'delete: success' to 'Delete'
+* DB update: write intermediate QFQ version after every step.
+
+Bug Fixes
+^^^^^^^^^
+
+* #5652 / TypeAheadSql: destroyed SQL statement. Fixed broken compare and missing init of $sqlTest.
+* #5668 / Fix Broken SIP after login.
+
+
+Version 0.25.13
+---------------
+
+Date: 08.03.18
+
+Notes
+^^^^^
+
+Features
+^^^^^^^^
+
+* AutoCron: Added doc for autocron. Extend AutoCron.php to be MultiDB aware. Update der AutoCron form.
+* #4720 / Separate Database for Form & FormElement - Multi DB - fixed problem that 'Quick Edit Form / FormElement' has been broken in MultiDB Setup.
+* #5603 / Report: final value of report columns (special column name)
+* Fabric / delete now triggers form.changed / emojis work again
+* #5571 / File Upload: save filesize and mimetype automatically in 'upload mode simple',if those columns exist.
+* #5423 / two new column names 'filesize', 'mimetype'
+* #5571 / File Upload: save filesize and mimetype
+
+  * STORE_VARS contains now 'mimeType' and 'fileSize'.
+  * sqlBefore and sqlAfter will be fired in Upload Advanced and new in Upload Simple as well.
+  * STORE_VARS contains now `filenameOnly`. It can be used in downloadButton=....
+
+Bug Fixes
+^^^^^^^^^
+
+* Fabric: Corrected resizing with changed width in editor
+* #5640 / UTF8 encoded strings: MAX LENGTH wrong
 
 Version 0.25.12
 ---------------
