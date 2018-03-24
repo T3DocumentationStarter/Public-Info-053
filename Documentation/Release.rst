@@ -37,6 +37,46 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 0.25.15
+---------------
+
+Date: 20.03.2018
+
+Features
+^^^^^^^^
+
+* Fabric Read Only mockup
+
+Bug Fixes
+^^^^^^^^^
+
+* #5706 Fixed that problematic characters in 'fileDestination' has not been sanatized.
+* Fixed problem with buttons clipping trough alert
+* Client: wrong variable, updated CSS for long errors
+
+Version 0.25.14a
+----------------
+
+Date: 15.03.2018
+
+Features
+^^^^^^^^
+
+* Change getMimeType() in Report in case file is missing or `file` beaks: instead to throw an exception, an empty string is returned.
+* Updated protocol.md with Alert description
+* Update Status message for save/delete.
+* Makefile: 1) remove sonar, add dependency to let update-qfq-doc run. 2) do qfq doc commit inside of the Makefile.
+* Client: Changed save timeout from 1500 to 3000
+* Client: removing the blackout screen when modal gets dismissed
+* Client: modal alerts are now blocking everything.
+* Manual.rst: fix RST syntax errors.
+
+Bug Fixes
+^^^^^^^^^
+
+* #5677-TinyMCE broken - fixed
+
+
 Version 0.25.14
 ---------------
 

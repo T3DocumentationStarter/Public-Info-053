@@ -1,5 +1,5 @@
 .. ==================================================
-.. Header hierachy
+.. Header hierarchy
 .. ==
 ..  --
 ..   ^^
@@ -6601,10 +6601,14 @@ The `autocron` service fires periodically jobs like `send a mail` or `open a web
 
 * The frequency can be configured.
 * Minimal time distance is 1 minute.
-* Per job: if a job's runs and the receives the next trigger, the running job will be completed first.
-* Per job: if more than one trigger arrives during a run, only one trigger will be processed.
-* If the system misses a run, it will be played as soon as the system is online again.
-* Running and processed jobs can easily be monitored.
+* Per job:
+
+  * If a job's runs and receives the next trigger, the running job will be completed first.
+  * If more than one trigger arrives during a run, only one trigger will be processed.
+  * If the system misses a run, it will be played as soon as the system is online again.
+  * If multiple runs are missed, only one run is fired as soon as the system is online again.
+
+* Running and processed jobs can easily be monitored via *lastRun, lastStatus, nextRun, inProgress*.
 
 Setup
 ^^^^^
@@ -6619,11 +6623,11 @@ Create / edit `autocron` jobs
 Create a T3 page with a QFQ record. Such page should be access restricted and is only needed to edit `autocron` jobs: ::
 
 	form={{form:S}}
+	dbIndex={{DB_INDEX_QFQ:Y}}
 
 	10 {
-		 # List of Forms: Do not show this list of forms if there is a form given by SIP.
 		# Table header.
-		sql = SELECT CONCAT('{{pageId:T}}&form=cron') as Pagen, 'id', 'Enable', 'Next run','Frequency','Comment','Last run','Status' FROM (SELECT 1) AS fake WHERE  '{{form:SE}}'=''
+		sql = SELECT CONCAT('p:{{pageId:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment','Last run','Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
 		head = <table class='table table-hover qfq-table-50'>
 		tail = </table>
 		rbeg = <thead><tr>
@@ -6631,32 +6635,69 @@ Create a T3 page with a QFQ record. Such page should be access restricted and is
 		fbeg = <th>
 		fend = </th>
 
-	10 {
-		# All Cron Jobs
-		sql = SELECT CONCAT('{{pageId:T}}&form=cron&r=', c.id) AS _Pagee, c.id,
-				  IF(c.status='enable','green','gray') AS _bullet,
-				  IF(c.nextrun=0,"", DATE_FORMAT(c.nextrun, "%d.%m.%y %H:%i:%s")),
-				  c.frequency,
-				  c.comment,
-				  IF(c.lastrun=0,"", DATE_FORMAT(c.lastrun,"%d.%m.%y %H:%i:%s")),
-				  LEFT(c.laststatus,40),
-				  CONCAT('form=cron&r=', c.id) AS _Paged
-				 FROM Cron AS c
-				 ORDER BY c.id
-
-		rbeg = <tr>
-		rend = </tr>
-		fbeg = <td>
-		fend = </td>
+		10 {
+			# All Cron Jobs
+			sql = SELECT CONCAT('<tr class="', IF(c.lastStatus LIKE 'Error%','danger',''),
+										IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),' warning',''),
+										IF(c.status='enable','',' text-muted'), '">'),
+								'<td>', CONCAT('p:{{pageId:T}}&form=cron&r=', c.id) AS _pagee, '</td><td>',
+								c.id, '</td><td>',
+								IF(c.nextrun=0,"", DATE_FORMAT(c.nextrun, "%d.%m.%y %H:%i:%s")), '</td><td>',
+								c.frequency, '</td><td>',
+								c.comment, '</td><td>',
+								IF(c.lastrun=0,"", DATE_FORMAT(c.lastrun,"%d.%m.%y %H:%i:%s")), '</td><td>',
+								LEFT(c.laststatus,40) AS '_+pre', '</td><td>',
+								CONCAT('U:form=cron&r=', c.id) AS _paged, '</td></tr>'
+							FROM Cron AS c
+							ORDER BY c.id
 		}
 	}
 
+Usage
+^^^^^
+
+The OS `cron` service will call the `QFQ autocron` every minute. `QFQ autocron` checks if there is a pending job, by looking
+for jobs with `Next run`<=NOW(). All found jobs will be fired - depending on their type, such jobs will send mail(s) or
+open a `webpage`. A `webpage` will mostly be a local T3 page with at least one QFQ record on it. Such a QFQ record might
+do some manipulation on the database or any other wished task.
+
+After finishing a job, `Next run` will be increased by `Frequency`. If `Next run` still points in the past, it will be
+increased by Frequency again, until it points to the future.
+
+With `Next run`=0 the auto repeating is switched off.
+
+Type: Mail
+''''''''''
+
+At the moment there is a special sendmail notation - this will change in the future.
+
+* `Mail`: ::
+
+  {{!SELECT 'john@doe.com' AS sendMailTo, 'Custom subject' AS sendMailSubject, 'jane@doe.com' AS sendMailFrom,
+             123 AS sendMailGrId, 456 AS sendMailXId}}
+
+Autocron will send as many mails as records are selected by the SQL query in field `Mail`. Field `Mail body` provides
+the mail text.
 
 
+Type: Website
+'''''''''''''
+
+The page specified in `URL` will be opened.
+
+Optional the output of that page can be logged to a file (take care to have write permissions on that file).
+
+* `Log output to file`=`output.log` - creates a file in the Typo3 host directory.
+* `Log output to file`=`/var/log/output.log` - creates a file in `/var/log/` directory.
 
 
+Also `overwrite` or `append` can be selected for the output file. In case of `append` a file rotation should be setup on
+ OS level.
 
-
+To check for a successful DB connection, it's a good practice to report a custom token on the T3 page / QFQ record like
+'DB Connect: ok'. Such a string can be checked via `Pattern to look for on output`=`/DB Connect: ok/`. The pattern
+needs to be written in PHP PCRE syntax. For a simple search string, just surround them with '/'.
+If the pattern is found on the page, the job get's 'Ok' - else 'Error - ...'.
 
 
 .. _help:
@@ -6677,16 +6718,23 @@ Tips:
 QFQ specific
 ------------
 
-Variable empty: {{...}}
-^^^^^^^^^^^^^^^^^^^^^^^
+Problem with Query or variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Specify the required sanitize class. Remember: for STORE_FORM and STORE_CLIENT the default is sanatize class is `digit`. This means if
-the variable content is a string, this violates the sanitize class and the replaced content will be an empty string!
+Specify the required sanitize class. Remember: for STORE_FORM and STORE_CLIENT the default is sanitize class is `digit`.
+This means if the variable content is a string, this violates the sanitize class and the variable will not be replaced.
 
-Form: put the problematic variable or SQL statement in the 'title' or note 'field' of a `FormElement`. This should show
-the content. For SQL statements, remove the outer token (e.g. only one curly brace) to avoid SQL triggering: ::
+Tip on Form: put the problematic variable or SQL statement in the 'title' or note 'field' of a `FormElement`. This should show
+the content. For SQL statements, remove the outer token (e.g. only one curly brace) to avoid triggering SQL: ::
 
-  Person { SELECT ... WHERE id={{buggyVar:alnumx}} }
+  FE.title: Person { SELECT ... WHERE id={{buggyVar:alnumx}} }
+
+Tip on Report: In case the query did not contain any double ticks, just wrap all but 'SELECT' in double ticks: ::
+
+ Buggy query:  10.sql = SELECT id, ... FROM myTable WHERE status={{myVar}} ORDER BY status
+ Debug query:  10.sql = SELECT "id, ... FROM myTable WHERE status={{myVar}} ORDER BY status"
+
+
 
 Error read file config.qfq.ini: syntax error on line xx
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
