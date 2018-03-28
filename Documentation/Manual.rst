@@ -705,7 +705,7 @@ QFQ Keywords (Bodytext)
  +===================+=================================================================================+
  | form              | Formname defined in ttcontent record bodytext                                   |
  |                   | - Fix. E.g.: **form = person**                                                  |
- |                   | - by SIP: **form = {{form}}**                                                   |
+ |                   | - by SIP: **form = {{form:SE}}**                                                |
  |                   | - by SQL: **form = {{SELECT c.form FROM conference AS c WHERE c.id={{a:C}} }}** |
  +-------------------+---------------------------------------------------------------------------------+
  | r                 | <record id> The form will load the record with the specified id                 |
@@ -1507,7 +1507,7 @@ Store: *TYPO3* (Bodytext) - T
  | form                    | Formname defined in ttcontent record bodytext                     | see note |
  |                         |                                                                   |          |
  |                         | * Fix. E.g. *form = person*                                       |          |
- |                         | * via SIP. E.g. *form = {{form}}*                                 |          |
+ |                         | * via SIP. E.g. *form = {{form:SE}}*                              |          |
  +-------------------------+-------------------------------------------------------------------+----------+
  | pageId                  | Record id of current Typo3 page                                   | see note |
  +-------------------------+-------------------------------------------------------------------+----------+
@@ -1904,7 +1904,7 @@ General
   * Inside the QFQ record: `form  = <formname>`. E.g.:
 
     * Static: `form = Person`
-    * Dynamic: `form  = {{form:S}}`  (the left `form` is a keyword for QFQ, the right `form` is a free chooseable variable name)
+    * Dynamic: `form  = {{form:SE}}`  (the left `form` is a keyword for QFQ, the right `form` is a free chooseable variable name)
 
   * With the `Dynamic` option, it's easily possible to use one Typo3 page and display different forms on that specific
     page. This is nice to configure few Typo 3 pages. The disadvantage is that the user might loose the navigation.
@@ -2996,9 +2996,9 @@ Type: datetime
 
   * *FormElement.parameter*:
 
-    * *dateFormat*: yyyy-mm-dd | dd.mm.yyyy
-    * *showSeconds*: 0|1 - shows the seconds. Independent if the user specifies seconds, they are displayed '1' or not '0'.
-    * *showZero*: 0|1 - For an empty timestamp, With '0' nothing is displayed. With '1' the string '0000-00-00 00:00:00' is displayed.
+    * *dateFormat* = yyyy-mm-dd | dd.mm.yyyy
+    * *showSeconds* = 0|1 - shows the seconds. Independent if the user specifies seconds, they are displayed '1' or not '0'.
+    * *showZero* = 0|1 - For an empty timestamp, With '0' nothing is displayed. With '1' the string '0000-00-00 00:00:00' is displayed.
 
 Type: extra
 ^^^^^^^^^^^
@@ -3016,7 +3016,7 @@ Type: text
 ^^^^^^^^^^
 
 * General input for text and number.
-* *FormElement.size*:
+* *FormElement.size* =
 
   * <number>:  width of input element in characters. Lineheight = 1.
   * <cols>,<rows>: input element = textarea, width=<cols>, height=<rows>
@@ -3115,9 +3115,7 @@ Type: editor
 
   This might have impacts on the editor. See https://www.tinymce.com/docs/configure/content-filtering/#forced_root_block
 
-* *FormElement.size*:
-
-  * <min_height>,<max_height>: in pixels, including top and bottom bars. E.g.: 300,600
+* *FormElement.size* = <min_height>,<max_height>: in pixels, including top and bottom bars. E.g.: 300,600
 
 
 Type: annotate
@@ -3202,7 +3200,7 @@ Type: radio
     entry, but the empty value should not be selectable.
   * *emptyItemAtStart*: Existence of this item inserts an empty entry at the beginning of the selectlist.
   * *emptyItemAtEnd*: Existence of this item inserts an empty entry at the end of the selectlist.
-  * *buttonClass*: Instead of the plain radio fields, Bootstrap
+  * *buttonClass* = <class> - Instead of the plain radio fields, Bootstrap
     `buttons <http://getbootstrap.com/javascript/#buttons-checkbox-radio>`_. are rendered as `radio` elements. Use
     one of the following `classes <http://getbootstrap.com/css/#buttons-options>`_:
 
@@ -3232,7 +3230,9 @@ Type: select
 
 * Select lists will be built from one of three sources:
 
-  * 'sql1': E.g. *{{!SELECT type AS label FROM car }}* or *{{!SELECT type AS label, typeNr AS id FROM car}}* or *{{!SHOW tables}}*.
+  * *FormElement.sql1* = `{{!<SQL Query}}`
+
+    * E.g. *{{!SELECT type AS label FROM car }}* or *{{!SELECT type AS label, typeNr AS id FROM car}}* or *{{!SHOW tables}}*.
 
     * Resultset format 'named': column 'label' and optional a column 'id'.
     * Resultset format 'index':
@@ -3248,7 +3248,7 @@ Type: select
 
   * Definition of the *enum* or *set* field (only labels, ids are not possible).
 
-* *FormElement.size*: `<value>`
+* *FormElement.size* = `<value>`
 
   * `<value>`: <empty>|0|1: drop-down list.
   * `<value>`: >1: Select field with *size* rows height. Multiple selection of items is possible.
@@ -3269,17 +3269,19 @@ The *FormElement* type 'subrecord' renders a list of records (so called secondar
 or add new records. The list is defined as a SQL query. The number of records shown is not limited. These *FormElement*
 will be rendered inside the form as a HTML table.
 
-* *mode / modeSql*:
+* *mode / modeSql* = `<type/value>`
 
   * *show / required*: the regular mode to show the subrecords
   * *readonly*: New / Edit / Delete Buttons are disabled
   * *hidden*: The FormElement is rendered, but hidden with `display='none'`.
 
-* *dynamicUpdate*: not supported at the moment.
+* *dynamicUpdate* - not supported at the moment.
 
-* *sql1*: SQL query to select records. E.g.::
+* *sql1* = `{{!<SQL Query}}`
 
-   {{!SELECT addr.id AS id, CONCAT(addr.street, addr.streetnumber) AS a, addr.city AS b, addr.zip AS c FROM Address AS addr}}
+   * SQL query to select records. E.g.::
+
+      {{!SELECT addr.id AS id, CONCAT(addr.street, addr.streetnumber) AS a, addr.city AS b, addr.zip AS c FROM Address AS addr}}
 
   * Notice the **exclamation mark** after '{{' - this is necessary to return an array of elements, instead of a single string.
   * Exactly one column **'id'** has to exist; it specifies the primary record for the target form.
@@ -3320,10 +3322,16 @@ will be rendered inside the form as a HTML table.
 
 * *FormElement.parameter*
 
-  * *form*: Target form, e.g. *form=person*
-  * *page*: Target page with detail form. If none specified, use the current page.
+  * *form* = `<form name>` - Target form, e.g. *form=person*
+  * *page* = `<T3 page alias or id>` - Target page with detail form. If none specified, use the current page.
   * *extraDeleteForm*: Optional. The per row delete Button will reference the form specified here (for deleting) instead of the default (*form*).
-  * *detail*: Mapping of values from a) the primary form, b) the current row, c) any constant or '{{...}}' - to the target form (defined via `form=...`).
+  * *detail* = `<string>` - Mapping of values from
+
+    * a) the primary form,
+    * b) the current row,
+    * c) any constant or '{{...}}' -
+
+    to the target form (defined via `form=...`).
 
     * Syntax::
 
@@ -3349,8 +3357,8 @@ Type: time
 * Optional:
 * *FormElement.parameter*
 
-  * *showSeconds*: 0|1 - shows the seconds. Independent if the user specifies seconds, they are displayed '1' or not '0'.
-  * *showZero*: 0|1 - For an empty timestamp, With '0' nothing is displayed. With '1' the string '00:00[:00]' is displayed.
+  * *showSeconds* = `0|1` - shows the seconds. Independent if the user specifies seconds, they are displayed '1' or not '0'.
+  * *showZero* =  `0|1` - For an empty timestamp, With '0' nothing is displayed. With '1' the string '00:00[:00]' is displayed.
 
 .. _`input-upload`:
 
@@ -3378,7 +3386,7 @@ Inside the *Form editor* it's shown as a 'native FormElement'.
 During saving the current record, it behaves like an action FormElement
 and will be processed after saving the primary record and before any action FormElements are processed.
 
-* *FormElement.value*: By default, the full path of any already uploaded file is shown. To show something different, e.g.
+* *FormElement.value* = `<string>` - By default, the full path of any already uploaded file is shown. To show something different, e.g.
   only the filename, define: ::
 
 	 a) {{filenameBase:V}}
@@ -3388,10 +3396,10 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
 * *FormElement.parameter*:
 
-  * *capture=camera*: On a smartphone, after pressing the 'open file' button, the camera will be opened and a
+  * *capture* = `camera` - On a smartphone, after pressing the 'open file' button, the camera will be opened and a
     choosen picture will be uploaded. Automatically set/overwrite `accept=image/*`.
 
-  * *accept*: `<mime type>,image/*,video/*,audio/*,.doc,.docx,.pdf`
+  * *accept* = `<mime type>,image/*,video/*,audio/*,.doc,.docx,.pdf`
 
     * List of mime types (also known as 'media types'): http://www.iana.org/assignments/media-types/media-types.xhtml
     * If none is specified, 'application/pdf' is set. This forces that always (!) one type is specified.
@@ -3405,9 +3413,9 @@ See also `downloadButton`_ to offer a download of an uploaded file.
     * If for a specific filetype is no mime type available, the definition of file extension(s) is possible. This is **less
       secure**, cause there is no *content* check on the server after the upload.
 
-  * *maxFileSize*: max filesize in bytes (no unit), kilobytes (k/K) or megabytes (m/M) for an uploaded file. Default: 10M.
+  * *maxFileSize* = `<size>` - max filesize in bytes (no unit), kilobytes (k/K) or megabytes (m/M) for an uploaded file. Default: 10M.
 
-  * *fileDestination*: Destination where to copy the file. A good practice is to specify a relative `fileDestination` -
+  * *fileDestination* = `<pathFileName>` - Destination where to copy the file. A good practice is to specify a relative `fileDestination` -
     such an installation (filesystem and database) are moveable.
 
     * If the original filename should be part of `fileDestination`, the variable *{{filename}}* (STORE_VARS) can be used. Example ::
@@ -3447,12 +3455,12 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
         sqlAfter = {{UPDATE Data SET mimeType='{{mimeType:V}}', fileSize={{fileSize:V}} WHERE id={{id:R}} }}
 
-  * *fileReplace=always*: If `fileDestination` exist - replace it by the new one.
+  * *fileReplace* = `always` - If `fileDestination` exist - replace it by the new one.
 
 
 .. _`downloadButton`:
 
-  * *downloadButton*: If given, shows a button to download the previous uploaded file - instead of the string given in
+  * *downloadButton* = `<string>` - If given, shows a button to download the previous uploaded file - instead of the string given in
     `fe.value`. It's important that `fe.value` points to a readable file on the server.
 
     * If `downloadButton` ist empty, just shows the regular download glyph.
@@ -3510,36 +3518,36 @@ This mode will serve further database structure scenarios.
 
 A typical name for such an 'upload'-FormElement, to show that the name does not exist in the table, might start with 'my', e.g. 'myUpload1'.
 
-* *FormElement.value*: The path/filename, shown during 'form load' to indicate a previous uploaded file, has to be queried
+* *FormElement.value* = `<string>` - The path/filename, shown during 'form load' to indicate a previous uploaded file, has to be queried
   with this field. E.g.::
 
       {{SELECT pathFileNamePicture FROM Note WHERE id={{slaveId}} }}
 
 * *FormElement.parameter*:
 
-  * *fileDestination*: determine the path/filename. E.g.::
+  * *fileDestination* = `<pathFileName>` - determine the path/filename. E.g.::
 
      fileDestination=fileadmin/person/{{name:R0}}_{{id:R}}/uploads/picture_{{filename}}
 
-  * *slaveId*: Defines the target record where to retrieve and store the path/filename of the uploaded file. Check also :ref:`slave-id`. E.g.::
+  * *slaveId* = `<id>` - Defines the target record where to retrieve and store the path/filename of the uploaded file. Check also :ref:`slave-id`. E.g.::
 
       slaveId={{SELECT id FROM Note WHERE pId={{id:R0}} AND type='picture' LIMIT 1}}
 
-  * *sqlBefore*: fired during a form save, before the following queries are fired.
+  * *sqlBefore* = `{{<query>}}` - fired during a form save, before the following queries are fired.
 
-  * *sqlInsert*: fired if `slaveId=0` and an upload exist (user has choosen a file)::
+  * *sqlInsert* = `{{<query>}}` - fired if `slaveId=0` and an upload exist (user has choosen a file)::
 
       sqlInsert={{INSERT INTO Note (pId, type, pathFileName) VALUE ({{id:R0}}, 'image', '{{fileDestination}}') }}
 
-  * *sqlUpdate*: fired if `slaveId>0` and an upload exist (user has choosen a file). E.g.::
+  * *sqlUpdate* = `{{<query>}}` - fired if `slaveId>0` and an upload exist (user has choosen a file). E.g.::
 
       sqlUpdate={{UPDATE Note SET pathFileName = '{{fileDestination}}' WHERE id={{slaveId}} LIMIT 1}}
 
-  * *sqlDelete*: fired if `slaveId>0` and no upload exist (user has not choosen a file). E.g.::
+  * *sqlDelete* = `{{<query>}}` - fired if `slaveId>0` and no upload exist (user has not choosen a file). E.g.::
 
       sqlDelete={{DELETE FROM Note WHERE id={{slaveId:V}}  LIMIT 1}}
 
-  * *sqlAfter*: fired after all previous queries have been fired. Might update the new created id to a primary record. E.g.::
+  * *sqlAfter* = `{{<query>}}` - fired after all previous queries have been fired. Might update the new created id to a primary record. E.g.::
 
       sqlAfter={{UPDATE Person SET noteIdPicture = {{slaveId}} WHERE id={{id:R0}} LIMIT 1 }}
 
@@ -3554,10 +3562,12 @@ page. The split is done via http://www.cityinthesky.co.uk/opensource/pdf2svg/.
 
  * *FormElement.parameter*:
 
-   * *fileSplit*: Activate the splitting process. Only possible value: `fileSplit=svg`.
-   * *fileDestinationSplit*: Target directory and filename pattern for the created & split'ed files. E.g.
-     `fileDestinationSplit=fileadmin/protected/{{id:R}}.{{filenameBase}}.%02d.svg`.
-   * *tableNameSplit*: Reference in table 'Split' to the table, which holds the original PDF file.
+   * *fileSplit* = `<type>` - Activate the splitting process. Only possible value: `fileSplit=svg`.
+   * *fileDestinationSplit* = `<pathFileName (pattern)>` - Target directory and filename pattern for the created & split'ed files. E.g. ::
+
+     fileDestinationSplit = fileadmin/protected/{{id:R}}.{{filenameBase}}.%02d.svg
+
+   * *tableNameSplit* = `<tablename>` - Reference in table 'Split' to the table, which holds the original PDF file.
 
 The splitting happens immediately after the user pressed save.
 
@@ -3616,19 +3626,19 @@ Parameter: sqlValidate
 
   *FormElement.parameter*:
 
-  * *requiredList* - List of `native`-*FormElement* names: only if all of those elements are filled (!=0 and !=''), the *current*
+  * *requiredList* = `<fe.name[s]>` - List of `native`-*FormElement* names: only if all of those elements are filled (!=0 and !=''), the *current*
     `action`-*FormElement* will be processed. This will enable or disable the check, based on the user input! If no
     `native`-*FormElement* names are given, the specified check will always be performed.
-  * *sqlValidate* - validation query. E.g.: `sqlValidate={{!SELECT id FROM Person AS p WHERE p.name LIKE {{name:F:all}} AND p.firstname LIKE {{firstname:F:all}} }}`
+  * *sqlValidate* = `{{<query>}}` - validation query. E.g.: `sqlValidate={{!SELECT id FROM Person AS p WHERE p.name LIKE {{name:F:all}} AND p.firstname LIKE {{firstname:F:all}} }}`
 
     * Pay attention to `{{!...` after the equal sign.
 
-  * *expectRecords* - number of expected records.
+  * *expectRecords* = `<value>`- number of expected records.
 
     * *expectRecords* = `0` or *expectRecords* = `0,1` or *expectRecords* = `{{SELECT COUNT(id) FROM Person}}`
     * Separate multiple valid record numbers by ','. If at least one of those matches, the check will pass successfully.
 
-  * *messageFail* - Message to show. E.g.: *messageFail* = `There is already a person called {{firstname:F:all}} {{name:F:all}}`
+  * *messageFail* = `<string>` - Message to show. E.g.: *messageFail* = `There is already a person called {{firstname:F:all}} {{name:F:all}}`
 
 .. _slave-id:
 
@@ -3637,7 +3647,7 @@ Parameter: slaveId
 
 *FormElement.parameter*:
 
-  * *slaveId*:
+  * *slaveId* = `<id>`:
 
     * Auto fill: name the action `action`-*FormElement* equal to an existing column (table from the current form definition).
       *slaveId* will be automatically filled with the value of the named column.
@@ -3661,16 +3671,16 @@ Parameter: sqlBefore / sqlInsert / sqlUpdate / sqlDelete / sqlAfter
 
 *FormElement.parameter*:
 
-  * *requiredList* - List of `native`-*FormElement*: only if all of those elements are filled, the current
+  * *requiredList* = `<fe.name[s]>` - List of `native`-*FormElement*: only if all of those elements are filled, the current
     `action`-*FormElement* will be processed.
 
-  * *sqlBefore*: always fired (before any *sqlInsert*, *sqlUpdate*, ..)
-  * *sqlInsert*: fired if *slaveId* == `0` or *slaveId* == `''`.
-  * *sqlUpdate*: fired if *slaveId* > `0`.
-  * *sqlDelete*: fired if *slaveId* > `0`, after *sqlInsert* or *sqlUpdate*. Be careful not to delete filled records!
+  * *sqlBefore* = `{{<query>}}` - always fired (before any *sqlInsert*, *sqlUpdate*, ..)
+  * *sqlInsert* = `{{<query>}}` - fired if *slaveId* == `0` or *slaveId* == `''`.
+  * *sqlUpdate* = `{{<query>}}` - fired if *slaveId* > `0`.
+  * *sqlDelete* = `{{<query>}}` - fired if *slaveId* > `0`, after *sqlInsert* or *sqlUpdate*. Be careful not to delete filled records!
     Always add a check, if values given, not to delete the record! *sqlHonorFormElements* helps to skip such checks.
-  * *sqlAfter*: always fired (after *sqlInsert*, *sqlUpdate* or *sqlDelete*).
-  * *sqlHonorFormElements*: list of *FormElement* names (this parameter is optional).
+  * *sqlAfter* = `{{<query>}}` - always fired (after *sqlInsert*, *sqlUpdate* or *sqlDelete*).
+  * *sqlHonorFormElements* = `<fe.name[s]>` list of *FormElement* names (this parameter is optional).
 
     * If one of the named *FormElements* is not empty:
 
@@ -3752,27 +3762,27 @@ Type: sendmail
    * processing `afterSave` action `FormElements`.
 
 
-* *FormElement.value*: Body of the email. See also: `html-formatting`_
+* *FormElement.value* = `<string>` - Body of the email. See also: `html-formatting`_
 
 * *FormElement.parameter*:
 
-  * *sendMailTo* - Comma-separated list of receiver email addresses. Optional: 'realname <john@doe.com>. If there
+  * *sendMailTo* = `<string>` - Comma-separated list of receiver email addresses. Optional: 'realname <john@doe.com>. If there
     is no recipient email address, *no* mail will be sent.
-  * *sendMailCc* - Comma-separated list of receiver email addresses. Optional: 'realname <john@doe.com>.
-  * *sendMailBcc* - Comma-separated list of receiver email addresses. Optional: 'realname <john@doe.com>.
-  * *sendMailFrom* - Sender of the email. Optional: 'realname <john@doe.com>'. **Mandatory**.
-  * *sendMailSubject* - Subject of the email.
-  * *sendMailReplyTo* - Reply this email address. Optional: 'realname <john@doe.com>'.
-  * *sendMailAttachment* - List of 'sources' to attach to the mail as files. Check `attachment`_ for options.
-  * *sendMailHeader* - Specify custom header.
-  * *sendMailFlagAutoSubmit* - **on|off** - If 'on' (default), the mail contains the header
+  * *sendMailCc* = `<string>` - Comma-separated list of receiver email addresses. Optional: 'realname <john@doe.com>.
+  * *sendMailBcc* = `<string>` - Comma-separated list of receiver email addresses. Optional: 'realname <john@doe.com>.
+  * *sendMailFrom* = `<string>` - Sender of the email. Optional: 'realname <john@doe.com>'. **Mandatory**.
+  * *sendMailSubject* = `<string>` - Subject of the email.
+  * *sendMailReplyTo* = `<string>` - Reply this email address. Optional: 'realname <john@doe.com>'.
+  * *sendMailAttachment* = `<string>` - List of 'sources' to attach to the mail as files. Check `attachment`_ for options.
+  * *sendMailHeader* = `<string>` - Specify custom header.
+  * *sendMailFlagAutoSubmit* = `<string>` - **on|off** - If 'on' (default), the mail contains the header
     'Auto-Submitted: auto-send' - this suppress a) OoO replies, b) forwarding of emails.
-  * *sendMailGrId* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
-  * *sendMailXId* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
-  * *sendMailXId2* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
-  * *sendMailXId3* - Will be copied to the mailLog record. Helps to setup specific logfile queries.
-  * *sendMailSubjectHtmlEntity* - **encode|decode|none** - the mail subject will htmlspecialchar() encoded / decoded (default) or none (untouched).
-  * *sendMailBodyHtmlEntity* - **encode|decode|none** - the mail body will htmlspecialchar() encoded, decoded (default) or none (untouched).
+  * *sendMailGrId* = `<string>` - Will be copied to the mailLog record. Helps to setup specific logfile queries.
+  * *sendMailXId* = `<string>` - Will be copied to the mailLog record. Helps to setup specific logfile queries.
+  * *sendMailXId2* = `<string>` - Will be copied to the mailLog record. Helps to setup specific logfile queries.
+  * *sendMailXId3* = `<string>` - Will be copied to the mailLog record. Helps to setup specific logfile queries.
+  * *sendMailSubjectHtmlEntity* = `<string>` - **encode|decode|none** - the mail subject will htmlspecialchar() encoded / decoded (default) or none (untouched).
+  * *sendMailBodyHtmlEntity*= `<string>`  - **encode|decode|none** - the mail body will htmlspecialchar() encoded, decoded (default) or none (untouched).
 
 * To use values of the submitted form, use the STORE_FORM. E.g. `{{name:F:allbut}}`
 * To use the `id` of a new created or already existing primary record, use the STORE_RECORD. E.g. `{{id:R}}`.
@@ -3792,7 +3802,7 @@ Type: paste
 
 See also `copy-form`_.
 
-* *sql1*: e.g. `{{!SELECT {{id:P}} AS id, '{{myNewName:FE:allbut}}' AS name}}` (only one record) or `{{!SELECT i.id AS id, {{basketId:P}} AS basketId FROM Item AS i WHERE i.basketId={{id:P}} }}` (multiple records)
+* *sql1* = `{{<query>}}` - e.g. `{{!SELECT {{id:P}} AS id, '{{myNewName:FE:allbut}}' AS name}}` (only one record) or `{{!SELECT i.id AS id, {{basketId:P}} AS basketId FROM Item AS i WHERE i.basketId={{id:P}} }}` (multiple records)
 
   * Pay attention to '!'.
   * For every row, a new record is created in `recordDestinationTable`.
@@ -3803,9 +3813,9 @@ See also `copy-form`_.
 
 * *FormElement.parameter*:
 
-  * *recordSourceTable* - Optional: table from where the records will be copied. Default: <recordDestinationTable>
-  * *recordDestinationTable* - table where the new records will be copied to.
-  * *translateIdColumn* - columnname to update references of newly created id's.
+  * *recordSourceTable* = `<tableName>` - Optional: table from where the records will be copied. Default: <recordDestinationTable>
+  * *recordDestinationTable* = `<tableName>`  - table where the new records will be copied to.
+  * *translateIdColumn* = `<columnname>`  - columnname to update references of newly created id's.
 
 .. _form-magic:
 
@@ -6594,16 +6604,16 @@ SYSTEM
 
 .. _`autocron`:
 
-Auto Cron
----------
+AutoCron
+--------
 
-The `autocron` service fires periodically jobs like `send a mail` or `open a webpage`.
+The `AutoCron` service fires periodically jobs like `open a webpage` or `send mail`.
 
-* The frequency can be configured.
-* Minimal time distance is 1 minute.
+* Will be triggered via system cron. Minimal time distance is 1 minute.
+* Starttime and frequency configureable.
 * Per job:
 
-  * If a job's runs and receives the next trigger, the running job will be completed first.
+  * If a job still runs and receives the next trigger, the running job will be completed first.
   * If more than one trigger arrives during a run, only one trigger will be processed.
   * If the system misses a run, it will be played as soon as the system is online again.
   * If multiple runs are missed, only one run is fired as soon as the system is online again.
@@ -6613,21 +6623,22 @@ The `autocron` service fires periodically jobs like `send a mail` or `open a web
 Setup
 ^^^^^
 
-Setup a cron entry, typically as the webserver user ('www-data' on debian): ::
+Setup a system cron entry, typically as the webserver user ('www-data' on debian): ::
 
   * * * * * /usr/bin/php /var/www/html/typo3conf/ext/qfq/qfq/external/autocron.php
 
-Create / edit `autocron` jobs
+Create / edit `AutoCron` jobs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Create a T3 page with a QFQ record. Such page should be access restricted and is only needed to edit `autocron` jobs: ::
+Create a T3 page with a QFQ record (similar to the formeditor). Such page should be access restricted and is only needed
+to edit `AutoCron` jobs: ::
 
-	form={{form:S}}
 	dbIndex={{DB_INDEX_QFQ:Y}}
+	form={{form:S}}
 
 	10 {
 		# Table header.
-		sql = SELECT CONCAT('p:{{pageId:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment','Last run','Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
+		sql = SELECT CONCAT('p:{{pageId:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment','Last run','In progress', 'Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
 		head = <table class='table table-hover qfq-table-50'>
 		tail = </table>
 		rbeg = <thead><tr>
@@ -6637,34 +6648,67 @@ Create a T3 page with a QFQ record. Such page should be access restricted and is
 
 		10 {
 			# All Cron Jobs
-			sql = SELECT CONCAT('<tr class="', IF(c.lastStatus LIKE 'Error%','danger',''),
-										IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),' warning',''),
-										IF(c.status='enable','',' text-muted'), '">'),
+			sql = SELECT CONCAT('<tr class="',
+										IF(c.lastStatus LIKE 'Error%','danger',''),
+ 										IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),' warning',''),
+										IF(c.status='enable','',' text-muted'),'" ',
+
+										IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),'title="inProgress > 10mins"',
+										IF(c.lastStatus LIKE 'Error%','title="Status: Error"','')),
+										'>'),
 								'<td>', CONCAT('p:{{pageId:T}}&form=cron&r=', c.id) AS _pagee, '</td><td>',
 								c.id, '</td><td>',
 								IF(c.nextrun=0,"", DATE_FORMAT(c.nextrun, "%d.%m.%y %H:%i:%s")), '</td><td>',
 								c.frequency, '</td><td>',
 								c.comment, '</td><td>',
 								IF(c.lastrun=0,"", DATE_FORMAT(c.lastrun,"%d.%m.%y %H:%i:%s")), '</td><td>',
+								IF(c.inProgress=0,"", DATE_FORMAT(c.inProgress,"%d.%m.%y %H:%i:%s")), '</td><td>',
 								LEFT(c.laststatus,40) AS '_+pre', '</td><td>',
 								CONCAT('U:form=cron&r=', c.id) AS _paged, '</td></tr>'
-							FROM Cron AS c
-							ORDER BY c.id
+						FROM Cron AS c
+						ORDER BY c.id
 		}
 	}
+
 
 Usage
 ^^^^^
 
-The OS `cron` service will call the `QFQ autocron` every minute. `QFQ autocron` checks if there is a pending job, by looking
-for jobs with `Next run`<=NOW(). All found jobs will be fired - depending on their type, such jobs will send mail(s) or
+The system `cron` service will call the `QFQ AutoCron` every minute. `QFQ AutoCron` checks if there is a pending job, by looking
+for jobs with `nextRun`<=NOW(). All found jobs will be fired - depending on their type, such jobs will send mail(s) or
 open a `webpage`. A `webpage` will mostly be a local T3 page with at least one QFQ record on it. Such a QFQ record might
-do some manipulation on the database or any other wished task.
+do some manipulation on the database or any other task.
 
-After finishing a job, `Next run` will be increased by `Frequency`. If `Next run` still points in the past, it will be
-increased by Frequency again, until it points to the future.
+A job with `nextRun`=0 or `inProgress`!=0 won't never be started.
 
-With `Next run`=0 the auto repeating is switched off.
+Due to checking `inProgress`, jobs will never run in parallel, even if a job needs more than 1 minute (intervall system
+cron).
+
+Job: repeating
+''''''''''''''
+
+* frequency: '1 MINUTE', '2 DAY', '3 MONTH', ....
+
+After finishing a job, `nextRun` will be increased by `frequency`. If `nextRun` still points in the past, it will be
+increased by `frequency` again, until it points to the future.
+
+
+Job: asynchronous
+'''''''''''''''''
+
+* frequency: <empty>
+
+An 'AutoCron' job becomes 'asynchronous' if `frequency` is empty. Then, auto repeating is switched off.
+
+If `nextRun` is > 0 and in the past, the job will be fired. After the job has been done, `nextRun` will be set to 0.
+
+This is useful for jobs which have to be fired from time to time.
+
+To fire such an asynchronous job, just set `nextRun`=NOW() and wait for the next system cron run.
+
+If such a job is running and a new `nextRun`=NOW() is applied, the 'AutoCron' job will be fired again during the next
+system cron run.
+
 
 Type: Mail
 ''''''''''
@@ -6673,10 +6717,9 @@ At the moment there is a special sendmail notation - this will change in the fut
 
 * `Mail`: ::
 
-  {{!SELECT 'john@doe.com' AS sendMailTo, 'Custom subject' AS sendMailSubject, 'jane@doe.com' AS sendMailFrom,
-             123 AS sendMailGrId, 456 AS sendMailXId}}
+  {{!SELECT 'john@doe.com' AS sendMailTo, 'Custom subject' AS sendMailSubject, 'jane@doe.com' AS sendMailFrom, 123 AS sendMailGrId, 456 AS sendMailXId}}
 
-Autocron will send as many mails as records are selected by the SQL query in field `Mail`. Field `Mail body` provides
+AutoCron will send as many mails as records are selected by the SQL query in field `Mail`. Field `Mail body` provides
 the mail text.
 
 
