@@ -6607,10 +6607,13 @@ SYSTEM
 AutoCron
 --------
 
-The `AutoCron` service fires periodically jobs like `open a webpage` or `send mail`.
+The `AutoCron` service fires periodically jobs like `open a webpage` (typically a QFQ page which does some database
+actions) or `send mail`.
 
-* Will be triggered via system cron. Minimal time distance is 1 minute.
-* Starttime and frequency configureable.
+* AutoCron will be triggered via system cron. Minimal time distance therefore is 1 minute. If this is not sufficient,
+  any process who starts `.../typo3conf/ext/qfq/qfq/external/autocron.php` via `/usr/bin/php` frequently might be used.
+
+* Custom start time and frequency.
 * Per job:
 
   * If a job still runs and receives the next trigger, the running job will be completed first.
@@ -6623,9 +6626,20 @@ The `AutoCron` service fires periodically jobs like `open a webpage` or `send ma
 Setup
 ^^^^^
 
-Setup a system cron entry, typically as the webserver user ('www-data' on debian): ::
+* Setup a system cron entry, typically as the webserver user ('www-data' on debian).
+* Necessary privileges:
+
+  * Read for `.../typo3conf/ext/qfq/*`
+  * Write, if a logfile should be written (specified per cron job) in the custom specified directory.
+
+Cron task:  ::
 
   * * * * * /usr/bin/php /var/www/html/typo3conf/ext/qfq/qfq/external/autocron.php
+
+AutoCron Jobs of type 'website' needs the php.ini setting: ::
+
+  allow_url_fopen = On
+
 
 Create / edit `AutoCron` jobs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -6742,11 +6756,36 @@ To check for a successful DB connection, it's a good practice to report a custom
 needs to be written in PHP PCRE syntax. For a simple search string, just surround them with '/'.
 If the pattern is found on the page, the job get's 'Ok' - else 'Error - ...'.
 
+Access restriction
+;;;;;;;;;;;;;;;;;;
+
+To protect AutoCron pages not to be triggered accidental or by unprivileged access, access to those page tree might be
+limited to localhost. Some example Typoscript: ::
+
+	# Access allowed for any logged in user or via 'localhost'
+	[usergroup = *] || [IP = 127.0.0.1]
+	  page.10 < styles.content.get
+	[else]
+	  # Error Message
+	  page.10 = TEXT
+	  page.10.value = <h2>Access denied</h2>Please log in or access this page from an authorized host. Your current IP address:&nbsp;
+	  page.20 = TEXT
+	  page.20.data = getenv : REMOTE_ADDR
+	[global]
+
+
+
+AutoCron / website: HTTPS protocol
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+* For `https` the PHP extension `php_openssl` has to be installed.
+* All certificates are accepted, even self signed without a correct chain or hostnames, not listed in the certificate.
+  This is useful if there is a general 'HTTP >> HTTPS' redirection configured and the website is accessed via `https://localhost/...`
 
 .. _help:
 
-Help
-====
+General Tips
+============
 
 * Does the error happens on every *page* or only on specific one?
 * Does the error happens on every *form* or only on specific one?

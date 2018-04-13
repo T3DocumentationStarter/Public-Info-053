@@ -334,8 +334,8 @@ Bug Fixes
 
 * #4865 / Pill Dynamic Updates Show / Hide
 * #5031 / Missing details in DbException: New definition of SYSTEM_SHOW_DEBUG_INFO: even after config.qfq.ini is parsed
-   and SIP Infos has been read - if there is no BE User logged in, the value stays on 'auto' (earlier it has been replaced
-   to 'no'). Staying on 'auto' keeps the information that replacing is still open and not replaced means 'no'-BE User logged in.
+  and SIP Infos has been read - if there is no BE User logged in, the value stays on 'auto' (earlier it has been replaced
+  to 'no'). Staying on 'auto' keeps the information that replacing is still open and not replaced means 'no'-BE User logged in.
 * #5016 / Loose checkbox value on save - Dirty workaround - better solution necessary.
 * #5017 / STORE_RECORD used in FormElement and via '#!report' - save & restore STORE_RECORD.
 * #5004 / FormElement with state 'ReadOnly' will be saved with empty value - existing values will be overwritten - fixed.
@@ -951,7 +951,7 @@ Features
 * New security option `escapeTypeDefault`: will be defined 1) sytem wide in config.qfq.ini, or 2) more specific per
   Form or 3) individually per variable. The later has priority.
 * #3544 / Form: view current form - It's now possible to direct view a form, which is currently loaded/edited in the
-   FormEditor: Button 'eye' near left of button 'save'.
+  FormEditor: Button 'eye' near left of button 'save'.
 * #3552 / typeAheadLdapSearchPerToken - webpass kann nicht gleichzeitig nach Vornamen und Nachnamen suchen. Added option
   typeAheadLdapSearchPerToken to split search value in token and OR-combine every search with the individual tokens.
 * Download latest QFQ builds and releases: https://w3.math.uzh.ch/qfq/.
@@ -1043,7 +1043,7 @@ Bug Fixes
 
 * TypeAhead.js: Handle <ENTER> key properly.
 * #3462 / FormElement.parameter: requiredList not ok for non numeric content. STORE_FORM had been called without 'sanatize class'.
-   Therefore, all non numeric values has been sanatized by default. New: SANATIZE_ALLOW_ALL.
+  Therefore, all non numeric values has been sanatized by default. New: SANATIZE_ALLOW_ALL.
 * Corrected error message to use 'itemList' instead of 'itemValues'. Renamed constant too.
 * #2542 / FormElement-Typ 'note' funktioniert nicht mit dynamic update. 'Label' and 'note' are fixed - 'value' is still not updated, open.
 
@@ -1084,8 +1084,8 @@ Bug Fixes
  * #3419 / typeAheadSql: Array with only one column or non standard columnnames are not handeld properbly.
    Detection of missing LIMIT implemented.
  * #3425 / Form.parameter, FormElement.parameter: comment handling, trailing & leading spaces
-    Manual.rst: commented handling of 'comment character' and 'escaping of leading/trailing spaces'
-    Support.php: new funtion handleEscapeSpaceComment().
+   Manual.rst: commented handling of 'comment character' and 'escaping of leading/trailing spaces'
+   Support.php: new funtion handleEscapeSpaceComment().
  * Evaluate.php: parse all F|FE.parameter via handleEscapeSpaceComment(). A leading '#' or ' ' might be escaped by '\'.
  * Saving 'extra' FE in STORE_SIP has been done with inappropiate FE_NAME. Correct is the pure FE_NAME, without any
    extension like recordId. Unessary and broken decoding removed.
