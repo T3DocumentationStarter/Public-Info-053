@@ -36,10 +36,10 @@ QFQ Extension
 	      	    		2017
 
 	          	:Author:
-	      				Carsten Rose, Rafael Ostertag
+		      				Carsten Rose, Benjamin Baer
 
 	          	:Email:
-	      		    	carsten.rose@math.uzh.ch, rafael.ostertag@math.uzh.ch
+		      		    	carsten.rose@math.uzh.ch, benjamin.baer@math.uzh.ch
 
 	          	:License:
 	          		This document is published under the Open Publication License

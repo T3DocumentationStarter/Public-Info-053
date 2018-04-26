@@ -36,6 +36,45 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 18.04.0
+---------------
+
+Date: 26.04.2018
+
+Notes
+^^^^^
+
+* QFQ marked as 'stable'
+* New version numbering: Year.Month.Index
+* Manual.rst:
+
+  * AutoCron documentation enhanced.
+  * Replace '{{form:S}}' against '{{form:SE}}'.
+  * Check list for 'new installations'.
+  * Description for config variables enhanced.
+  * Details 'how record locking' is done.
+  * Details: extraButtonInfo
+  * Replace config.qfq.ini on most places with 'configuration'
+
+* Path of 'sql.log' / 'mail.log' are now relative to <site path> (not <ext path> as before).
+
+Features
+^^^^^^^^
+
+* formEditor.sql: update table cron.
+* AutoCron.php: allow https connections with invalid certificate (e.g. 'localhost' is not listed as a valid hostname).
+* ext_conf_template.txt: Extension manager configuration setup.
+
+Bug Fixes
+^^^^^^^^^
+
+* AutoCron:
+
+  * Update form 'cron' to load/save records in DB_INDEX_QFQ
+  * Fix problem with array in checkForOldJobs().
+  * Implement check that re-trigger asynchronous cron jobs are handled correctly.
+
+
 
 Version 0.25.15
 ---------------

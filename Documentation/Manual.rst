@@ -87,15 +87,10 @@ The program is not included in QFQ and has to be manually installed.
   * Best is to install the QT version from the named website above.
   * In case of trouble with wkhtmltopdf, also install 'libxrender1'.
 
-In `config-qfq-ini`_ specify the:
+In `configuration`_ specify the:
 
-* installed `wkhtmltopdf` binary:
-
-  * `WKHTMLTOPDF = /.../wkhtmltopdf`
-
-* the site base URL:
-
-  * `BASE_URL_PRINT = http://example.com/`
+* installed `wkhtmltopdf` binary: `cmdWkhtmltopdf`.
+* the site base URL: `baseUrl`.
 
 
 **Important**: To access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check! `wkhtml`
@@ -175,12 +170,11 @@ Setup
 
   * If the Extensionmanager stops after importing: check your memory limit in php.ini.
 
-* Enable the online local-documentation_.
-* Copy/rename the file *<Documentroot>/typo3conf/ext/<ext_dir>/config.example.qfq.ini* to
-  *<Documentroot>/typo3conf/config.qfq.ini* and configure the necessary values: `config.qfq.ini`_
-  The configuration file is outside the extension directory to not loose it during updates.
+* Copy/rename the file *<site path>/typo3conf/ext/qfq/config.example.qfq.ini* to *config.qfq.in*.
+  Configure the necessary settings `configuration`_
+  The configuration file is outside the of extension directory, to not loose it during updates.
 * When the QFQ Extension is called the first time on the Typo3 Frontend, the file *<ext_dir>/qfq/sql/formEditor.sql* will
-  played and fills the database with the *Form editor* records. This also happens automatically after each software update of QFQ.
+  played and fills the database with the *Form editor* records. This also happens automatically after each update of QFQ.
 * Configure Typoscript to include Bootstrap, jQuery, QFQ javascript and CSS files.
 
 .. _setup-css-js:
@@ -228,7 +222,7 @@ FormEditor
 Setup a *report* to manage all *forms*:
 
 * Create a Typo3 page.
-* Set the 'URL Alias' to `form` (default) or the individual defined value in parameter EDIT_FORM_PAGE (config.qfq.ini).
+* Set the 'URL Alias' to `form` (default) or the individual defined value in parameter `editFormPage` (configuration_).
 * Insert a content record of type *qfq*.
 * In the bodytext insert the following code:
 
@@ -237,8 +231,8 @@ Setup a *report* to manage all *forms*:
 	# If there is a form given by SIP: show
 	form={{form:SE}}
 
-	# In case DB_INDEX_QFQ is different from DB_INDEX_DATA, set DB_INDEX_QFQ.
-	dbIndex = {{DB_INDEX_QFQ:Y}}
+	# In case indexQfq is different from indexData, set indexQfq.
+	dbIndex = {{indexQfq:Y}}
 
 	10 {
 		# List of Forms: Do not show this list of forms if there is a form given by SIP.
@@ -261,133 +255,203 @@ Setup a *report* to manage all *forms*:
 		}
 	}
 
+.. _install-checklist:
+
+Install Check List
+------------------
+
+* Protect the directory `<T3 installation>/fileadmin/protected` in Apache against direct file access. Those directory
+  should be used for confidential (uploaded / generated) data.
+* Protect the directory `<T3 installation>/fileadmin` in Apache to not execute PHP Scripts - malicious uploads won't be executed.
+* Setup a log rotation rule for `sqlLog`.
+* Check that `sqlLogMode` is set to `modify`  on productive sites.
+
+.. _configuration:
+
+Configuration
+-------------
+
+.. _extension-manager-qfq-configuration:
+
+Extension Manager: QFQ Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Keyword                       | Default / Example                                     | Description                                                                |
++===============================+=======================================================+============================================================================+
+| Config                                                                                                                                                             |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| documentation                 | http://docs.typo3.org...                              | Link to the online documentation of QFQ. Every QFQ installation also       |
+|                               |                                                       | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| thumbnailDirSecure            | fileadmin/protected/qfqThumbnail                      | Important: secure directory 'protected' (recursive) against direct access. |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| thumbnailDirPublic            | typo3temp/qfqThumbnail                                | Both thumbnail directories will be created if not existing.                |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| cmdInkscape                   | inkscape                                              | If inkscape is not available, specify an empty string.                     |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| cmdConvert                    | convert                                               | GraphicsMagics 'convert' is recommended.                                   |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| cmdWkhtmltopdf                | /usr/bin/wkhtmltopdf                                  | PathFilename of wkhtmltopdf.                                               |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| baseUrl                       | http://example.com                                    | URL where wkhtmltopdf will fetch the HTML (no parameter, those comes later)|
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| sendEMailOptions              | -o tls=yes                                            | General options. Check: http://caspian.dotconf.net/menu/Software/SendEmail |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| dateFormat                    | yyyy-mm-dd                                            | Possible options: yyyy-mm-dd, dd.mm.yyyy                                   |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Dynamic                                                                                                                                                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| fillStoreSystemBySql1|2|3     | SELECT s.id AS ...                                    | Specific values read from the database to fill the system store during QFQ |
+|                               |                                                       | load. See `fillStoreSystemBySql`_ for a usecase.                           |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| fillStoreSystemBySqlErrorMsg2 | No current period found                               | Only define an error message, if QFQ should stop running                   |
+|                               |                                                       | in case of an SQL error or not exact one record.                           |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Debug                                                                                                                                                              |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| sqlLogMode                    | modify                                                | *all*: every statement will be logged - this might a lot.                  |
+|                               |                                                       | *modify*: log only statements who change data. *error*: log only DB errors.|
+|                               |                                                       | *none*: no SQL log at all.                                                 |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| sqlLog                        | typo3conf/sql.log                                     | Filename to log SQL commands: relative to <site path> or absolute.         |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| mailLog                       | typo3conf/mail.log                                    | Filename to log `sendEmail` commands: relative to <site path> or absolute. |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| showDebugInfo                 | auto                                                  | FE - Possible values: yes|no|auto|download. For 'auto': If a BE User is    |
+|                               |                                                       | logged in, a debug information will be shown on the FE.                    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| redirectAllMailTo             | john@doe.com                                          | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Database                                                                                                                                                           |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| dbInit                        | dbInit=set names utf8                                 | Global init for using the database.                                        |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| update                        | auto                                                  | 'auto': apply DB Updates only if there is a newer version.                 |
+|                               |                                                       | 'always': apply DB Updates always, especially play formEditor.sql every    |
+|                               |                                                       | time QFQ is called - *not* recommended!                                    |
+|                               |                                                       | 'never': never apply DB Updates.                                           |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| indexData                     | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameData:Y}}   |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| indexQfq                      | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameQfq:Y}}    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Security                                                                                                                                                           |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| escapeTypeDefault             | m                                                     | All variables `{{...}}` get this escape class by default.                  |
+|                               |                                                       | See `variable-escape`_.                                                    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| securityVarsHoneypot          | email,username,password                               | If empty: no check. All named variables will rendered as INPUT elements    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| securityAttackDelay           | 5                                                     | If an attack is detected, sleep 'x' seconds and exit PHP process           |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| securityShowMessage           | true                                                  | If an attack is detected, show a message                                   |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| securityGetMaxLength          | 50                                                    | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
+|                               |                                                       | `ExceptionMaxLength`_                                                      |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Form-Config                                                                                                                                                        |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| recordLockTimeoutSeconds      | 900                                                   | Timeout for record locking. After this time, a record will be replaced     |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| enterAsSubmit                 | enterAsSubmit = 1                                     | 0: off, 1: Pressing *enter* in a form means *save* and *close*             |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| editFormPage                  | form                                                  | T3 Pagealias to edit a form.                                               |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formDataPatternError          | please check pattern error                            | Customizable error message used in validator.js. 'pattern' violation       |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formDataRequiredError         | missing value                                         | Customizable error message used in validator.js. 'required' fields         |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formDataMatchError            | type error                                            | Customizable error message used in validator.js. 'match' retype mismatch   |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formDataError                 | generic error                                         | Customizable error message used in validator.js. 'no specific' given       |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Form-Layout                                                                                                                                                        |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| cssClassQfqContainer          | container                                             | QFQ with own Bootstrap: 'container'.                                       |
+|                               |                                                       | QFQ already nested in Bootstrap of mainpage: <empty>                       |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| cssClassQfqForm               | qfq-color-base                                        | Wrap around QFQ 'Form'.                                                    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| cssClassQfqFormPill           | qfq-color-grey-1                                      | Wrap around title bar for pills: CSS Class, typically a background color.  |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| cssClassQfqFormBody           | qfq-color-grey-2                                      | Wrap around FormElements: CSS Class, typically a background color.         |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formBsColumns                 | 12                                                    | The whole form will be wrapped in 'col-md-??'. Default is 12 for 100%      |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formBsLabelColumns            | 3                                                     | Default number of BS columns for the 'label'-column                        |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formBsInputColumns            | 6                                                     | Default number of BS columns for the 'input'-column                        |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formBsNoteColumns             | 3                                                     | Default number of BS columns for the 'note'-column                         |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| extraButtonInfoInline         | <img src="info.png">                                  | Image for `extraButtonInfo`_ (inline)                                      |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| extraButtonInfoBelow          | <img src="info.png">                                  | Image for `extraButtonInfo`_ (below)                                       |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| extraButtonInfoPosition       | below                                                 | 'auto' (default) or 'below'. See `extraButtonInfo`_                        |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| extraButtonInfoClass          | pull-right                                            | '' (default) or 'pull-right'. See `extraButtonInfo`_                       |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Form-Language                                                                                                                                                      |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formLanguage[ABCD]Id          | -  E.g.: 1                                            | In Typo3 configured pageLanguage id. The number after the 'L' parameter.   |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formLanguage[ABCD]Label       | -  E.G.: english                                      | Label shown in *Form editor*, on the 'basic' tab.                          |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| saveButtonText                | -                                                     | Text on the form save button. Typically none.                              |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| saveButtonTooltip             | Save                                                  | Tooltip on the form save button.                                           |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| saveButtonClass               | btn btn-default navbar-btn                            | Bootstrap CSS class for save button on top of the form                     |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| saveButtonClassOnChange       | alert-info btn-info                                   | Bootstrap CSS class for save button showing 'data changed'                 |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| saveButtonGlyphIcon           | glyphicon-ok                                          | Icon for the form save button                                              |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| closeButtonText               | -                                                     | Text on the form close button. Typically none.                             |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| closeButtonTooltip            | close                                                 | Tooltip on the form close button.                                          |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| closeButtonClass              | btn btn-default navbar-btn                            | Bootstrap CSS class for close button on top of the form                    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| closeButtonGlyphIcon          | glyphicon-remove                                      | Icon for the form close button                                             |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| deleteButtonText              | -                                                     | Text on the form delete button. Typically none.                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| deleteButtonTooltip           | delete                                                | Tooltip on the form delete button.                                         |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| deleteButtonClass             | btn btn-default navbar-btn                            | Bootstrap CSS class for delete button on top of the form                   |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| deleteButtonGlyphIcon         | glyphicon-trash                                       | Icon for the form delete button                                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| newButtonText                 | -                                                     | Text on the form new button. Typically none.                               |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| newButtonTooltip              | new                                                   | Tooltip on the form new button.                                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| newButtonClass                | btn btn-default navbar-btn                            | Bootstrap CSS class for new button on top of the form                      |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| newButtonGlyphIcon            | glyphicon-plus                                        | Icon for the form new button                                               |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+
+
 .. _config-qfq-ini:
 
 config.qfq.ini
 --------------
 
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| Keyword                     | Example                                               | Description                                                                |
-+=============================+=======================================================+============================================================================+
-| DB_INIT                     | DB_INIT=set names utf8                                | Global init for using the database.                                        |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DB_UPDATE                   | DB_UPDATE = auto                                      | 'auto': apply DB Updates only if there is a newer version.                 |
-|                             |                                                       | 'always': apply DB Updates always, especially play formEditor.sql every    |
-|                             |                                                       | time QFQ is called - *not* recommended!                                    |
-|                             |                                                       | 'never': never apply DB Updates.                                           |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DB_<n>_USER                 | DB_1_USER=qfqUser                                     | Credentials configured in MySQL                                            |
-| DB_<n>_PASSWORD             | DB_1_PASSWORD=1234567890                              | Credentials configured in MySQL                                            |
-| DB_<n>_SERVER               | DB_1_SERVER=localhost                                 | Hostname of MySQL Server                                                   |
-| DB_<n>_NAME                 | DB_1_NAME=qfq_db                                      | Database name                                                              |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DB_INDEX_DATA               | DB_INDEX_DATA = 1                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameData:Y}}   |
-| DB_INDEX_QFQ                | DB_INDEX_QFQ = 1                                      | Optional. Default: 1. Retrieve the current setting via {{_dbNameQfq:Y}}    |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| SQL_LOG                     | SQL_LOG=../../sql.log                                 | Filename to log SQL commands: relative to <ext_dir> or absolute.           |
-| SQL_LOG_MODE                | SQL_LOG_MODE=modify                                   | *all*: every statement will be logged - this might a lot.                  |
-|                             |                                                       | *modify*: log only statements who change data.                             |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| MAIL_LOG                    | SQL_LOG=../../mail.log                                | Filename to log `sendEmail` commands: relative to <ext_dir> or absolute.   |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| SEND_E_MAIL_OPTIONS         | SEND_E_MAIL_OPTIONS="-o tls=yes"                      | General options. Check: http://caspian.dotconf.net/menu/Software/SendEmail |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| SHOW_DEBUG_INFO             | SHOW_DEBUG_INFO=auto                                  | FE - Possible values: yes|no|auto|download. For 'auto': If a BE User is    |
-|                             |                                                       | logged in, a debug information will be shown on the FE.                    |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| REDIRECT_ALL_MAIL_TO        | REDIRECT_ALL_MAIL_TO=john@doe.com                     | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_CLASS_QFQ_CONTAINER     | CSS_CLASS_QFQ_CONTAINER=container                     | QFQ with own Bootstrap: 'container'.                                       |
-|                             |                                                       | QFQ already nested in Bootstrap of mainpage: <empty>                       |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| CSS_CLASS_QFQ_FORM          | CSS_CLASS_QFQ_FORM=qfq-color-base                     | Wrap around QFQ 'Form'.                                                    |
-| CSS_CLASS_QFQ_FORM_PILL     | CSS_CLASS_QFQ_FORM_PILL=qfq-color-grey-1              | Wrap around title bar for pills: CSS Class, typically a background color.  |
-| CSS_CLASS_QFQ_FORM_BODY     | CSS_CLASS_QFQ_FORM_BODY=qfq-color-grey-2              | Wrap around FormElements: CSS Class, typically a background color.         |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DATE_FORMAT                 | DATE_FORMAT= yyyy-mm-dd                               | Possible options: yyyy-mm-dd, dd.mm.yyyy                                   |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_DATA_PATTERN_ERROR     | FORM_DATA_PATTERN_ERROR=please check pa.              | Customizable error message used in validator.js. 'pattern' violation       |
-| FORM_DATA_REQUIRED_ERROR    | FORM_DATA_REQUIRED_ERROR=missing value                | Customizable error message used in validator.js. 'required' fields         |
-| FORM_DATA_MATCH_ERROR       | FORM_DATA_MATCH_ERROR=type error                      | Customizable error message used in validator.js. 'match' retype mismatch   |
-| FORM_DATA_ERROR             | FORM_DATA_ERROR=generic error                         | Customizable error message used in validator.js. 'no specific' given       |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_BS_COLUMNS             | FORM_BS_COLUMNS=12                                    | The whole form will be wrapped in 'col-md-??'. Default is 12 for 100%      |
-| FORM_BS_LABEL_COLUMNS       | FORM_BS_LABEL_COLUMNS = 3                             | Default number of BS columns for the 'label'-column                        |
-| FORM_BS_INPUT_COLUMNS       | FORM_BS_INPUT_COLUMNS = 6                             | Default number of BS columns for the 'input'-column                        |
-| FORM_BS_NOTE_COLUMNS        | FORM_BS_NOTE_COLUMNS = 3                              | Default number of BS columns for the 'note'-column                         |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_BUTTON_ON_CHANGE_CLASS | FORM_BUTTON_ON_CHANGE_CLASS=alert-info btn-info       | Color for save button after modification                                   |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| BASE_URL_PRINT              | BASE_URL_PRINT=http://example.com                     | URL where wkhtmltopdf will fetch the HTML (no parameter, those comes later)|
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| WKHTMLTOPDF                 | WKHTMLTOPDF=/usr/bin/wkhtmltopdf                      | Binary where to find wkhtmltopdf.                                          |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| EDIT_FORM_PAGE              | EDIT_FORM_PAGE = form                                 | T3 Pagealias to edit a form.                                               |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| LDAP_1_RDN                  | LDAP_1_RDN='ou=Admin,ou=example,dc=com'               | Credentials for non-anonymous LDAP access. At the moment only one set of   |
-| LDAP_1_PASSWORD             | LDAP_1_PASSWORD=mySecurePassword                      |                                                                            |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| ESCAPE_TYPE_DEFAULT         | ESCAPE_TYPE_DEFAULT=m                                 | All variables `{{...}}` get this escape class by default.                  |
-|                             |                                                       | See `variable-escape`_.                                                    |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password      | If empty: no check. All named variables will rendered as INPUT elements    |
-| SECURITY_ATTACK_DELAY       | SECURITY_ATTACK_DELAY = 5                             | If an attack is detected, sleep 'x' seconds and exit PHP process           |
-| SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password      | If empty: no check. All named variables will rendered as INPUT elements    |
-| SECURITY_SHOW_MESSAGE       | SECURITY_SHOW_MESSAGE = true                          | If an attack is detected, show a message                                   |
-| SECURITY_VARS_HONEYPOT      | SECURITY_VARS_HONEYPOT = email,username,password      | If empty: no check. All named variables will rendered as INPUT elements    |
-| SECURITY_GET_MAX_LENGTH     | SECURITY_GET_MAX_LENGTH = 50                          | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
-|                             |                                                       | `ExceptionMaxLength`_                                                      |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| GFX_EXTRA_BUTTON_INFO_INLINE| <img src="info.png">                                  | Image for `extraButtonInfo`_ (inline)                                      |
-| GFX_EXTRA_BUTTON_INFO_BELOW | <img src="info.png">                                  | Image for `extraButtonInfo`_ (below)                                       |
-| EXTRA_BUTTON_INFO_POSITION  | SYSTEM_EXTRA_BUTTON_INFO_POSITION=below               | 'auto' (default) or 'below'. See `extraButtonInfo`_                        |
-| EXTRA_BUTTON_INFO_CLASS     | SYSTEM_EXTRA_BUTTON_INFO_CLASS=pull-right             | '' (default) or 'pull-right'. See `extraButtonInfo`_                       |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| SAVE_BUTTON_TEXT            | SAVE_BUTTON_TEXT =                                    | Default text on the form save button. Typically none.                      |
-| SAVE_BUTTON_TOOLTIP         | SAVE_BUTTON_TOOLTIP = save                            | Default tooltip on the form save button.                                   |
-| SAVE_BUTTON_CLASS           | SAVE_BUTTON_CLASS = btn btn-default navbar-btn        | Default Bootstrap CSS class for buttons on top of the form                 |
-| SAVE_BUTTON_GLYPH_ICON      | SAVE_BUTTON_GLYPH_ICON = glyphicon-ok                 | Default Icon for the form save button                                      |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| CLOSE_BUTTON_TEXT           | CLOSE_BUTTON_TEXT =                                   | Default text on the form close button. Typically none.                     |
-| CLOSE_BUTTON_TOOLTIP        | CLOSE_BUTTON_TOOLTIP = close                          | Default tooltip on the form close button.                                  |
-| CLOSE_BUTTON_CLASS          | CLOSE_BUTTON_CLASS = btn btn-default navbar-btn       | Default Bootstrap CSS class for buttons on top of the form                 |
-| CLOSE_BUTTON_GLYPH_ICON     | CLOSE_BUTTON_GLYPH_ICON = glyphicon-remove            | Default Icon for the form close button                                     |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DELETE_BUTTON_TEXT          | DELETE_BUTTON_TEXT =                                  | Default text on the form delete button. Typically none.                    |
-| DELETE_BUTTON_TOOLTIP       | DELETE_BUTTON_TOOLTIP = delete                        | Default tooltip on the form delete button.                                 |
-| DELETE_BUTTON_CLASS         | DELETE_BUTTON_CLASS = btn btn-default navbar-btn      | Default Bootstrap CSS class for buttons on top of the form                 |
-| DELETE_BUTTON_GLYPH_ICON    | DELETE_BUTTON_GLYPH_ICON = glyphicon-trash            | Default Icon for the form delete button                                    |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| NEW_BUTTON_TEXT             | NEW_BUTTON_TEXT =                                     | Default text on the form new button. Typically none.                       |
-| NEW_BUTTON_TOOLTIP          | NEW_BUTTON_TOOLTIP = new                              | Default tooltip on the form new button.                                    |
-| NEW_BUTTON_CLASS            | NEW_BUTTON_CLASS = btn btn-default navbar-btn         | Default Bootstrap CSS class for buttons on top of the form                 |
-| NEW_BUTTON_GLYPH_ICON       | NEW_BUTTON_GLYPH_ICON = glyphicon-plus                | Default Icon for the form new button                                       |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DIRTY_RECORD_TIMEOUT_SECONDS| DIRTY_RECORD_TIMEOUT_SECONDS = 900                    | Timeout for record locking. After this time, a record will be replaced     |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DOCUMENTATION_QFQ           | DOCUMENTATION_QFQ=http://docs.typo3.org...            | Link to the online documentation of QFQ. Every QFQ installation also       |
-|                             |                                                       | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| FILL_STORE_SYSTEM_BY_SQL    | FILL_STORE_SYSTEM_BY_SQL = {{!SELECT s.id AS ...      | Specific values read from the database to fill the system store during QFQ |
-|                             |                                                       | load. See `fillStoreSystemBySql`_ for a usecase.                           |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_LANGUAGE_A_ID          | FORM_LANGUAGE_A__ID = 1                               | In Typo3 configured pageLanguage id. The number after the 'L' parameter.   |
-| FORM_LANGUAGE_B_ID          |                                                       |                                                                            |
-| FORM_LANGUAGE_C_ID          |                                                       |                                                                            |
-| FORM_LANGUAGE_D_ID          |                                                       |                                                                            |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| FORM_LANGUAGE_A_LABEL       | FORM_LANGUAGE_A_LABEL = english                       | Label shown in *Form editor*, on the 'basic' tab.                          |
-| FORM_LANGUAGE_B_LABEL       |                                                       |                                                                            |
-| FORM_LANGUAGE_C_LABEL       |                                                       |                                                                            |
-| FORM_LANGUAGE_D_LABEL       |                                                       |                                                                            |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| enterAsSubmit               | enterAsSubmit = 1                                     | 0: off, 1: Pressing *enter* in a form means *save* and *close*             |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| thumbnailDirSecure          | thumbnailDirSecure = fileadmin/protected/qfqThumbnail | Important: secure this directory against direct access.                    |
-| thumbnailDirPublic          | thumbnailDirPublic = typo3temp/qfqThumbnail           | Both thumbnail directories will be created if not existing.                |
-| cmdInkscape                 | cmdInkscape = inkscape                                | If inkscape is not available, specify an empty string.                     |
-| cmdConvert                  | cmdConvert = convert                                  | GraphicsMagics 'convert' is recommended.                                   |
-+-----------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Keyword                       | Example                                               | Description                                                                |
++===============================+=======================================================+============================================================================+
+| DB_<n>_USER                   | DB_1_USER=qfqUser                                     | Credentials configured in MySQL                                            |
+| DB_<n>_PASSWORD               | DB_1_PASSWORD=1234567890                              | Credentials configured in MySQL                                            |
+| DB_<n>_SERVER                 | DB_1_SERVER=localhost                                 | Hostname of MySQL Server                                                   |
+| DB_<n>_NAME                   | DB_1_NAME=qfq_db                                      | Database name                                                              |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| LDAP_1_RDN                    | LDAP_1_RDN='ou=Admin,ou=example,dc=com'               | Credentials for non-anonymous LDAP access. At the moment only one set of   |
+| LDAP_1_PASSWORD               | LDAP_1_PASSWORD=mySecurePassword                      |                                                                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+
 
 
 Example: *typo3conf/config.qfq.ini*
@@ -396,19 +460,7 @@ Example: *typo3conf/config.qfq.ini*
 
 	; QFQ configuration
 	;
-	; Save this file as: <Documentroot>/typo3conf/config.qfq.ini
-
-	; Configure own URL, where `wkhtmltopdf` fetches pages and produces PDFs
-	BASE_URL_PRINT = http://url.my/
-	; WKHTMLTOPDF = /opt/wkhtmltox/bin/wkhtmltopdf
-
-	; DB_INIT = set names utf8
-
-	; auto | always | never
-	; DB_UPDATE = auto
-
-	; DB_INDEX_DATA = 1
-	; DB_INDEX_QFQ = 1
+	; Save this file as: <site path>/typo3conf/config.qfq.ini
 
 	DB_1_USER = <DBUSER>
 	DB_1_SERVER = <DBSERVER>
@@ -420,116 +472,12 @@ Example: *typo3conf/config.qfq.ini*
 	; DB_2_PASSWORD = <DBPW>
 	; DB_2_NAME = <DB>
 
-	; '../../sql.log' = <T3 Install directory>/typo3conf/sql.log
-	; SQL_LOG = ../../sql.log
-
-	; all|modify|error|none
-	; SQL_LOG_MODE = modify
-
-	; MAIL_LOG = ../../mail.log
-	; SEND_E_MAIL_OPTIONS = "-o ... "  - check http://caspian.dotconf.net/menu/Software/SendEmail
-
-	; [auto|yes|no][,download]. 'auto': if BE User is logged in the value will be replaced by 'yes', else 'no'. Additional choose 'download'.
-	; SHOW_DEBUG_INFO = auto
-
-	; REDIRECT_ALL_MAIL_TO = john.doe@example.com
-
-	; QFQ with own Bootstrap: 'container'. QFQ already nested in Bootstrap of mainpage: <empty>
-	; CSS_CLASS_QFQ_CONTAINER =
-
-	; Default background color, specified via CSS class
-	; CSS_CLASS_QFQ_FORM =
-	; CSS_CLASS_QFQ_FORM_PILL = qfq-color-grey-1
-	; CSS_CLASS_QFQ_FORM_BODY = qfq-color-grey-2
-
-	; yyyy-mm-dd, dd.mm.yyyy
-	; DATE_FORMAT = yyyy-mm-dd
-
 	; Access via {{TECHNICAL_CONTACT:Y}}
 	; TECHNICAL_CONTACT = john@doe.com
-
-	;  validator.js: data-pattern-error="", data-required-error="", data-match-error="", data-error=""
-	; FORM_DATA_PATTERN_ERROR =
-	; FORM_DATA_REQUIRED_ERROR =
-	; FORM_DATA_MATCH_ERROR =
-	; FORM_DATA_ERROR =
-
-	;  Default width of whole form
-	; FORM_BS_COLUMNS = 12
-
-	;  Default size for Bootstrap Form Elements
-	; FORM_BS_LABEL_COLUMNS = 3
-	; FORM_BS_INPUT_COLUMNS = 6
-	; FORM_BS_NOTE_COLUMNS = 3
-
-	; EDIT_FORM_PAGE = form
 
 	; LDAP_1_RDN =
 	; LDAP_1_PASSWORD =
 
-	; ESCAPE_TYPE_DEFAULT=m
-
-	; SECURITY_VARS_HONEYPOT=email,username,password
-	; SECURITY_ATTACK_DELAY=5
-	; SECURITY_SHOW_MESSAGE=true
-	; SECURITY_GET_MAX_LENGTH=50
-
-	; GFX_EXTRA_BUTTON_INFO_INLINE = <img src="file.png">
-	; GFX_EXTRA_BUTTON_INFO_BELOW = <img src="file.png">
-	; EXTRA_BUTTON_INFO_POSITION = auto | below
-	; EXTRA_BUTTON_INFO_POSITION_CLASS = pull-right
-
-	; SAVE_BUTTON_TEXT =
-	; SAVE_BUTTON_TOOLTIP = save
-	; SAVE_BUTTON_CLASS = btn btn-default navbar-btn
-	; SAVE_BUTTON_GLYPH_ICON = glyphicon-ok
-
-	; CLOSE_BUTTON_TEXT =
-	; CLOSE_BUTTON_TOOLTIP = close
-	; CLOSE_BUTTON_CLASS = btn btn-default navbar-btn
-	; CLOSE_BUTTON_GLYPH_ICON = glyphicon-remove
-
-	; DELETE_BUTTON_TEXT =
-	; DELETE_BUTTON_TOOLTIP = delete
-	; DELETE_BUTTON_CLASS = btn btn-default navbar-btn
-	; DELETE_BUTTON_GLYPH_ICON = glyphicon-trash
-
-	; NEW_BUTTON_TEXT =
-	; NEW_BUTTON_TOOLTIP = new
-	; NEW_BUTTON_CLASS = btn btn-default navbar-btn
-	; NEW_BUTTON_GLYPH_ICON = glyphicon-plus
-
-	; RECORD_LOCK_TIMEOUT_SECONDS = 900
-
-	; Local Documentation (doc fits to installed version):  typo3conf/ext/qfq/Documentation/html/Manual.html
-	; DOCUMENTATION_QFQ = https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html
-
-	; FILL_STORE_SYSTEM_BY_SQL_1 = "SELECT id AS _periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1"
-	; Important: only define an error message, if QFQ should stop running in case of an SQL error or not exact 1 record.
-	; FILL_STORE_SYSTEM_BY_SQL_ERROR_MSG_1 = No current period found
-
-	; FORM_LANGUAGE_A_ID =       E.g. FORM_LANGUAGE_A_ID = 1
-	; FORM_LANGUAGE_A_LABEL =    E.g. FORM_LANGUAGE_A_ID = English
-
-	; FORM_LANGUAGE_B_ID =       E.g. FORM_LANGUAGE_B_ID = 2
-	; FORM_LANGUAGE_B_LABEL =    E.g. FORM_LANGUAGE_B_ID = French
-
-	; FORM_LANGUAGE_C_ID =       E.g. FORM_LANGUAGE_C_ID = 3
-	; FORM_LANGUAGE_C_LABEL =    E.g. FORM_LANGUAGE_C_ID = Spain
-
-	; FORM_LANGUAGE_D_ID =       E.g. FORM_LANGUAGE_D_ID = 4
-	; FORM_LANGUAGE_D_LABEL =    E.g. FORM_LANGUAGE_D_ID = Chinese
-
-	; Pressing the 'enter' key is equal to save and close
-	; enterAsSubmit = 1
-
-	; Attention: be sure that 'fileadmin/protected' is really locked down by a webserver directive.
-	;   See https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html#secure-direct-fileaccess
-	;
-	; thumbnailDirSecure = fileadmin/protected/qfqThumbnail
-	; thumbnailDirPublic = typo3temp/qfqThumbnail
-	; cmdInkscape = inkscape
-	; cmdConvert = convert
 
 After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
 
@@ -563,8 +511,8 @@ E.g. to setup a contact address and reuse the information inside your installati
 Fill STORE_SYSTEM by SQL
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-A specified SELECT statement in `config.qfq.ini`_ in variable `FILL_STORE_SYSTEM_BY_SQL_1` (or `FILL_STORE_SYSTEM_BY_SQL_2`,
-or `FILL_STORE_SYSTEM_BY_SQL_3`) will be fired. The query should have 0 (nothing happens) or 1 row. All columns will be
+A specified SELECT statement in `configuration`_ in variable `fillStoreSystemBySql1` (or `2`,
+or `3`) will be fired. The query should have 0 (nothing happens) or 1 row. All columns will be
 **added** to the existing STORE_SYSTEM. Existing variables will be overwritten. Be careful not to overwrite system values.
  
 This option is useful to make generic custom values, saved in the database, accessible to all QFQ Report and Forms.
@@ -573,8 +521,8 @@ Access such variables via `{{<varname>:Y}}`.
 In case QFQ should stop working if a given query does not select exact one record (e.g. a missing period), define an
 error message: ::
 
-  FILL_STORE_SYSTEM_BY_SQL_1 = "SELECT name FROM Person WHERE name='Doe'"
-  FILL_STORE_SYSTEM_BY_SQL_ERROR_MSG_1 = Too many or to few "Doe's" in our database
+  fillStoreSystemBySql1: SELECT name FROM Person WHERE name='Doe'
+  fillStoreSystemBySqlErrorMsg1: Too many or to few "Doe's" in our database
 
 .. _`periodId`:
 
@@ -586,18 +534,17 @@ This is
 * a usecase, implemented via `fillStoreSystemBySql`_,
 * a way to access `Period.id` with respect to the current period (the period itself is custom defined).
 
-After a full QFQ installation, three things are prepared:
+After a full QFQ installation:
 
 * a table `Period` (extend / change it to your needs, fill them with your periods),
 * one sample record in table `Period`,
-* in `config.qfq.ini`_ the default definition of `FILL_STORE_SYSTEM_BY_SQL_1` will set the variable `periodId` during QFQ load.
 
 Websites, delivering semester data, schoolyears schedules, or any other type or periods, often need an index to the
 *current* period.
 
-In `config.qfq.ini`: ::
+In configuration_: ::
 
-	FILL_STORE_SYSTEM_BY_SQL_1 = 'SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1'
+	fillStoreSystemBySql1: SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1
 
 a variable 'periodId' will automatically computed and filled in STORE SYSTEM. Access it via `{{periodId:Y0}}`.
 To get the name and current period: ::
@@ -628,7 +575,7 @@ To get access to the Typo3 installation, 'dbuser' should also have acces to the 
 Exception for SECURITY_GET_MAX_LENGTH
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If it is necessary to use a GET variable which exceeds SECURITY_GET_MAX_LENGTH limit, name the variable with '_<num>' at
+If it is necessary to use a GET variable which exceeds `securityGetMaxLength` limit, name the variable with '_<num>' at
 the end. E.g. `my_long_variable_130`. Such a variable has an allowed length of 130 chars. Access the variable as
 usual with the variable name: `{{my_long_variable_130:C:...}}`.
 
@@ -747,11 +694,11 @@ QFQ Keywords (Bodytext)
  | <level>.altsql    | If <level>.sql is empty, these query will be fired. No sub queries.             |
  |                   | Shown after `althead`                                                           |
  +-------------------+---------------------------------------------------------------------------------+
- | debugShowBodyText | If='1' and config.qfq.ini:*SHOW_DEBUG_INFO = yes*, shows a tooltip with bodytext|
+ | debugShowBodyText | If='1' and configuration_:*showDebugInfo: yes*, shows a tooltip with bodytext   |
  +-------------------+---------------------------------------------------------------------------------+
- | sqlLog            | Overwrites config.qfq.ini: `SQL_LOG`_ . Only affects `Report`, not `Form`.      |
+ | sqlLog            | Overwrites configuration_: `SQL_LOG`_ . Only affects `Report`, not `Form`.      |
  +-------------------+---------------------------------------------------------------------------------+
- | sqlLogMode        | Overwrites config.qfq.ini: `SQL_LOG_MODE`_ . Only affects `Report`, not `Form`. |
+ | sqlLogMode        | Overwrites configuration_: `SQL_LOG_MODE`_ . Only affects `Report`, not `Form`. |
  +-------------------+---------------------------------------------------------------------------------+
 
 .. _`qfq-database`:
@@ -815,26 +762,26 @@ A `Multi Database` setup is given, if 'QFQ system' is different from 'QFQ data'.
 Data: Data1, Data2, ..., Data n
 '''''''''''''''''''''''''''''''
 
-Every database needs to be configured via `config.qfq.ini`_ with it's own `index`.
+Every database needs to be configured via `configuration`_ with it's own `index`.
 
-`QFQ data` might switch between different 'data'-databases. In `config.qfq.ini` one main `QFQ data` index will be specified
-in `DB_INDEX_QFQ`. If specific forms or reports should use a different database than that, `dbIndex` might change
-`DB_INDEX_DATA` temporarily.
+`QFQ data` might switch between different 'data'-databases. In configuration_ one main `QFQ data` index will be specified
+in `indexQfq`. If specific forms or reports should use a different database than that, `dbIndex` might change
+`indexData` temporarily.
 
 `dbIndex`: A `Report` (field `dbIndex`) as well as a `Form` (field `parameter`.`dbIndex`) can operate on a specific database.
 
 
 A `Form` will:
 
-* load the own definition from `DB_INDEX_QFQ` (table `Form` and `FormElement`),
-* loads and save data from/in `DB_INDEX_DATA` (config.qfq.in) / `dbIndex` (form.parameter.dbIndex),
+* load the own definition from `indexQfq` (table `Form` and `FormElement`),
+* loads and save data from/in `indexData` (config.qfq.in) / `dbIndex` (form.parameter.dbIndex),
 * retrieve extra information via `dbIndexExtra` - this is useful to offer information from a database and save them in a
   different one.
 
-The simplest setup, QFQ system & data in the same database, needs no DB_INDEX_QFQ / DB_INDEX_DATA definition in
-`config.qfq.ini` or one or both of them set to '1'
+The simplest setup, QFQ system & data in the same database, needs no `indexQfq / indexData` definition in
+configuration_ or one or both of them set to '1'
 
-To separate QFQ system and data, DB_INDEX_QFQ and DB_INDEX_DATA will have different indexes.
+To separate QFQ system and data, indexQfq and indexData will have different indexes.
 
 
 A Multi Database setup might be useful for:
@@ -866,7 +813,7 @@ Note:
 | C | appC3.edu      | 'wAppC3'     | <dbHostAppC3>, <dbnameC3>_t3  | <dbHostC3>, <dbnameSysC3>_db | <dbHostData>_db, <dbNameData>_db |
 +---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
 
-In `config.qfq.ini`_ mutliple database credentials can be prepared. Mandatory is at least one credential setup like
+In config-qfq-ini_ mutliple database credentials can be prepared. Mandatory is at least one credential setup like
 `DB_1_USER`, `DB_1_SERVER`, `DB_1_PASSWORD`, `DB_1_NAME`. The number '1' indicates the `dbIndex`. Increment the number
 to specify further database credential setups.
 
@@ -887,14 +834,14 @@ Debug
 SQL Logging
 -----------
 
-File: `config.qfq.ini`_
+configuration_
 
 .. _SQL_LOG:
 
-* *SQL_LOG*
+* *sqlLog*
 
   * Filename where to log SQL queries and statistical data.
-  * File is relative to the extension directory or absolute (starting with '/').
+  * File is relative to the `<site path>` or absolute (starting with '/').
   * Content: SQL queries and timestamp, formName/formId, fe_user, success, affected rows, newly created record
     id's and accessed from IP.
   * The global setting can be overwritten by defining `sqlLog` inside of a QFQ tt-content record.
@@ -902,7 +849,7 @@ File: `config.qfq.ini`_
 
 .. _SQL_LOG_MODE:
 
-* *SQL_LOG_MODE = all|modify|error|none*
+* *sqlLogMode: all|modify|error|none*
 
   * *all*: logs every SQL statement.
   * *modify*: logs only statements who might potentially change data.
@@ -910,7 +857,7 @@ File: `config.qfq.ini`_
   * *none*: no query logging at all.
   * The global setting can be overwritten by defining `sqlLogMode` inside of a QFQ tt-content record.
 
-* *SHOW_DEBUG_INFO = [yes|no|auto],[download]*
+* *showDebugInfo = [yes|no|auto],[download]*
 
   If active, displays additional information in the Frontend (FE). This is typically helpful during development.
 
@@ -929,8 +876,8 @@ File: `config.qfq.ini`_
 
   * *auto*: Depending if there is a Typo3 BE session, set internally:
 
-    * *SHOW_DEBUG_INFO = yes*  (BE session exist)
-    * *SHOW_DEBUG_INFO = no*   (no BE session)
+    * *showDebugInfo = yes*  (BE session exist)
+    * *showDebugInfo = no*   (no BE session)
 
   * *download*:
 
@@ -942,9 +889,9 @@ File: `config.qfq.ini`_
 Redirect all mail to (catch all)
 --------------------------------
 
-File: `config.qfq.ini`_
+configuration_
 
-* *REDIRECT_ALL_MAIL_TO=john@doe.com*
+* *redirectAllMailTo=john@doe.com*
 
   * During the development, it might be helpful to configure a 'catch all' email address, which QFQ uses as the final receiver
     instead of the original intended one.
@@ -1073,12 +1020,12 @@ braces. ::
 
 	{{[1]SELECT ... }}
 
-For using the DB_INDEX_DATA and DB_INDEX_QFQ (`config.qfq.ini`_), it's a good practice to specify the variable name
+For using the indexData and indexQfq (configuration_), it's a good practice to specify the variable name
 instead of the numeric index. ::
 
-   {{[{{DB_INDEX_DATA:Y}}]SELECT ...}}
+   {{[{{indexData:Y}}]SELECT ...}}
 
-If no dbIndex is given, `{{DB_INDEX_DATA:Y}}` is used.
+If no dbIndex is given, `{{indexData:Y}}` is used.
 
 
 Example
@@ -1091,7 +1038,7 @@ Example
   {{SELECT id, city FROM Address AS adr WHERE adr.accId={{SELECT id FROM Account AS acc WHERE acc.name={{feUser:T0}} }} }}
   {{!SELECT id, name FROM Person}}
   {{[2]SELECT id, name FROM Form}}
-  {{[{{DB_INDEX_QFQ:Y}}]SELECT id, name FROM Form}}
+  {{[{{indexQfq:Y}}]SELECT id, name FROM Form}}
 
 .. _`row-column-variables`:
 
@@ -1203,19 +1150,19 @@ To protect the web application the following `escape` types are available:
 	* 'L' - LDAP DN values will be escaped. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
 	* 's' - single ticks will be escaped. str_replace() of ' against \\'.
 	* 'd' - double ticks will be escaped: str_replace() of " against \\".
-	* 'c' - config - the escape type configured in `config.qfq.ini`_.
-	* ''  - the escape type configured in `config.qfq.ini`_.
+	* 'c' - config - the escape type configured in `configuration`_.
+	* ''  - the escape type configured in `configuration`_.
 	* '-' - no escaping.
 
 * The `escape` type is defined by the fourth parameter of the variable. E.g.: `{{name:FE:alnumx:m}}` (m = mysql).
 * It's possible to combine different `escape` types, they will be processed in the order given. E.g. `{{name:FE:alnumx:Ls}}` (L, s).
 * Escaping is typically necessary for SQL or LDAP queries.
 * Be careful when escaping nested variables. Best is to escape **only** the most outer variable.
-* In `config.qfq.ini`_ a global `ESCAPE_TYPE_DEFAULT` can be defined. The configured escape type applies to all substituted
+* In configuration_ a global `escapeTypeDefault` can be defined. The configured escape type applies to all substituted
   variables, who *do not* contain a *specific* escape type.
 * Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the *Form editor*). This overwrites the
-  global definition of `config.qfq.ini`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
-  in `config.qfq.ini`_.
+  global definition of `configuration`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
+  in `configuration`_.
 * To suppress a default escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
 
 Security
@@ -1250,7 +1197,7 @@ Get Parameter
 
 * GET parameter might contain urlencoded content (%xx). Therefore all GET parameter will be processed by 'urldecode()'.
   As a result a text like '%nn' in GET variables will always be decoded. It's not possible to transfer '%nn' itself.
-* GET variables are limited to SECURITY_GET_MAX_LENGTH chars - any violation will stop QFQ.
+* GET variables are limited to securityGetMaxLength chars - any violation will stop QFQ.
 
 Post Parameter
 --------------
@@ -1270,12 +1217,12 @@ Honeypot
 --------
 
 Every QFQ Form contains 'honeypot'-HTML input elements (HTML: hidden & readonly). Which of them to use is configured in
-`config.qfq.ini`_ (default:   'username', 'password' and 'email'). On every start of QFQ (form, report, save, ...),
+`configuration`_ (default:   'username', 'password' and 'email'). On every start of QFQ (form, report, save, ...),
 these variables are tested if they are non-empty. In such a case a probably malicous bot has send the request and the
 request will not be processed.
 
 If any of the default configured variable names are needed (which will never be the case for QFQ), an explicit variable name
-list have to be configured in `config.qfq.ini`_.
+list have to be configured in `configuration`_.
 
 **QFQ security restriction**:
 
@@ -1284,10 +1231,10 @@ list have to be configured in `config.qfq.ini`_.
 Violation
 ---------
 
-On any violation, QFQ will sleep SECURITY_ATTACK_DELAY seconds (`config.qfq.ini`_) and than exit the running PHP process.
+On any violation, QFQ will sleep `securityAttackDelaySeconds` (`configuration`_) and than exit the running PHP process.
 A detected attack leads to a complete white (=empty) page.
 
-If SECURITY_SHOW_MESSAGE = true (`config.qfq.ini`_), at least a message is displayed after the delay.
+If `securityShowMessage`: true (`configuration`_), at least a message is displayed after the delay.
 
 Client Parameter via SIP
 ------------------------
@@ -1305,7 +1252,7 @@ Secure direct fileaccess
 ------------------------
 
 If the application uploads files, mostly it's not necessary and often a security issue, to offer a direct download of
-the uploaded files. Best is to create a directory, e.g. `fileadmin/protected` and deny direct access via webbrowser to it.
+the uploaded files. Best is to create a directory, e.g. `<site path>/fileadmin/protected` and deny direct access via webbrowser to it.
 E.g. for Apache set a htaccess rule: ::
 
 		<Directory "/var/www/html/fileadmin/protected">
@@ -1609,53 +1556,49 @@ Store: *SYSTEM* - Y
  +-------------------------+--------------------------------------------------------------------------+
  | Name                    | Explanation                                                              |
  +=========================+==========================================================================+
- | DB_USER                 | defined in config.qfq.ini                                                |
+ | DB_USER                 | defined in configuration_                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | DB_SERVER               | defined in config.qfq.ini                                                |
+ | DB_SERVER               | defined in configuration_                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | DB_NAME                 | defined in config.qfq.ini                                                |
+ | DB_NAME                 | defined in configuration_                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | DB_INIT                 | defined in config.qfq.ini                                                |
+ | init                    | defined in configuration_                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | SQL_LOG                 | defined in config.qfq.ini, see `SQL_LOG`_                                |
+ | sqlLog                  | defined in configuration_, see `SQL_LOG`_                                |
  +-------------------------+--------------------------------------------------------------------------+
- | SQL_LOG_MODE            | defined in config.qfq.ini, `SQL_LOG_MODE`_                               |
+ | sqlLogMode              | defined in configuration_, `SQL_LOG_MODE`_                               |
  +-------------------------+--------------------------------------------------------------------------+
- | SHOW_DEBUG_INFO         | defined in config.qfq.ini                                                |
+ | showDebugInfo           | defined in configuration_                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | CSS_LINK_CLASS_INTERNAL | defined in config.qfq.ini                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | CSS_LINK_CLASS_EXTERNAL | defined in config.qfq.ini                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | CSS_CLASS_QFQ_CONTAINER | defined in config.qfq.ini                                                |
+ | cssClassQfqContainer    | defined in configuration_                                                |
  +-------------------------+--------------------------------------------------------------------------+
  | EXT_PATH                | computed during runtime                                                  |
  +-------------------------+--------------------------------------------------------------------------+
  | SITE_PATH               | computed during runtime                                                  |
  +-------------------------+--------------------------------------------------------------------------+
- | DATE_FORMAT             | defined in config.qfq.ini                                                |
+ | dateFormat              | defined in configuration_                                                |
  +-------------------------+--------------------------------------------------------------------------+
- | class                   | defined in config.qfq.ini (CSS_CLASS_QFQ_FORM) or form definition        |
+ | class                   | defined in configuration_ (CSS_CLASS_QFQ_FORM) or form definition        |
  +-------------------------+--------------------------------------------------------------------------+
- | classPill               | defined in config.qfq.ini (CSS_CLASS_QFQ_FORM_PILL) or form definition   |
+ | classPill               | defined in configuration_ (CSS_CLASS_QFQ_FORM_PILL) or form definition   |
  +-------------------------+--------------------------------------------------------------------------+
- | classBody               | defined in config.qfq.ini (CSS_CLASS_QFQ_FORM_BODY) or form definition   |
+ | classBody               | defined in configuration_ (CSS_CLASS_QFQ_FORM_BODY) or form definition   |
  +-------------------------+--------------------------------------------------------------------------+
- | data-pattern-error      | defined in config.qfq.ini or form definition                             |
+ | data-pattern-error      | defined in configuration_ or form definition                             |
  +-------------------------+--------------------------------------------------------------------------+
- | data-require-error      | defined in config.qfq.ini or form definition                             |
+ | data-require-error      | defined in configuration_ or form definition                             |
  +-------------------------+--------------------------------------------------------------------------+
- | data-match-error        | defined in config.qfq.ini or form definition                             |
+ | data-match-error        | defined in configuration_ or form definition                             |
  +-------------------------+--------------------------------------------------------------------------+
- | data-error              | defined in config.qfq.ini or form definition                             |
+ | data-error              | defined in configuration_ or form definition                             |
  +-------------------------+--------------------------------------------------------------------------+
- | bsColumns               | defined in config.qfq.ini (FORM_BS_COLUMNS) or form definition           |
+ | bsColumns               | defined in configuration_ (FORM_BS_COLUMNS) or form definition           |
  +-------------------------+--------------------------------------------------------------------------+
- | bsLabelColumns          | defined in config.qfq.ini (FORM_BS_LABEL_COLUMNS) or form definition     |
+ | bsLabelColumns          | defined in configuration_ (FORM_BS_LABEL_COLUMNS) or form definition     |
  +-------------------------+--------------------------------------------------------------------------+
- | bsInputColumns          | defined in config.qfq.ini (FORM_BS_INPUT_COLUMNS) or form definition     |
+ | bsInputColumns          | defined in configuration_ (FORM_BS_INPUT_COLUMNS) or form definition     |
  +-------------------------+--------------------------------------------------------------------------+
- | bsNoteColumns           | defined in config.qfq.ini (FORM_BS_NOTE_COLUMNS) or form definition      |
+ | bsNoteColumns           | defined in configuration_ (FORM_BS_NOTE_COLUMNS) or form definition      |
  +-------------------------+--------------------------------------------------------------------------+
  | sqlFinal                | computed during runtime, used for error reporting                        |
  +-------------------------+--------------------------------------------------------------------------+
@@ -1694,7 +1637,7 @@ To decide which Parameter should be placed on *Form.parameter* and which on *For
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | ldapTimeLimit               | 3 (default)                      | Maximum time to wait for an answer of the LDAP Server         | x    | x           | TA, FSL  |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| ldapUseBindCredentials      | ldapUseBindCredentials=1         | Use LDAP_1_* crendentials from config.qfq.ini for ldap_bind() | x    | x           | TA, FSL  |
+| ldapUseBindCredentials      | ldapUseBindCredentials=1         | Use LDAP_1_* crendentials from config-qfq-ini_ for ldap_bind()| x    | x           | TA, FSL  |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadLdap               | -                                | Enable LDAP as 'Typeahead' data source                        |      | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
@@ -1720,7 +1663,7 @@ To decide which Parameter should be placed on *Form.parameter* and which on *For
 
 * *typeAheadLimit*: there might be a hard limit on the server side (e.g. 100) - which can't be extended.
 * *ldapUseBindCredentials* is only necessary if `anonymous` access is not possible. RDN and password has to be configured in
-  `config.qfq.ini`.
+  config-qfq-ini_.
 
 .. _LDAP_Typeahead:
 
@@ -1915,15 +1858,17 @@ General
 Record locking
 --------------
 
-Forms and 'record delete'-function support basic record locking. If a user opens a form and start to change content, a
+Forms and 'record delete'-function support basic record locking. A user opens a form: starting with the first change of content, a
 record lock will be acquired in the background. If the lock is denied (another user already owns a lock on the record) an
 alert is shown.
-By default the record lock mode is 'exclusive' and the default timeout is 15 minutes. Both can be configured per form. The
-initial default timeout can also be configured in `config.qfq.ini`_ (will be copied to the form during creating the form).
+By default the record lock mode is 'exclusive' and the default timeout is 15 minutes. Both can be configured per form.
+The general timeout can also be configured in configuration_ (will be copied to the form during creating the form).
 
-If a timeout expires, the lock is deleted. During the next change in a form, the lock is acquired again.
+The lock timeout counts from the first change, not from the last modification on the form.
 
-A lock is assgined to a record of a table. Multiple forms, with the same primary table, uses the same lock for a given record.
+If a timeout expires, the lock becomes invalid. During the next change in a form, the lock is acquired again.
+
+A lock is assigned to a record of a table. Multiple forms, with the same primary table, uses the same lock for a given record.
 
 If a `Form` acts on further records (e.g. via FE action), those records are not protected by this basic record locking.
 
@@ -2041,7 +1986,8 @@ Depending on `r`, the following access permission will be taken:
     'access granted'. The grant will be revoked when the QFQ session is destroyed - this happens when a user loggs out or
     the webbrowser is closed.
 
-* `logged_in` / `logged_out`: for forms which might be displayed without a SIP, but maybe on a protected or even unprotected page. *The option is probably not often used.*
+* `logged_in` / `logged_out`: for forms which might be displayed without a SIP, but maybe on a protected or even
+  unprotected page. *The option is probably not often used.*
 
 * `always`: such a form is always allowed to be loaded.
 
@@ -2167,7 +2113,7 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | Name                        | Type   | Description                                                                                              |
 +=============================+========+==========================================================================================================+
-| dbIndex                     | int    | Database credential index, given via `config.qfq.ini`_ to let the current `Form` operate on the database.|
+| dbIndex                     | int    | Database credential index, given via `config-qfq-ini`_ to let the current `Form` operate on the database.|
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | bsColumns                   | int    | Wrap the whole form in '<div class="col-md-??">                                                          |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2218,45 +2164,45 @@ Parameter
 | mode                        | string | The value `readonly` will activate a global readonly mode of the form - the user can't change any data.  |
 |                             |        | See :ref:`form-mode-global`                                                                              |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| enterAsSubmit               | digit  | 0: off, 1: Pressing *enter* in a form means *save* and *close*. Takes default from `config.qfq.ini`_.    |
+| enterAsSubmit               | digit  | 0: off, 1: Pressing *enter* in a form means *save* and *close*. Takes default from configuration_.       |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | submitButtonText            | string | Show a save button at the bottom of the form, with <submitButtonText> . See `submitButtonText`_.         |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | saveButtonActive            | -      | Make the 'save'-button active on *Form* load (instead of waiting for the first user change).             |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| saveButtonText              | string | Overwrite default from config.qfq.ini: SAVE_BUTTON_TEXT                                                  |
+| saveButtonText              | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| saveButtonTooltip           | string | Overwrite default from config.qfq.ini: SAVE_BUTTON_TOOLTIP                                               |
+| saveButtonTooltip           | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| saveButtonClass             | string | Overwrite default from config.qfq.ini: SAVE_BUTTON_CLASS                                                 |
+| saveButtonClass             | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| saveButtonGlyphIcon         | string | Overwrite default from config.qfq.ini: SAVE_BUTTON_GLYPH_ICON                                            |
+| saveButtonGlyphIcon         | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| closeButtonText             | string | Overwrite default from config.qfq.ini: CLOSE_BUTTON_TEXT                                                 |
+| closeButtonText             | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| closeButtonTooltip          | string | Overwrite default from config.qfq.ini: CLOSE_BUTTON_TOOLTIP                                              |
+| closeButtonTooltip          | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| closeButtonClass            | string | Overwrite default from config.qfq.ini: CLOSE_BUTTON_CLASS                                                |
+| closeButtonClass            | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| closeButtonGlyphIcon        | string | Overwrite default from config.qfq.ini: CLOSE_BUTTON_GLYPH_ICON                                           |
+| closeButtonGlyphIcon        | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| deleteButtonText            | string | Overwrite default from config.qfq.ini: DELETE_BUTTON_TEXT                                                |
+| deleteButtonText            | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| deleteButtonTooltip         | string | Overwrite default from config.qfq.ini: DELETE_BUTTON_TOOLTIP                                             |
+| deleteButtonTooltip         | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| deleteButtonClass           | string | Overwrite default from config.qfq.ini: DELETE_BUTTON_CLASS                                               |
+| deleteButtonClass           | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| deleteButtonGlyphIcon       | string | Overwrite default from config.qfq.ini: DELETE_BUTTON_GLYPH_ICON                                          |
+| deleteButtonGlyphIcon       | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| newButtonText               | string | Overwrite default from config.qfq.ini: NEW_BUTTON_TEXT                                                   |
+| newButtonText               | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| newButtonTooltip            | string | Overwrite default from config.qfq.ini: NEW_BUTTON_TOOLTIP                                                |
+| newButtonTooltip            | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| newButtonClass              | string | Overwrite default from config.qfq.ini: NEW_BUTTON_CLASS                                                  |
+| newButtonClass              | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| newButtonGlyphIcon          | string | Overwrite default from config.qfq.ini: NEW_BUTTON_GLYPH_ICON                                             |
+| newButtonGlyphIcon          | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| extraButtonInfoClass        | string | Overwrite default from config.qfq.ini: EXTRA_BUTTON_INFO_CLASS                                           |
+| extraButtonInfoClass        | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | fillStoreVar                | string | Fill the STORE_VAR with custom values. See `STORE_VARS`_.                                                |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2887,10 +2833,10 @@ extraButtonPassword
 extraButtonInfo
 ;;;;;;;;;;;;;;;
 
+* After Form load,  the `info` button/icon is shown but the information message is hidden.
 * The user has to click on the `info` button/icon to see an additional message.
-* After Form load, the information message is hidden.
-* The value of this parameter is the text shown.
-* Shows an `info` button/icon, depending of EXTRA_BUTTON_INFO_POSITION in `config.qfq.ini`_
+* The value of this parameter is the text shown to the user.
+* Shows an `info` button/icon, depending of `extraButtonInfoPosition` in configuration_
 
   * `auto`, depending on `FormElement` type:
 
@@ -2899,8 +2845,8 @@ extraButtonInfo
 
   * `below`: below the FormElement for all types.
 
-* With display `below`, a defined class in `extraButtonInfoClass` (FE, F, config.qfq.ini) will be applied. E.g. this
-  might be `pull-right` to align the grafic on the right side of the input element.
+* For `FormElement` with mode `below`, a `span` element with the given class in `extraButtonInfoClass` (FE, F, configuration_)
+  will be applied. E.g. this might be `pull-right` to align the `info` button/icon on the right side below the input element.
 
 .. _`input-checkbox`:
 
@@ -3565,7 +3511,7 @@ page. The split is done via http://www.cityinthesky.co.uk/opensource/pdf2svg/.
    * *fileSplit* = `<type>` - Activate the splitting process. Only possible value: `fileSplit=svg`.
    * *fileDestinationSplit* = `<pathFileName (pattern)>` - Target directory and filename pattern for the created & split'ed files. E.g. ::
 
-     fileDestinationSplit = fileadmin/protected/{{id:R}}.{{filenameBase}}.%02d.svg
+       fileDestinationSplit = fileadmin/protected/{{id:R}}.{{filenameBase}}.%02d.svg
 
    * *tableNameSplit* = `<tablename>` - Reference in table 'Split' to the table, which holds the original PDF file.
 
@@ -3874,11 +3820,11 @@ Multi Language Form
 -------------------
 
 QFQ Forms might be configured for up to 5 different languages. Per language there is one extra field in the *Form editor*.
-Which field represents which language is configured in `config.qfq.ini`_.
+Which field represents which language is configured in configuration_.
 
 * The Typo3 installation needs to be configured to handle different languages - this is independet of QFQ and not covered
   here. QFQ will use the Typo3 internal variable 'pageLanguage', which typically correlates to the URL parameter 'L' in the URL.
-* In `config.qfq.ini`_ the Typo3 language index (value of 'L') and a language label have to be configured for each language.
+* In configuration_ the Typo3 language index (value of 'L') and a language label have to be configured for each language.
   Only than, the additional language fields in the *Form editor* will be shown.
 
 Example
@@ -3890,15 +3836,15 @@ Assuming the Typo3 page has the
 * english, L=1
 * spain, L=2
 
-Configuration in `config.qfq.ini`: ::
+Configuration in configuration_: ::
 
-		FORM_LANGUAGE_A_ID = 1
-		FORM_LANGUAGE_A_LABEL = english
+		formLanguageAId = 1
+		formLanguageALabel = english
 
-		FORM_LANGUAGE_B_ID = 2
-		FORM_LANGUAGE_B_LABEL = spain
+		formLanguageBId = 2
+		formLanguageBLabel = spain
 
-The default language is not covered in config.qfq.ini.
+The default language is not covered in configuration_.
 
 The *Form editor* now shows on the pill 'Basic' (Form und FormEditor) for both languages each an additional parameter
 input field. Any input field in the *Form editor* can be redeclared in the correspondig language parameter field. Any
@@ -4016,7 +3962,7 @@ column on the right side will be rendered.
 
 The used default column (=bootstrap grid) width is *3,6,3* for *label, input, note*.
 
-* The system wide default can be changed via `config-qfq-ini`_ - the new settings are the default
+* The system wide default can be changed via `configuration`_ - the new settings are the default
   settings for all forms.
 * Per *Form* settings can be done in the *Form* parameter field. They overwrite the system wide default.
 * Per *FormElement* settings can be done in the *FormElement* parameter field. They overwrite the *Form* setting.
@@ -4193,7 +4139,7 @@ Support for record locking is given with mode:
 
 * *exclusive*: user can't force a write.
 
-  * Including a timeout (default 15 mins: DIRTY_RECORD_TIMEOUT_SECONDS in `config.qfq.ini`_) for maximum lock time.
+  * Including a timeout (default 15 mins dirtyRecordTimeoutSeconds in configuration_) for maximum lock time.
 
 * *advisory*: user is only warned, but allowed to overwrite.
 * *none*: no bookeeping about locks.
@@ -4221,7 +4167,7 @@ corresponding value from STORE_SIP will be returned. Existing records will use t
 Central configured values
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Any variable in *config.qfq.ini* can be used by *{{<varname>:Y}}* in form or report statements.
+Any variable in configuration_ can be used by *{{<varname>:Y}}* in form or report statements.
 
 E.g.
 
@@ -4237,15 +4183,15 @@ Best for debugging is to specify in the tt-content record::
 
   debugShowBodyText = 1
 
-Note: Debug information is only display if it's enabled in  *config.qfq.ini* by
+Note: Debug information is only display if it's enabled in  configuration_ by
 
- * *SHOW_DEBUG_INFO=yes* or
- * *SHOW_DEBUG_INFO=auto* and logged in in the same Browser as a Typo3 backend user.
+ * *showDebugInfo: yes* or
+ * *showDebugInfo: auto* and logged in in the same Browser as a Typo3 backend user.
 
 More detailed error messages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If *SHOW_DEBUG_INFO* is enabled, a full stacktrace and variable contents are displayed in case of an error.
+If *showDebugInfo* is enabled, a full stacktrace and variable contents are displayed in case of an error.
 
 Form search
 ^^^^^^^^^^^
@@ -4850,14 +4796,14 @@ There are extensive ways to wrap columns and rows. See :ref:`wrapping-rows-and-c
 
 Debug the bodytext
 ------------------
-The parsed bodytext could be displayed by activating 'SHOW_DEBUG_INFO ' (:ref:`debug`) and specifying
+The parsed bodytext could be displayed by activating 'showDebugInfo' (:ref:`debug`) and specifying
 
 ::
 
     debugShowBodyText = 1
 
 A small symbol with a tooltip will be shown, where the content record will be displayed on the webpage.
-Note: :ref:`debug` information will only be shown with *SHOW_DEBUG_INFO = yes* in config.qfq.ini .
+Note: :ref:`debug` information will only be shown with *showDebugInfo: yes* in configuration_.
 
 Structure
 ---------
@@ -6186,7 +6132,7 @@ used. Office file formats are not supported. Due to speed and quality reasons, S
 If a file format is not known, QFQ tries to show a corresponding file type image provided by Typo3 - such an image is not
 scaled.
 
-In `config.qfq.ini`_ the exact location of `convert` and `inkscape` can be configured (optional) as well as the directory
+In configuration_ the exact location of `convert` and `inkscape` can be configured (optional) as well as the directory
 names for the cached thumbnails.
 
 +-------+--------------------------------+----------------------------------------------------------------------------+
@@ -6250,7 +6196,7 @@ Thumbnail: secure
 '''''''''''''''''
 
 Mode 'secure' is activated via enabling SIP (`s:1`, default). The thumbnail is saved under the path `thumbnailDirSecure`
-as configured in `config.qfq.ini`_.
+as configured in configuration_.
 
 The secure path needs to be protected against direct file access by the webmaster / webserver configuration too.
 
@@ -6262,7 +6208,7 @@ Thumbnail: public
 '''''''''''''''''
 
 Mode 'public' has to be explicit activated by specifying `s:0`. The thumbnail is saved under the path `thumbnailDirPublic`
-as configured in `config.qfq.ini`_.
+as configured in configuration_.
 
 QFQ returns a HTML 'img'-tag: ::
 
@@ -6647,7 +6593,7 @@ Create / edit `AutoCron` jobs
 Create a T3 page with a QFQ record (similar to the formeditor). Such page should be access restricted and is only needed
 to edit `AutoCron` jobs: ::
 
-	dbIndex={{DB_INDEX_QFQ:Y}}
+	dbIndex={{indexQfq:Y}}
 	form={{form:S}}
 
 	10 {
@@ -6718,9 +6664,9 @@ If `nextRun` is > 0 and in the past, the job will be fired. After the job has be
 
 This is useful for jobs which have to be fired from time to time.
 
-To fire such an asynchronous job, just set `nextRun`=NOW() and wait for the next system cron run.
+To fire such an asynchronous job, just set `nextRun=NOW()` and wait for the next system cron run.
 
-If such a job is running and a new `nextRun`=NOW() is applied, the 'AutoCron' job will be fired again during the next
+If such a job is running and a new `nextRun=NOW()` is applied, the 'AutoCron' job will be fired again during the next
 system cron run.
 
 
@@ -6752,7 +6698,7 @@ Also `overwrite` or `append` can be selected for the output file. In case of `ap
  OS level.
 
 To check for a successful DB connection, it's a good practice to report a custom token on the T3 page / QFQ record like
-'DB Connect: ok'. Such a string can be checked via `Pattern to look for on output`=`/DB Connect: ok/`. The pattern
+'DB Connect: ok'. Such a string can be checked via `Pattern to look for on output=/DB Connect: ok/`. The pattern
 needs to be written in PHP PCRE syntax. For a simple search string, just surround them with '/'.
 If the pattern is found on the page, the job get's 'Ok' - else 'Error - ...'.
 
