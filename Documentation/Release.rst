@@ -36,6 +36,36 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 18.4.4
+--------------
+
+Date: 28.04.18
+
+Bug Fixes
+^^^^^^^^^
+
+* Fix broken ext_emconf.php
+
+Version 18.4.3
+--------------
+
+Date: 28.04.18
+
+Bug Fixes
+^^^^^^^^^
+
+* Version Number ...04... not supported by TE. Changing naming scheme to omit leading zero.
+
+Version 18.04.1
+---------------
+
+Date: 28.04.2018
+
+Bug Fixes
+^^^^^^^^^
+
+* config: broken dbIndexQfq, dbIndexData
+
 Version 18.04.0
 ---------------
 

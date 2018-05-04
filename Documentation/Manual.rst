@@ -1072,7 +1072,7 @@ The following code will render a 'new person' button::
 
 	{{p:form&form=Person|s|N|t:new person AS link}}
 
-For better reading, the format string might be wrapped in single or double quotes (this ist optional): ::
+For better reading, the format string might be wrapped in single or double quotes (this is optional): ::
 
 	{{"p:form&form=Person|s|N|t:new person" AS link}}
 
@@ -1275,7 +1275,7 @@ This is in general a good security improvement for directories with user supplie
 File upload
 -----------
 
-By default the mime type of every uploaded file is checked against a whitelist of allowed mime types. The mime type of
+By default the mime type of every uploaded file is checked against a white list of allowed mime types. The mime type of
 a file can be (easily) faked by an attacker. This check is good to handle regular user file upload for specific file types. To
 prevent attacks against uploading and executing malicous code this won't help.
 
@@ -1553,59 +1553,8 @@ Store: *SYSTEM* - Y
 
 * Sanitized: *no*
 
- +-------------------------+--------------------------------------------------------------------------+
- | Name                    | Explanation                                                              |
- +=========================+==========================================================================+
- | DB_USER                 | defined in configuration_                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | DB_SERVER               | defined in configuration_                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | DB_NAME                 | defined in configuration_                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | init                    | defined in configuration_                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | sqlLog                  | defined in configuration_, see `SQL_LOG`_                                |
- +-------------------------+--------------------------------------------------------------------------+
- | sqlLogMode              | defined in configuration_, `SQL_LOG_MODE`_                               |
- +-------------------------+--------------------------------------------------------------------------+
- | showDebugInfo           | defined in configuration_                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | cssClassQfqContainer    | defined in configuration_                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | EXT_PATH                | computed during runtime                                                  |
- +-------------------------+--------------------------------------------------------------------------+
- | SITE_PATH               | computed during runtime                                                  |
- +-------------------------+--------------------------------------------------------------------------+
- | dateFormat              | defined in configuration_                                                |
- +-------------------------+--------------------------------------------------------------------------+
- | class                   | defined in configuration_ (CSS_CLASS_QFQ_FORM) or form definition        |
- +-------------------------+--------------------------------------------------------------------------+
- | classPill               | defined in configuration_ (CSS_CLASS_QFQ_FORM_PILL) or form definition   |
- +-------------------------+--------------------------------------------------------------------------+
- | classBody               | defined in configuration_ (CSS_CLASS_QFQ_FORM_BODY) or form definition   |
- +-------------------------+--------------------------------------------------------------------------+
- | data-pattern-error      | defined in configuration_ or form definition                             |
- +-------------------------+--------------------------------------------------------------------------+
- | data-require-error      | defined in configuration_ or form definition                             |
- +-------------------------+--------------------------------------------------------------------------+
- | data-match-error        | defined in configuration_ or form definition                             |
- +-------------------------+--------------------------------------------------------------------------+
- | data-error              | defined in configuration_ or form definition                             |
- +-------------------------+--------------------------------------------------------------------------+
- | bsColumns               | defined in configuration_ (FORM_BS_COLUMNS) or form definition           |
- +-------------------------+--------------------------------------------------------------------------+
- | bsLabelColumns          | defined in configuration_ (FORM_BS_LABEL_COLUMNS) or form definition     |
- +-------------------------+--------------------------------------------------------------------------+
- | bsInputColumns          | defined in configuration_ (FORM_BS_INPUT_COLUMNS) or form definition     |
- +-------------------------+--------------------------------------------------------------------------+
- | bsNoteColumns           | defined in configuration_ (FORM_BS_NOTE_COLUMNS) or form definition      |
- +-------------------------+--------------------------------------------------------------------------+
- | sqlFinal                | computed during runtime, used for error reporting                        |
- +-------------------------+--------------------------------------------------------------------------+
- | sqlParamArray           | computed during runtime, used for error reporting                        |
- +-------------------------+--------------------------------------------------------------------------+
- | sqlCount                | computed during runtime, used for error reporting                        |
- +-------------------------+--------------------------------------------------------------------------+
+See configuration_ for a list of all settings.
+
 
 .. _LDAP:
 
@@ -3406,12 +3355,14 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
 .. _`downloadButton`:
 
-  * *downloadButton* = `<string>` - If given, shows a button to download the previous uploaded file - instead of the string given in
-    `fe.value`. It's important that `fe.value` points to a readable file on the server.
+  * *downloadButton* = `t:<string>` - If given, shows a button to download the previous uploaded file - instead of the string given in
+    `fe.value`. The button is only shown if `fe.value` points to a readable file on the server.
 
-    * If `downloadButton` ist empty, just shows the regular download glyph.
+    * If `downloadButton` is empty, just shows the regular download glyph.
     * To just show the filename: `downloadButton = t:{{filenameOnly:V}}`
     * Additional attributes might be given like `downloadButton = t:Download|o:check file`. Please check `download`_.
+
+      * The following attributes are hard coded (can't be changed): `s|M:file|d|F`
 
   * fileSplit, fileDestinationSplit, tableNameSplit: see split-pdf-upload_
 
