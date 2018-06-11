@@ -86,11 +86,13 @@ The program is not included in QFQ and has to be manually installed.
 
   * Best is to install the QT version from the named website above.
   * In case of trouble with wkhtmltopdf, also install 'libxrender1'.
+  * The current version 0.12.4 might have trouble with https connections. Version 0.12.5-dev (github master branch)
+    seems more reliable. Please contact the QFQ authors if you need a compiled Ubuntu version of wkhtmltopdf.
 
 In `configuration`_ specify the:
 
-* installed `wkhtmltopdf` binary: `cmdWkhtmltopdf`.
-* the site base URL: `baseUrl`.
+* `cmdWkhtmltopdf=/opt/wkhtmltox/bin/wkhtmltopdf`.
+* `baseUrl=http://www.example.com/`.
 
 
 **Important**: To access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check! `wkhtml`
@@ -103,7 +105,7 @@ Configure via Typo3 Installtool `All configuration > $TYPO3_CONF_VARS['FE']`: ::
 **Warning**: this disables an important anti-'session hijacking' protection. The security level of the whole installation
 will be *lowered*! Again, this is only needed if `wkhtml` needs access to FE_GROUP protected pages & content. As an
 alternative to lower the security level, create a separated page subtree which is only accessible (configured via
-Typosript) from specific IPs **or** if a FE-User is logged in.
+Typoscript) from specific IPs **or** if a FE-User is logged in.
 
 If there are problems with converting/downloading FE_GROUP protected pages, check `SHOW_DEBUG_INFO = download` to debug.
 
@@ -205,12 +207,12 @@ Setup CSS & JS
 		file05 = typo3conf/ext/qfq/Resources/Public/JavaScript/globalize.js
 		file06 = typo3conf/ext/qfq/Resources/Public/JavaScript/tinymce.min.js
 		file07 = typo3conf/ext/qfq/Resources/Public/JavaScript/EventEmitter.min.js
-      file08 = typo3conf/ext/qfq/Resources/Public/JavaScript/typeahead.bundle.min.js
+        file08 = typo3conf/ext/qfq/Resources/Public/JavaScript/typeahead.bundle.min.js
 		file09 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.min.js
 
 		# Only needed in case FormElement 'annotate' is used.
 		file10 = typo3conf/ext/qfq/Resources/Public/JavaScript/fabric.min.js
-      file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
+        file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
 	}
 
 
@@ -1090,10 +1092,10 @@ Sanitize class
 Values in STORE_CLIENT *C* (Client=Browser) and STORE_FORM *F* (Form, HTTP 'post') are checked against a
 sanitize class. Values from other stores are not checked against any sanitize class.
 
-* If a value violates the specific sanitize class, the value becomes `!!<name of sanitize class>!!`. E.g. `!!gigit!!`.
+* If a value violates the specific sanitize class, the value becomes `!!<name of sanitize class>!!`. E.g. `!!digit!!`.
 * Variables get by default the sanitize class defined in the corresponding `FormElement`. If not defined,
   the default class is 'digit'.
-* A default sanitize class can be overwritten by individual definition: *{{a:C:all}}*
+* A default sanitize class can be overwritten by individual definition: *{{a:C:alnumx}}*
 
 For QFQ variables and FormElements:
 
@@ -1114,14 +1116,14 @@ For QFQ variables and FormElements:
 
 Only in FormElement:
 
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **auto**         | Form |       | Only supported for FormElements. Most suitable checktype is dynamically evaluated based |
-|                  |      |       | native column definition, the FormElement type, and other info. See below for details.  |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}                                         |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **pattern**      | Form |       | Compares the value against a regexp.                                                    |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
++------------------+------+-------+-------------------------------------------------------------------------------------------+
+| **auto**         | Form |       | Only supported for FormElements. Most suitable checktype is dynamically evaluated based   |
+|                  |      |       | on native column definition, the FormElement type, and other info. See below for details. |
++------------------+------+-------+-------------------------------------------------------------------------------------------+
+| **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}                                           |
++------------------+------+-------+-------------------------------------------------------------------------------------------+
+| **pattern**      | Form |       | Compares the value against a regexp.                                                      |
++------------------+------+-------+-------------------------------------------------------------------------------------------+
 
 
 Rules for CheckType Auto (by priority):
@@ -1171,18 +1173,18 @@ Security
 All values passed to QFQ will be:
 
 * Checked against max. length and allowed content, on the client and on the server side. On the server side, the check
-  happens before any further processing. The 'length' and 'allowed' content is specified per `FormElement`. 'alnumx' is the
-  default allowed content for those. Violating the rules will stop the 'save record' process (Form) or result in an empty value (Report).
+  happens before any further processing. The 'length' and 'allowed' content is specified per `FormElement`. 'digit' or
+  'alnumx' is the default. Violating the rules will stop the 'save record' process (Form) or result in an empty
+  value (Report). If a variable is not replaced, check the default sanitize class.
 
 * Only elements defined in the `Form` definition or requested by `Report` will be processed.
 
-* UTF8 normalized (normalizer::normalize) to unify different ways of composing characters. It's more a database interest
+* UTF8 normalized (normalizer::normalize) to unify different ways of composing characters. It's more a database interest,
   to work with unified data.
 
 SQL statements are typically fired as `prepared statements` with separated variables.
 Further *custom* SQL statements will be defined by the webmaster - those do not use `prepared statements` and might be
-affected by SQL injection. To prevent SQL injection, every variable can be escaped with `mysqli::real_escape_string` by
-defining the `escape` modifier `m`.
+affected by SQL injection. To prevent SQL injection, every variable is by default escaped with `mysqli::real_escape_string`.
 
 **QFQ notice**:
 
@@ -1197,7 +1199,12 @@ Get Parameter
 
 * GET parameter might contain urlencoded content (%xx). Therefore all GET parameter will be processed by 'urldecode()'.
   As a result a text like '%nn' in GET variables will always be decoded. It's not possible to transfer '%nn' itself.
-* GET variables are limited to securityGetMaxLength chars - any violation will stop QFQ.
+
+* GET values are limited to securityGetMaxLength (extension-manager-qfq-configuration_) chars - any violation will
+  stop QFQ. Individual exceptions are defined via ExceptionMaxLength_.
+
+* GET parameter 'type' and 'L' might affected by (T3, configuration dependent) cache poisoning. If they contain non digit
+  values, only the first character is used (if this is a digit) or completely cleaned (else).
 
 Post Parameter
 --------------
@@ -1248,8 +1255,8 @@ Variables needed by Typo3 remains on the link and are not 'sip-encoded'.
 
 .. _`SecureDirectFileAccess`:
 
-Secure direct fileaccess
-------------------------
+Secure direct file access
+-------------------------
 
 If the application uploads files, mostly it's not necessary and often a security issue, to offer a direct download of
 the uploaded files. Best is to create a directory, e.g. `<site path>/fileadmin/protected` and deny direct access via webbrowser to it.
@@ -1881,7 +1888,7 @@ Definition
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Show button              | 'new, delete, close, save' (Default: 'new,delete,close,save'): Shown named buttons in the upper right corner of the form.  See `form-showButton`_  |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
-|Forward Mode             | 'client | no | url | url-skip-history' (Default: client): See `form-forward`_.                                                                     |
+|Forward Mode             | 'auto | close | no | url | url-skip-history' (Default: auto): See `form-forward`_.                                                                 |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Forward (Mode) Page      | a) URL / Typo3 page id/alias or b) Forward Mode (via '{{...}}') or combination of a) & b). See `form-forward`_.                                    |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1996,14 +2003,15 @@ Forward (=forwardMode)
 
 After the user presses *Save*, *Close*, *Delete* or *New*, different actions are possible where the browser redirects to.
 
-* `client` (default) - the QFQ browser Javascript logic, decides to stay on the page or to force a redirection
-  to a previous page.
+* `auto` (default) - the QFQ browser Javascript logic, decides to stay on the page or to force a redirection
+  to a previous page. The decision depends on:
   
-  * *Close* closes the current page and goes back to the previous page. Note: if a new tab is opened and the user presses
-    QFQ close (in any way) - in that new browser tab there is no previous page! QFQ won't close the tab, instead a message
-    is shown
+  * *Close* goes back (feels like close) to the previous page. Note: if there is no history, QFQ won't close the tab,
+     instead a message is shown.
   * *Save* stays on the current page.
-  
+
+* `close` - goes back (feels like close) to the previous page. Note: if there is no history, QFQ won't close the tab,
+     instead a message is shown.
 * `no` - no change, the browser remains on the current side. Close does not close the page. It just triggers a save if 
   there are modified data.
 * `url` - the browser redirects to the URL or T3 page named in `Forward URL / Page`. Independent if the user presses `save` or `close`.
@@ -2024,14 +2032,14 @@ Format: [<url>] or [<mode>|<url>]
   * `{{SELECT ...}}`
   * `<mode>|<url>`
 
-* `<mode>` - Valid keywords are as above: `no|client|url|url-skip-history`
+* `<mode>` - Valid keywords are as above: `auto|close|no|url|url-skip-history`
 
 Specifying the mode in `forwardPage` overwrites `formMode` (but only if `formMode` is `url...`).
 
 Also regular QFQ statements like {{var}} or {{SELECT ...}} are possible in `forwardPage`. This is useful to dynamically
 redirect to different targets, depending on user input or any other dependencies.
 
-If a forwardMode 'url...' is specified and there is no `forwardPage`, QFQ falls down to `client` mode.
+If a forwardMode 'url...' is specified and there is no `forwardPage`, QFQ falls down to `auto` mode.
 
 On a form, the user might click 'save' or 'save,close' or 'close' (with modified data this leads to 'save,close').
 The CLIENT `submit_reason` shows the user action:
@@ -2041,7 +2049,7 @@ The CLIENT `submit_reason` shows the user action:
 Example forwardPage
 ^^^^^^^^^^^^^^^^^^^
 
-* `{{SELECT IF('{{formModeGlobal:S:anumx}}'='requiredOff', 'no', 'client') }}`
+* `{{SELECT IF('{{formModeGlobal:S:alnumx}}'='requiredOff', 'no', 'auto') }}`
 * `{{SELECT IF('{{submit_reason:CE:alnumx}}'='save', 'no', 'url'), '|http://example.com' }}`
 
 Type: combined dynamic mode & URL/page
@@ -2117,7 +2125,8 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | submitButtonText            | string | Show a save button at the bottom of the form, with <submitButtonText> . See `submitButtonText`_.         |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| saveButtonActive            | -      | Make the 'save'-button active on *Form* load (instead of waiting for the first user change).             |
+| saveButtonActive            | -      | 0: off, 1: Make the 'save'-button active on *Form* load (instead of waiting for the first user change).  |
+|                             |        | The save button is still 'gray' (record not dirty), but the user can click 'save'.                       |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | saveButtonText              | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2548,7 +2557,7 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | htmlAfter              | string | HTML Code wrapped after the complete *FormElement*                                                       |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| wrapRow                | string | If specified, skip default wrapping (`<div class='col-md-?>`). Instead the given string is used.         |
+| wrapRow                | string | If specified, skip default wrapping (`<div class='col-md-?'>`). Instead the given string is used.        |
 +------------------------+--------+                                                                                                          |
 | wrapLabel              | string |                                                                                                          |
 +------------------------+--------+                                                                                                          |
@@ -2929,6 +2938,8 @@ Type: text
     the value is an empty string
   * *inputType* = number (optional). Typically the HTML tag 'type' will be 'text', 'textarea' or 'number' (detected automatically).
     If necessary, the HTML tag 'type' might be forced to a specific given value.
+  * *step* = Step size of the up/down buttons which increase/decrease the number of in the input field. Optional.
+    Default 1. Only useful with `inputType=number` (defined explicit via `inputType` or detected automatically).
 
 .. _`input-typeahead`:
 
@@ -4111,6 +4122,21 @@ Best practice
 Custom default value only for 'new records'
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Method 1
+''''''''
+
+On `Form.parameter` define a `fillStoreVar` query with a column name equal to a form field. That's all.
+
+Example: ::
+
+  FormElement.name = technicalContact
+  Form.parameter.fillStoreVar = {{!SELECT CONCAT(p.firstName, ' ', p.name) AS technicalContact FROM Person AS p WHERE p.account='{{feUser:T}}' }}
+
+What we use here is the default STORE prio FSRVD. If the form loads with r=0, 'F', 'S' and 'R' are empty. 'V' is filled.
+If r>0, than 'F' and 'S' are empty and 'R' is filled.
+
+Method 2
+''''''''
 In the specific `FormElement` set `value={{columnName:RSE}}`. The link to the form should be rendered with
 '"...&columnName=<data>&..." AS _page'. The trick is that the STORE_RECORD is empty for new records, and therefore the
 corresponding value from STORE_SIP will be returned. Existing records will use the already saved value.
@@ -4155,7 +4181,7 @@ QFQ content record::
     head = <form action='#' method='get'><input type='hidden' name='id' value='{{pageId:T}}'>Search: <input type='text' name='search' value='{{search:CE:all}}'><input type='submit' value='Submit'></form>
   }
 
-  # SQL statement will find and list all the relevant forms - be careful not to open a cross site scripting door: the parameter 'search' needs to be sanatized.
+  # SQL statement will find and list all the relevant forms - be careful not to open a cross site scripting door: the parameter 'search' needs to be sanitized.
   20 {
     sql = SELECT CONCAT('?detail&form=form&r=', f.id) AS _Pagee, f.id, f.name, f.title
               FROM Form AS f
@@ -5151,6 +5177,21 @@ Column: _link
 Render mode
 ^^^^^^^^^^^
 
+The following table might be hard to read - but it's really useful to understand. It solves a lot of different situations.
+If there are no special condition (like missing value, or suppressed links), render mode 0 is sufficient.
+But if the URL text is missing, or the URL is missing, OR the link should be rendered in sql row 1-10, but not 5, than
+render mode might dynamically control the rendered link.
+
+* Horizontal:
+
+  * If 'url & text' is given, column 2 shows the result.
+  * If only 'url' is given, column 3 shows the result.
+  * If only 'text' is given, column 4 shows the result.
+
+* Vertical:
+
+  * Column 0 is the render mode and controls how the link is rendered.
+
 +-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
 |Mode       |Both: url & text    |Only: url          |Only: text|Description                                                            |
 +===========+====================+===================+==========+=======================================================================+
@@ -5170,6 +5211,10 @@ Render mode
 +-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
 |7          | pure url           |pure url           |          |no link, pure url                                                      |
 +-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
+
+::
+
+    10.sql = SELECT CONCAT('u:', p.homepage, IF(p.showHomepage='yes','|r:0', '|r:5') ) AS _link FROM Person AS p
 
 
 Link Examples
@@ -6191,8 +6236,125 @@ E.g.::
 
     10.sql = SELECT "p:home&r=0|t:Home|c:qfq-100 qfq-left" AS _pagev
 
-Examples
---------
+
+Drag and drop
+-------------
+
+Sort/order elements
+^^^^^^^^^^^^^^^^^^^
+
+Manually sorting and ordering of elements via `HTML5 drag and drop` is supported via QFQ. Any sortable element
+should be represented by a database record with an order column. If the elements are unordered, they will be ordered after
+the first 'drag and drop' move of an element.
+
+Functionality is divided into:
+
+* Display list: the records will be displayed via QFQ/report.
+* Update database: updates of the order column are managed by a specific 'drag and drop' definition form.
+
+Part 1: Display list
+''''''''''''''''''''
+
+Display the list of elements via a regular QFQ content record. All 'drag and drop' elements have to be nested by an HTML
+element:
+
+* With `class="qfq-dnd-sort"`.
+* With an automatically SIP protected form name: `{{'form=<form name>' AS _data-dnd-api}}`
+* Only direct children of such element can be dragged.
+* Every children needs a unique identifier `data-dnd-id="<unique>"`. Typically this is the corresponding record id.
+* The record needs a dedicated order column, which will be updated through API calls in time.
+
+A `<div>` example HTML output: ::
+
+    <div class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/qfq/api/dragAndDrop.php?s=badcaffee1234">
+        <div class="anyClass" id="<uniq1>" data-dnd-id="55">
+            Numbero Uno
+        </div>
+        <div class="anyClass" id="<uniq2>" data-dnd-id="18">
+            Numbero Deux
+        </div>
+        <div class="anyClass" id="<uniq3>" data-dnd-id="27">
+            Numbero Tre
+        </div>
+    </div>
+
+
+A typical QFQ report which generates those `<div>` HTML: ::
+
+    10 {
+      sql = SELECT '<div id="anytag-', n.id,'" data-dnd-id="', n.id,'">' , n.note, '</div>'
+                   FROM Note AS n
+                   WHERE grId=28
+                   ORDER BY n.ord
+
+      head = <div class="qfq-dnd-sort" data-dnd-api="{{'form=dndSortNote&grId=28|A:dnd-sort' AS _api}}">
+      tail = </div>
+    }
+
+
+A `<table>` based setup is also possible. Note the attribute  `data-columns="3"` - those generates a dropzone
+which is the same width as the outer table. ::
+
+    <table>
+        <tbody class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/qfq/api/dragAndDrop.php?s=badcaffee1234" data-columns="3">
+            <tr> class="anyClass" id="<uniq1>" data-dnd-id="55">
+                <td>Numbero Uno</td><td>Numbero Uno.2</td><td>Numbero Uno.3</td>
+            </tr>
+            <tr class="anyClass" id="<uniq2>" data-dnd-id="18">
+                <td>Numbero Deux</td><td>Numbero Deux.2</td><td>Numbero Deux.3</td>
+            </tr>
+            <tr class="anyClass" id="<uniq3>" data-dnd-id="27">
+                <td>Numbero Tre</td><td>Numbero Tre.2</td><td>Numbero Tre.3</td>
+            </tr>
+        </tbody>
+    </table>
+
+A typical QFQ report which generates those HTML: ::
+
+    10 {
+      sql = SELECT '<tr id="anytag-', n.id,'" data-dnd-id="', n.id,'" data-columns="3">' , n.id AS '_+td', n.note AS '_+td', n.ord AS '_+td', '</tr>'
+                   FROM Note AS n
+                   WHERE grId=28
+                   ORDER BY n.ord
+
+      head = <table><tbody class="qfq-dnd-sort" {{'form=dndSortNote&grId=28' AS _data-dnd-api}} data-columns="3">
+      tail = </tbody><table>
+    }
+
+Part 2: Update database
+'''''''''''''''''''''''
+
+A dedicated `Form`, without any `FormElements`, is needed to define the database update definition.
+
+Fields:
+
+* Name: <custom form name> - used in Part 1 in the  `_data-dnd-api` variable.
+* Table: <table with the element records> - used to the update the records specified by `dragAndDropOrderSql`.
+
+* Parameter:
+
++-------------------------------------+--------------------------------------------------------------------------------+
+| Attribute                           | Description                                                                    |
++=====================================+================================================================================+
+| orderInterval = <number>            | Optional. By default '10'. Might be any number > 0.                            |
++-------------------------------------+--------------------------------------------------------------------------------+
+| orderColumn = <column name>         | Optional. By default 'ord'.                                                    |
++-------------------------------------+--------------------------------------------------------------------------------+
+| dragAndDropOrderSql =                                 | Query to selects the *same* records as the report in the     |
+| {{!SELECT n.id AS id, n.ord AS ord FROM Note AS n     | same *order!* Inconsistencies results in sort differences.   |
+| ORDER BY n.ord}}                                      | The columns `id` and `ord` are *mandatory.*                  |
++-------------------------------------------------------+--------------------------------------------------------------+
+
+The form related to the example of part 1: ::
+
+  Form.name: dndSortNote
+  Form.table: Note
+  Form.parameter: orderInterval = 1
+  Form.parameter: orderColumn = ord
+  Form.parameter: dragAndDropOrderSql = {{!SELECT n.id AS id, n.ord AS ord FROM Note AS n WHERE n.grId={{grId:S0}} ORDER BY n.ord}}
+
+Report Examples
+---------------
 
 The following section gives some examples of typical reports
 
@@ -6496,7 +6658,7 @@ FormElement) forms: ::
 
 .. _`system`:
 
-SYSTEM
+System
 ======
 
 .. _`autocron`:
@@ -6544,42 +6706,42 @@ Create / edit `AutoCron` jobs
 Create a T3 page with a QFQ record (similar to the formeditor). Such page should be access restricted and is only needed
 to edit `AutoCron` jobs: ::
 
-	dbIndex={{indexQfq:Y}}
-	form={{form:S}}
+    dbIndex={{indexQfq:Y}}
+    form={{form:S}}
 
-	10 {
-		# Table header.
-		sql = SELECT CONCAT('p:{{pageId:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment','Last run','In progress', 'Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
-		head = <table class='table table-hover qfq-table-50'>
-		tail = </table>
-		rbeg = <thead><tr>
-		rend = </tr></thead>
-		fbeg = <th>
-		fend = </th>
+    10 {
+        # Table header.
+        sql = SELECT CONCAT('p:{{pageId:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment','Last run','In progress', 'Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
+        head = <table class='table table-hover qfq-table-50'>
+        tail = </table>
+        rbeg = <thead><tr>
+        rend = </tr></thead>
+        fbeg = <th>
+        fend = </th>
 
-		10 {
-			# All Cron Jobs
-			sql = SELECT CONCAT('<tr class="',
-										IF(c.lastStatus LIKE 'Error%','danger',''),
- 										IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),' warning',''),
-										IF(c.status='enable','',' text-muted'),'" ',
+        10 {
+        # All Cron Jobs
+        sql = SELECT CONCAT('<tr class="',
+                            IF(c.lastStatus LIKE 'Error%','danger',''),
+                            IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),' warning',''),
+                            IF(c.status='enable','',' text-muted'),'" ',
 
-										IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),'title="inProgress > 10mins"',
-										IF(c.lastStatus LIKE 'Error%','title="Status: Error"','')),
-										'>'),
-								'<td>', CONCAT('p:{{pageId:T}}&form=cron&r=', c.id) AS _pagee, '</td><td>',
-								c.id, '</td><td>',
-								IF(c.nextrun=0,"", DATE_FORMAT(c.nextrun, "%d.%m.%y %H:%i:%s")), '</td><td>',
-								c.frequency, '</td><td>',
-								c.comment, '</td><td>',
-								IF(c.lastrun=0,"", DATE_FORMAT(c.lastrun,"%d.%m.%y %H:%i:%s")), '</td><td>',
-								IF(c.inProgress=0,"", DATE_FORMAT(c.inProgress,"%d.%m.%y %H:%i:%s")), '</td><td>',
-								LEFT(c.laststatus,40) AS '_+pre', '</td><td>',
-								CONCAT('U:form=cron&r=', c.id) AS _paged, '</td></tr>'
-						FROM Cron AS c
-						ORDER BY c.id
-		}
-	}
+                            IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),'title="inProgress > 10mins"',
+                            IF(c.lastStatus LIKE 'Error%','title="Status: Error"','')),
+                            '>'),
+                        '<td>', CONCAT('p:{{pageId:T}}&form=cron&r=', c.id) AS _pagee, '</td><td>',
+                        c.id, '</td><td>',
+                        IF(c.nextrun=0,"", DATE_FORMAT(c.nextrun, "%d.%m.%y %H:%i:%s")), '</td><td>',
+                        c.frequency, '</td><td>',
+                        c.comment, '</td><td>',
+                        IF(c.lastrun=0,"", DATE_FORMAT(c.lastrun,"%d.%m.%y %H:%i:%s")), '</td><td>',
+                        IF(c.inProgress=0,"", DATE_FORMAT(c.inProgress,"%d.%m.%y %H:%i:%s")), '</td><td>',
+                        LEFT(c.laststatus,40) AS '_+pre', '</td><td>',
+                        CONCAT('U:form=cron&r=', c.id) AS _paged, '</td></tr>'
+                FROM Cron AS c
+        ORDER BY c.id
+        }
+    }
 
 
 Usage
