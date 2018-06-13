@@ -36,6 +36,63 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 18.6.0
+--------------
+
+Date: 13.06.2018
+
+Notes
+^^^^^
+
+* config.qfq.ini migrated to config.qfq.php - the old config.qfq.ini get's `chmod 000`.
+* Most of config.qfq.ini migrated to Typo3 / Extension Manager - all but the DB /LDAP credentials.
+* Keep in config.qfq.ini: ::
+
+    # Rename DB credentials from DB_<key> to DB_1_<key>, with key = 'NAME|HOST|USER|PASSWORD'
+    DB_1_USER = ...
+    DB_1_SERVER = ...
+    DB_1_PASSWORD = ...
+    DB_1_NAME = ...
+
+* NEW: Drag and drop to sort elements! Check the Manual.
+* `URL forwardMode`
+
+  * `client` renamed to `auto`.
+  * `close` added.
+
+Features
+^^^^^^^^
+
+ * #6100 / Url Forward Auto: Update Manual.rst. The F.parameter.saveAndClose has been removed again. Mode 'close' can be assigned statically or dynamic.
+ * #6178 / Input: Step: New option 'step' for FE.parameter.
+ * Download.php: references to non existing files now reported as missing file, not 'wrong mimetype' anymore.
+ * #4918 / Drag'n'Drop reorder elements DRAGANDDROP.md, PROTOCOL.md: Doc for "drag'n' drop" implementation.
+   dragAndDrop.php: API endpoint DragAndDrop.php: Class for implementing drag'n' drop functionality.
+   Link.php: implement new renderMode=8 - returning only the sip. QuickFormQuery.php: New entry point for processing "drag'n' drop".
+ * #3971 / Form title: new design from form title
+
+Bug Fixes
+^^^^^^^^^
+
+* #5077 / Dynamic Update & FE.type=required: Server fixed -
+
+  a) dynamic calculated modeSql respected,
+  b) formModeGlobal=requiredOff respected,
+  c) dynamic FE with mode='hidden' are not saved anymore.
+
+ * #6176 / Icon not aligned when error text: Buttons now wrapped in one 'input-group'.
+ * Manual.rst: reformat autocron QFQ code
+ * #5880 / Skip Error Message during dynamicUpdate
+ * #5870 / Missing file config.qfq.ini: Clean QFQ message
+ * #5924 / config.qfq.ini/LocalConfiguration.php: several places in formEditor.sql still contained the 'dbIndex...'
+   instead of 'index...'. fixed.
+ * #6168 Configuration language setting ignored: Form and FormElement editor still used uppercase config values for
+   language configuration. Updated to the new camel case notation.
+ * #5890 / config.qfq.ini is public readable. Renamed file to config.qfq.php. Implement a basic migration assistant to
+   copy DB credentials to new config.qfq.php. All other values have to be copied to extmanager/qfq-configuration manually.
+ * #6216 / Oops, an error occurred! Code - unhandled exception will be caught now.
+
+
 Version 18.4.4
 --------------
 
@@ -119,7 +176,7 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-* #5706 Fixed that problematic characters in 'fileDestination' has not been sanatized.
+* #5706 / Fixed that problematic characters in 'fileDestination' has not been sanatized.
 * Fixed problem with buttons clipping trough alert
 * Client: wrong variable, updated CSS for long errors
 

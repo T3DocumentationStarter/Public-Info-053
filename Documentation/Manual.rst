@@ -172,7 +172,7 @@ Setup
 
   * If the Extensionmanager stops after importing: check your memory limit in php.ini.
 
-* Copy/rename the file *<site path>/typo3conf/ext/qfq/config.example.qfq.ini* to *config.qfq.in*.
+* Copy/rename the file *<site path>/typo3conf/ext/qfq/config.example.qfq.php* to *config.qfq.php*.
   Configure the necessary settings `configuration`_
   The configuration file is outside the of extension directory, to not loose it during updates.
 * When the QFQ Extension is called the first time on the Typo3 Frontend, the file *<ext_dir>/qfq/sql/formEditor.sql* will
@@ -437,9 +437,9 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 
 
-.. _config-qfq-ini:
+.. _config-qfq-php:
 
-config.qfq.ini
+config.qfq.php
 --------------
 
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -456,13 +456,13 @@ config.qfq.ini
 
 
 
-Example: *typo3conf/config.qfq.ini*
+Example: *typo3conf/config.qfq.php*
 
 ::
 
 	; QFQ configuration
 	;
-	; Save this file as: <site path>/typo3conf/config.qfq.ini
+	; Save this file as: <site path>/typo3conf/config.qfq.php
 
 	DB_1_USER = <DBUSER>
 	DB_1_SERVER = <DBSERVER>
@@ -473,9 +473,6 @@ Example: *typo3conf/config.qfq.ini*
 	; DB_2_SERVER = <DBSERVER>
 	; DB_2_PASSWORD = <DBPW>
 	; DB_2_NAME = <DB>
-
-	; Access via {{TECHNICAL_CONTACT:Y}}
-	; TECHNICAL_CONTACT = john@doe.com
 
 	; LDAP_1_RDN =
 	; LDAP_1_PASSWORD =
@@ -494,15 +491,13 @@ After parsing the configuration, the following variables will be set automatical
 Custom variables
 ^^^^^^^^^^^^^^^^
 
-It's also possible to setup custom variables in `config.qfq.ini`.
+Up to 30 custom variables can be defined in `configuration`_.
 
-E.g. to setup a contact address and reuse the information inside your installation do:
+E.g. to setup a contact address and reuse the information inside your installation do: ::
 
- * `config.qfq.in`::
-
-		ADMINISTRATIVE_CONTACT = john@doe.com
-		ADMINISTRATIVE_ADDRESS = John Doe, Hollywood Blvd. 1, L.A.
-		ADMINISTRATIVE_NAME = John Doe
+   custom1: ADMINISTRATIVE_CONTACT = john@doe.com
+   custom2: ADMINISTRATIVE_ADDRESS = John Doe, Hollywood Blvd. 1, L.A.
+   custom3: ADMINISTRATIVE_NAME = John Doe
 
  * Somewhere in a `Form` or in `Report`::
 
@@ -776,7 +771,7 @@ in `indexQfq`. If specific forms or reports should use a different database than
 A `Form` will:
 
 * load the own definition from `indexQfq` (table `Form` and `FormElement`),
-* loads and save data from/in `indexData` (config.qfq.in) / `dbIndex` (form.parameter.dbIndex),
+* loads and save data from/in `indexData` (config.qfq.php) / `dbIndex` (form.parameter.dbIndex),
 * retrieve extra information via `dbIndexExtra` - this is useful to offer information from a database and save them in a
   different one.
 
@@ -815,7 +810,7 @@ Note:
 | C | appC3.edu      | 'wAppC3'     | <dbHostAppC3>, <dbnameC3>_t3  | <dbHostC3>, <dbnameSysC3>_db | <dbHostData>_db, <dbNameData>_db |
 +---+----------------+--------------+-------------------------------+------------------------------+----------------------------------+
 
-In config-qfq-ini_ mutliple database credentials can be prepared. Mandatory is at least one credential setup like
+In config-qfq-php_ mutliple database credentials can be prepared. Mandatory is at least one credential setup like
 `DB_1_USER`, `DB_1_SERVER`, `DB_1_PASSWORD`, `DB_1_NAME`. The number '1' indicates the `dbIndex`. Increment the number
 to specify further database credential setups.
 
@@ -1593,7 +1588,7 @@ To decide which Parameter should be placed on *Form.parameter* and which on *For
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | ldapTimeLimit               | 3 (default)                      | Maximum time to wait for an answer of the LDAP Server         | x    | x           | TA, FSL  |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| ldapUseBindCredentials      | ldapUseBindCredentials=1         | Use LDAP_1_* crendentials from config-qfq-ini_ for ldap_bind()| x    | x           | TA, FSL  |
+| ldapUseBindCredentials      | ldapUseBindCredentials=1         | Use LDAP_1_* crendentials from config-qfq-php_ for ldap_bind()| x    | x           | TA, FSL  |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadLdap               | -                                | Enable LDAP as 'Typeahead' data source                        |      | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
@@ -1619,7 +1614,7 @@ To decide which Parameter should be placed on *Form.parameter* and which on *For
 
 * *typeAheadLimit*: there might be a hard limit on the server side (e.g. 100) - which can't be extended.
 * *ldapUseBindCredentials* is only necessary if `anonymous` access is not possible. RDN and password has to be configured in
-  config-qfq-ini_.
+  config-qfq-php_.
 
 .. _LDAP_Typeahead:
 
@@ -2070,7 +2065,7 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | Name                        | Type   | Description                                                                                              |
 +=============================+========+==========================================================================================================+
-| dbIndex                     | int    | Database credential index, given via `config-qfq-ini`_ to let the current `Form` operate on the database.|
+| dbIndex                     | int    | Database credential index, given via `config-qfq-php`_ to let the current `Form` operate on the database.|
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | bsColumns                   | int    | Wrap the whole form in '<div class="col-md-??">                                                          |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -6236,6 +6231,7 @@ E.g.::
 
     10.sql = SELECT "p:home&r=0|t:Home|c:qfq-100 qfq-left" AS _pagev
 
+.. _drag_and_drop:
 
 Drag and drop
 -------------
@@ -6243,14 +6239,16 @@ Drag and drop
 Sort/order elements
 ^^^^^^^^^^^^^^^^^^^
 
-Manually sorting and ordering of elements via `HTML5 drag and drop` is supported via QFQ. Any sortable element
+Manually sorting and ordering of elements via `HTML5 drag and drop` is supported via QFQ. Any element to sort
 should be represented by a database record with an order column. If the elements are unordered, they will be ordered after
 the first 'drag and drop' move of an element.
 
 Functionality is divided into:
 
 * Display list: the records will be displayed via QFQ/report.
-* Update database: updates of the order column are managed by a specific 'drag and drop' definition form.
+* Sort records: updates of the order column are managed by a specific definition form. The form is not a regular form
+  (e.g. there are no FormElements), instead it's only a container to held the SQL update query as well as providing
+  access control via SIP. The form is automatically called via AJAX.
 
 Part 1: Display list
 ''''''''''''''''''''
@@ -6259,7 +6257,7 @@ Display the list of elements via a regular QFQ content record. All 'drag and dro
 element:
 
 * With `class="qfq-dnd-sort"`.
-* With an automatically SIP protected form name: `{{'form=<form name>' AS _data-dnd-api}}`
+* With a form name: `{{'form=<form name>' AS _data-dnd-api}}`
 * Only direct children of such element can be dragged.
 * Every children needs a unique identifier `data-dnd-id="<unique>"`. Typically this is the corresponding record id.
 * The record needs a dedicated order column, which will be updated through API calls in time.
@@ -6293,7 +6291,7 @@ A typical QFQ report which generates those `<div>` HTML: ::
 
 
 A `<table>` based setup is also possible. Note the attribute  `data-columns="3"` - those generates a dropzone
-which is the same width as the outer table. ::
+which the same width as the outer table. ::
 
     <table>
         <tbody class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/qfq/api/dragAndDrop.php?s=badcaffee1234" data-columns="3">
@@ -6321,10 +6319,10 @@ A typical QFQ report which generates those HTML: ::
       tail = </tbody><table>
     }
 
-Part 2: Update database
-'''''''''''''''''''''''
+Part 2: Sort records
+''''''''''''''''''''
 
-A dedicated `Form`, without any `FormElements`, is needed to define the database update definition.
+A dedicated `Form`, without any `FormElements`, is used to define the database update definition.
 
 Fields:
 
@@ -6345,13 +6343,24 @@ Fields:
 | ORDER BY n.ord}}                                      | The columns `id` and `ord` are *mandatory.*                  |
 +-------------------------------------------------------+--------------------------------------------------------------+
 
-The form related to the example of part 1: ::
+The form related to the example of part 1 ('div' or 'table'): ::
 
   Form.name: dndSortNote
   Form.table: Note
   Form.parameter: orderInterval = 1
   Form.parameter: orderColumn = ord
   Form.parameter: dragAndDropOrderSql = {{!SELECT n.id AS id, n.ord AS ord FROM Note AS n WHERE n.grId={{grId:S0}} ORDER BY n.ord}}
+
+QFQ iterates over the result set of `dragAndDropOrderSql`. The value of column `id` have to correspond to the dragged HTML
+ element (given by `data-dnd-id`). Reordering always start with `orderInterval` and is incremented by `orderInterval` with each
+ record of the result set. The client reports a) the id of the dragged HTML element, b) the id of the hovered element and
+ c) the dropped position of above or below the hovered element. This information is compared to the result set and
+ changes are applied where appropriate.
+
+ Take care that the query of part 1 (display list) does a) select the same records and b) in the same order as the query
+ defined in part 2 (sort records) via `dragAndDropOrderSql`.
+
+ If you find that the reorder does not work at expected, those two sql queries are not identically.
 
 Report Examples
 ---------------
@@ -6877,7 +6886,7 @@ Tip on Report: In case the query did not contain any double ticks, just wrap all
 
 
 
-Error read file config.qfq.ini: syntax error on line xx
+Error read file config.qfq.php: syntax error on line xx
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Check the given line number. If it's a SQL statement, enclose it in single or double ticks.
@@ -6909,7 +6918,18 @@ The browser shows a red popup with 'Internal Server Error'. The message is gener
 request response of QFQ (=Server) is broken. This might happen e.g. if PHP can't start successfully or PHP fails to run
 due to  a missing php module or broken configuration.
 
+Oops, an error occurred! Code: 20180612205917761fc593
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+You see this message on all places where a QFQ content record should produce some output. Typically the extension fails
+to load. If the error message disappears when the QFQ extension is disabled (instead a message `qfq_qfq can't be rendered`
+is shown), than QFQ is the problem.
+
+Search the given code in `typo3temp/logs/*`, in this example 20180612205917761fc593. You'll should find a stacktrace with
+a more detailed message.
+
+The error might occur if there are problematic characters in config.qfq.php, like single or double ticks inside strings,
+ wich are not enclosed (correctly).
 
 .. _`javascriptProblem`:
 
