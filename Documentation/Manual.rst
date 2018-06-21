@@ -150,6 +150,8 @@ via commandline options. A basic HTML email support is implemented.
 The latest version is v1.56, which has at least one bug. That one is patched in the QFQ internal version v1.56p1 (see
 QFQ GIT sources in directory 'patches/sendEmail.patch').
 
+Nevertheless, on latest system the TLS support is broken - please check sendEmailProblem_.
+
 The Typo3 sendmail eco-system is not used at all by QFQ.
 
 Thumbnail
@@ -226,47 +228,49 @@ Setup a *report* to manage all *forms*:
 * Create a Typo3 page.
 * Set the 'URL Alias' to `form` (default) or the individual defined value in parameter `editFormPage` (configuration_).
 * Insert a content record of type *qfq*.
-* In the bodytext insert the following code:
+* In the bodytext insert the following code: ::
 
-::
+    # If there is a form given by SIP: show
+    form={{form:SE}}
 
-	# If there is a form given by SIP: show
-	form={{form:SE}}
+    # In case indexQfq is different from indexData, set indexQfq.
+    dbIndex = {{indexQfq:Y}}
 
-	# In case indexQfq is different from indexData, set indexQfq.
-	dbIndex = {{indexQfq:Y}}
+    10 {
+        # List of Forms: Do not show this list of forms if there is a form given by SIP.
+        # Table header.
+        sql = SELECT CONCAT('p:{{pageId:T}}&form=form') as _pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
+        head = <table class="table table-hover qfq-table-50">
+        tail = </table>
+        rbeg = <thead><tr>
+        rend = </tr></thead>
+        fbeg = <th>
+        fend = </th>
 
-	10 {
-		# List of Forms: Do not show this list of forms if there is a form given by SIP.
-		# Table header.
-		sql = SELECT CONCAT('p:{{pageId:T}}&form=form') as _pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
-		head = <table class="table table-hover qfq-table-50">
-		tail = </table>
-		rbeg = <thead><tr>
-		rend = </tr></thead>
-		fbeg = <th>
-		fend = </th>
-
-		10 {
-			# All forms
-			sql = SELECT CONCAT('p:{{pageId:T}}&form=form&r=', f.id) as _pagee, f.id, f.name, f.title, f.tableName, CONCAT('form=form&r=', f.id) as _Paged FROM Form AS f ORDER BY f.name
-			rbeg = <tr>
-			rend = </tr>
-			fbeg = <td>
-			fend = </td>
-		}
-	}
+        10 {
+            # All forms
+            sql = SELECT CONCAT('p:{{pageId:T}}&form=form&r=', f.id) as _pagee, f.id, f.name, f.title, f.tableName, CONCAT('form=form&r=', f.id) as _Paged FROM Form AS f ORDER BY f.name
+            rbeg = <tr>
+            rend = </tr>
+            fbeg = <td>
+            fend = </td>
+        }
+    }
 
 .. _install-checklist:
 
 Install Check List
 ------------------
 
-* Protect the directory `<T3 installation>/fileadmin/protected` in Apache against direct file access. Those directory
-  should be used for confidential (uploaded / generated) data.
+* Protect the directory `<T3 installation>/fileadmin/protected` in Apache against direct file access.
+
+  * `<T3 installation>/fileadmin/protected/` should be used for confidential (uploaded / generated) data.
+  * `<T3 installation>/fileadmin/protected/log/...` is the default place for QFQ logfiles.
+
 * Protect the directory `<T3 installation>/fileadmin` in Apache to not execute PHP Scripts - malicious uploads won't be executed.
 * Setup a log rotation rule for `sqlLog`.
-* Check that `sqlLogMode` is set to `modify`  on productive sites.
+* Check that `sqlLogMode` is set to `modify` on productive sites. With `none` you have no chance to find out who changed
+  which data and `all` really logs a mass of data.
 
 .. _configuration:
 
@@ -300,7 +304,7 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | sendEMailOptions              | -o tls=yes                                            | General options. Check: http://caspian.dotconf.net/menu/Software/SendEmail |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| dateFormat                    | yyyy-mm-dd                                            | Possible options: yyyy-mm-dd, dd.mm.yyyy                                   |
+| dateFormat                    | yyyy-mm-dd                                            | Possible options: yyyy-mm-dd, dd.mm.yyyy.                                  |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Dynamic                                                                                                                                                            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -316,9 +320,11 @@ Extension Manager: QFQ Configuration
 |                               |                                                       | *modify*: log only statements who change data. *error*: log only DB errors.|
 |                               |                                                       | *none*: no SQL log at all.                                                 |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| sqlLog                        | typo3conf/sql.log                                     | Filename to log SQL commands: relative to <site path> or absolute.         |
+| sqlLog                        | fileadmin/protected/log/sql.log                       | Filename to log SQL commands: relative to <site path> or absolute. If the  |
+|                               |                                                       | directory does not exist, create it.                                       |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| mailLog                       | typo3conf/mail.log                                    | Filename to log `sendEmail` commands: relative to <site path> or absolute. |
+| mailLog                       | fileadmin/protected/log/mail.log                      | Filename to log `sendEmail` commands: relative to <site path> or absolute. |
+|                               |                                                       | If the directory does not exist, create it.                                |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | showDebugInfo                 | auto                                                  | FE - Possible values: yes|no|auto|download. For 'auto': If a BE User is    |
 |                               |                                                       | logged in, a debug information will be shown on the FE.                    |
@@ -334,44 +340,44 @@ Extension Manager: QFQ Configuration
 |                               |                                                       | time QFQ is called - *not* recommended!                                    |
 |                               |                                                       | 'never': never apply DB Updates.                                           |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| indexData                     | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameData:Y}}   |
+| indexData                     | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameData:Y}}.  |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| indexQfq                      | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameQfq:Y}}    |
+| indexQfq                      | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameQfq:Y}}.   |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Security                                                                                                                                                           |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | escapeTypeDefault             | m                                                     | All variables `{{...}}` get this escape class by default.                  |
 |                               |                                                       | See `variable-escape`_.                                                    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| securityVarsHoneypot          | email,username,password                               | If empty: no check. All named variables will rendered as INPUT elements    |
+| securityVarsHoneypot          | email,username,password                               | If empty: no check. All named variables will rendered as INPUT elements.   |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| securityAttackDelay           | 5                                                     | If an attack is detected, sleep 'x' seconds and exit PHP process           |
+| securityAttackDelay           | 5                                                     | If an attack is detected, sleep 'x' seconds and exit PHP process.          |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| securityShowMessage           | true                                                  | If an attack is detected, show a message                                   |
+| securityShowMessage           | true                                                  | If an attack is detected, show a message.                                  |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | securityGetMaxLength          | 50                                                    | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
-|                               |                                                       | `ExceptionMaxLength`_                                                      |
+|                               |                                                       | `ExceptionMaxLength`_.                                                     |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Form-Config                                                                                                                                                        |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| recordLockTimeoutSeconds      | 900                                                   | Timeout for record locking. After this time, a record will be replaced     |
+| recordLockTimeoutSeconds      | 900                                                   | Timeout for record locking. After this time, a record will be replaced.    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| enterAsSubmit                 | enterAsSubmit = 1                                     | 0: off, 1: Pressing *enter* in a form means *save* and *close*             |
+| enterAsSubmit                 | enterAsSubmit = 1                                     | 0: off, 1: Pressing *enter* in a form means *save* and *close*.            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | editFormPage                  | form                                                  | T3 Pagealias to edit a form.                                               |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formDataPatternError          | please check pattern error                            | Customizable error message used in validator.js. 'pattern' violation       |
+| formDataPatternError          | please check pattern error                            | Customizable error message used in validator.js. 'pattern' violation.      |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formDataRequiredError         | missing value                                         | Customizable error message used in validator.js. 'required' fields         |
+| formDataRequiredError         | missing value                                         | Customizable error message used in validator.js. 'required' fields.        |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formDataMatchError            | type error                                            | Customizable error message used in validator.js. 'match' retype mismatch   |
+| formDataMatchError            | type error                                            | Customizable error message used in validator.js. 'match' retype mismatch.  |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formDataError                 | generic error                                         | Customizable error message used in validator.js. 'no specific' given       |
+| formDataError                 | generic error                                         | Customizable error message used in validator.js. 'no specific' given.      |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Form-Layout                                                                                                                                                        |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | cssClassQfqContainer          | container                                             | QFQ with own Bootstrap: 'container'.                                       |
-|                               |                                                       | QFQ already nested in Bootstrap of mainpage: <empty>                       |
+|                               |                                                       | QFQ already nested in Bootstrap of mainpage: <empty>.                      |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | cssClassQfqForm               | qfq-color-base                                        | Wrap around QFQ 'Form'.                                                    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -379,21 +385,21 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | cssClassQfqFormBody           | qfq-color-grey-2                                      | Wrap around FormElements: CSS Class, typically a background color.         |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formBsColumns                 | 12                                                    | The whole form will be wrapped in 'col-md-??'. Default is 12 for 100%      |
+| formBsColumns                 | 12                                                    | The whole form will be wrapped in 'col-md-??'. Default is 12 for 100%.     |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formBsLabelColumns            | 3                                                     | Default number of BS columns for the 'label'-column                        |
+| formBsLabelColumns            | 3                                                     | Default number of BS columns for the 'label'-column.                       |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formBsInputColumns            | 6                                                     | Default number of BS columns for the 'input'-column                        |
+| formBsInputColumns            | 6                                                     | Default number of BS columns for the 'input'-column.                       |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formBsNoteColumns             | 3                                                     | Default number of BS columns for the 'note'-column                         |
+| formBsNoteColumns             | 3                                                     | Default number of BS columns for the 'note'-column.                        |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| extraButtonInfoInline         | <img src="info.png">                                  | Image for `extraButtonInfo`_ (inline)                                      |
+| extraButtonInfoInline         | <img src="info.png">                                  | Image for `extraButtonInfo`_ (inline).                                     |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| extraButtonInfoBelow          | <img src="info.png">                                  | Image for `extraButtonInfo`_ (below)                                       |
+| extraButtonInfoBelow          | <img src="info.png">                                  | Image for `extraButtonInfo`_ (below).                                      |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| extraButtonInfoPosition       | below                                                 | 'auto' (default) or 'below'. See `extraButtonInfo`_                        |
+| extraButtonInfoPosition       | below                                                 | 'auto' (default) or 'below'. See `extraButtonInfo`_.                       |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| extraButtonInfoClass          | pull-right                                            | '' (default) or 'pull-right'. See `extraButtonInfo`_                       |
+| extraButtonInfoClass          | pull-right                                            | '' (default) or 'pull-right'. See `extraButtonInfo`_.                      |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Form-Language                                                                                                                                                      |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -405,35 +411,39 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | saveButtonTooltip             | Save                                                  | Tooltip on the form save button.                                           |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| saveButtonClass               | btn btn-default navbar-btn                            | Bootstrap CSS class for save button on top of the form                     |
+| saveButtonClass               | btn btn-default navbar-btn                            | Bootstrap CSS class for save button on top of the form.                    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| saveButtonClassOnChange       | alert-info btn-info                                   | Bootstrap CSS class for save button showing 'data changed'                 |
+| saveButtonClassOnChange       | alert-info btn-info                                   | Bootstrap CSS class for save button showing 'data changed'.                |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| saveButtonGlyphIcon           | glyphicon-ok                                          | Icon for the form save button                                              |
+| saveButtonGlyphIcon           | glyphicon-ok                                          | Icon for the form save button.                                             |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | closeButtonText               | -                                                     | Text on the form close button. Typically none.                             |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | closeButtonTooltip            | close                                                 | Tooltip on the form close button.                                          |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| closeButtonClass              | btn btn-default navbar-btn                            | Bootstrap CSS class for close button on top of the form                    |
+| closeButtonClass              | btn btn-default navbar-btn                            | Bootstrap CSS class for close button on top of the form.                   |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| closeButtonGlyphIcon          | glyphicon-remove                                      | Icon for the form close button                                             |
+| closeButtonGlyphIcon          | glyphicon-remove                                      | Icon for the form close button.                                            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | deleteButtonText              | -                                                     | Text on the form delete button. Typically none.                            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | deleteButtonTooltip           | delete                                                | Tooltip on the form delete button.                                         |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| deleteButtonClass             | btn btn-default navbar-btn                            | Bootstrap CSS class for delete button on top of the form                   |
+| deleteButtonClass             | btn btn-default navbar-btn                            | Bootstrap CSS class for delete button on top of the form.                  |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| deleteButtonGlyphIcon         | glyphicon-trash                                       | Icon for the form delete button                                            |
+| deleteButtonGlyphIcon         | glyphicon-trash                                       | Icon for the form delete button.                                           |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | newButtonText                 | -                                                     | Text on the form new button. Typically none.                               |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | newButtonTooltip              | new                                                   | Tooltip on the form new button.                                            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| newButtonClass                | btn btn-default navbar-btn                            | Bootstrap CSS class for new button on top of the form                      |
+| newButtonClass                | btn btn-default navbar-btn                            | Bootstrap CSS class for new button on top of the form.                     |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| newButtonGlyphIcon            | glyphicon-plus                                        | Icon for the form new button                                               |
+| newButtonGlyphIcon            | glyphicon-plus                                        | Icon for the form new button.                                              |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| showIdInFormTitle             | 0 (off), 1 (on)                                       | Append at the form title the current record id.                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| cssClassColumnId              | text-muted                                            | A column in a subrecord with the name id|ID|Id gets this class.            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 
 
@@ -456,35 +466,39 @@ config.qfq.php
 
 
 
-Example: *typo3conf/config.qfq.php*
+Example: *typo3conf/config.qfq.php*: ::
 
-::
+    <?php
 
-	; QFQ configuration
-	;
-	; Save this file as: <site path>/typo3conf/config.qfq.php
+    // QFQ configuration
+    //
+    // Save this file as: <site path>/typo3conf/config.qfq.php
 
-	DB_1_USER = <DBUSER>
-	DB_1_SERVER = <DBSERVER>
-	DB_1_PASSWORD = <DBPW>
-	DB_1_NAME = <DB>
+    return [
+        'DB_1_USER' => '<DBUSER>',
+        'DB_1_SERVER' => '<DBSERVER>',
+        'DB_1_PASSWORD' => '<DBPW>',
+        'DB_1_NAME' => '<DB>',
 
-	; DB_2_USER = <DBUSER>
-	; DB_2_SERVER = <DBSERVER>
-	; DB_2_PASSWORD = <DBPW>
-	; DB_2_NAME = <DB>
+        //DB_2_USER = <DBUSER>
+        //DB_2_SERVER = <DBSERVER>
+        //DB_2_PASSWORD = <DBPW>
+        //DB_2_NAME = <DB>
 
-	; LDAP_1_RDN =
-	; LDAP_1_PASSWORD =
+        // DB_n ...
+        // ...
 
+        // LDAP_1_RDN =
+        // LDAP_1_PASSWORD =
+    ];
 
 After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
 
-+----------------+--------------------------------------------------------------------------+
-| _dbNameData    | Can be used to dynamically access the current selected database          |
-+----------------+--------------------------------------------------------------------------+
-| _dbNameQfq     | Can be used to dynamically access the current selected database          |
-+----------------+--------------------------------------------------------------------------+
++----------------+-----------------------------------------------------------------------------------+
+| _dbNameData    | Can be used to dynamically access the current selected database: {{dbNameData:Y}} |
++----------------+-----------------------------------------------------------------------------------+
+| _dbNameQfq     | Can be used to dynamically access the current selected database: {{dbNameQfq:Y}}  |
++----------------+-----------------------------------------------------------------------------------+
 
 .. _`CustomVariables`:
 
@@ -502,6 +516,8 @@ E.g. to setup a contact address and reuse the information inside your installati
  * Somewhere in a `Form` or in `Report`::
 
       {{ADMINISTRATIVE_CONTACT:Y}}, {{ADMINISTRATIVE_ADDRESS:Y}}, {{ADMINISTRATIVE_NAME}}
+
+It's also possible to configure such variables directly in `config.qfq.php`_.
 
 .. _`fillStoreSystemBySql`:
 
@@ -536,7 +552,7 @@ After a full QFQ installation:
 * a table `Period` (extend / change it to your needs, fill them with your periods),
 * one sample record in table `Period`,
 
-Websites, delivering semester data, schoolyears schedules, or any other type or periods, often need an index to the
+Websites, delivering semester data, school year schedules, or any other type or periods, often need an index to the
 *current* period.
 
 In configuration_: ::
@@ -1263,7 +1279,7 @@ E.g. for Apache set a htaccess rule: ::
 
 **Important**: all QFQ uploads should then save files in or below such a directory.
 
-To offer download of those files, use the reserved columnname '_download':`download`_ or variants.
+To offer download of those files, use the reserved columnname '_download' (see `download`_) or variants.
 
 **Important**: To protect the installation against executing of uploaded malicious script code, disable PHP for the final upload
 directory. E.g. `fileadmin`: ::
@@ -2073,6 +2089,8 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | class                       | string | HTML div with given class, surrounding the whole form. Eg.: class=container-fluid.                       |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| classTitle                  | string | CSS class inside of the `title` div. Default 'qfq-form-title'.                                           |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | classPill                   | string | HTML div with given class, surrounding the `pill` title line.                                            |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | classBody                   | string | HTML div with given class, surrounding all *FormElement*.                                                |
@@ -2158,6 +2176,8 @@ Parameter
 | extraButtonInfoClass        | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | fillStoreVar                | string | Fill the STORE_VAR with custom values. See `STORE_VARS`_.                                                |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| showIdInFormTitle           | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 * Example:
@@ -5087,6 +5107,8 @@ Special column names
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _thumbnail             |Create thumbnails on the fly. See `column-thumbnail`_.                                                                                                                                       |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _monitor               |Constantly display a file. See `column-monitor`_.                                                                                                                                            |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _+???                  |The content will be wrapped in the tag '???'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                                |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |_<nonReservedName>      |Suppress output. Column names with leading underscore are used to select data from the database and make it available in other parts of the report without generating any output.            |
@@ -5302,250 +5324,6 @@ Examples:
 | SELECT "p:form_person|q:Edit Person:::10:0" AS _link       | The Alert will be shown 10 seconds and is not modal.                      |
 +------------------------------------------------------------+---------------------------------------------------------------------------+
 
-.. _download:
-
-Download
-^^^^^^^^
-
-Download offers:
-
-* download a single file (any type),
-* concatenate several files (uploaded) and/or web pages (=HTML to PDF) into one PDF output file,
-* create a ZIP archive, filled with several files ('uploaded' or 'HTML to PDF'-converted).
-
-The downloads are SIP protected. Only the current user can use the link to download files.
-
-By using the `_link` columnname:
-
-* the option `d:...` initiate creating the download link and optional specifies an export filename,
-* the optional `M:...` (Mode) specifies the export type (file, pdf, zip),
-* setting `s:1` is mandatory for the download function,
-* the alttext `a:...` specifies a message in the download popup.
-
-By using `_pdf`,  `_Pdf`, `_file`, `_File`, `_zip`, `_Zip` as columnname, the options `d`, `m` and `s`
-will be set by automatically.
-
-All files will be read by PHP - therefore the directory might be protected against direct web access. This way is the
-preferred way to offer secure downloads via QFQ.
-
-In case the download needs a persistant URL (no SIP, no user session), a regular
-link, pointing directly to a file, have to be used - the download functionality described here is not appropriate for
-such a scenario.
-
-.. _download-parameter-files:
-
-Parameter and (element) sources
-'''''''''''''''''''''''''''''''
-
-* *download*: `d[:<exportFilename>]`
-
-  * *exportFilename* = <filename for save as> - Name, offered in the 'File save as' browser dialog. Default: 'output.<ext>'.
-
-    If there is no `exportFilename` defined, then the original filename is taken.
-
-    The user typically expects meaningful and distinct filenames for different download links.
-
-* *popupMessage*: `a:<text>` - will be displayed in the popup window during download. If the creating/download is fast, the window might disappear quickly.
-
-* *mode*: `M:<mode>`
-
-  * *mode* = <file | pdf | zip> - This parameter is optional and can be skipped in most situations. Mandatory
-    for 'zip'.
-
-      * If `M:file`, the mime type is derived dynamically from the specified file. In this mode, only one element source
-        is allowed per download link (no concatenation).
-
-      * In case of multiple element sources, only `pdf` or `zip` is supported.
-      * If `M:zip` is used together with `p:...`, `U:...` or `u:..`, those HTML pages will be converted to PDF. Those files
-        get generic filenames inside the archive.
-      * If not specified, the **default** 'Mode' depends on the number of specified element sources (=file or web page):
-
-        * If only one `file` is specifed, the default is `file`.
-        * If there is a) a page defined or b) multiple elements, the default is `pdf`.
-
-* *element sources* - for `M:pdf` or `M:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
-
-  * *file*: `F:<pathFileName>` - relative or absolute pathFileName offered for a) download (single), or to be concatenated
-    in a PDF or ZIP.
-  * *page*: `p:id=<t3 page>&<key 1>=<value 1>&<key 2>=<value 2>&...&<key n>=<value n>`.
-
-    * By default, the options given to wkhtml will *not* be encoded by a SIP!
-    * To encode the parameter via SIP: Add '_sip=1' to the URL GET parameter.
-
-      E.g. `p:id=form&_sip=1&form=Person&r=1`.
-
-      In that way, specific sources for the `download` might be SIP encrypted.
-
-    * Any current HTML cookies will be forwarded to/via `wkhtml`. This includes the current FE Login as well as any
-      QFQ session. Also the current User-Agent are faked via the `wkhtml` page request.
-
-    * If there are trouble with accessing FE_GROUP protected content, please check `wkhtmltopdf`_.
-
-  * *url*: `u:<url>` - any URL, pointing to an internal or external destination.
-
-  * *WKHTML Options* for `page`, `urlParam` or `url`:
-
-    * The 'HTML to PDF' will be done via `wkhtmltopdf`.
-    * All possible options, suitable for `wkhtmltopdf`, can be submitted in the `p:...`, `u:...` or `U:...` element source.
-      Check `wkhtmltopdf.txt <https://wkhtmltopdf.org/usage/wkhtmltopdf.txt>`_ for possible options. Be aware that
-      key/value tuple in the  documentation is separated by a space, but to respect the QFQ key/value notation of URLs,
-      the key/value tuple in `p:...`, `u:...` or `U:...` has to be separated by '='. Please see last example below.
-
-	Most of the other Link-Class attributes can be used to customize the link as well.
-
-Example `_link`: ::
-
-	# single `file`. Specifying a popup message window text is not necessary, cause a file directly accessed is fast.
-	SELECT "d:file.pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
-
-	# single `file`, with mode
-	SELECT "d:file.pdf|M:pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
-
-	# three sources: two pages and one file
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
-
-	# three sources: two pages and one file
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
-
-	# three sources: two pages and one file, parameter to wkhtml will be SIP encoded
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1&_sip=1|p:id=detail2&r=1&_sip=1|F:fileadmin/pdf/test.pdf" AS _link
-
-	# three sources: two pages and one file, the second page will be in landscape and pagesize A3
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1&--orientation=Landscape&--page-size=A3|F:fileadmin/pdf/test.pdf" AS _link
-
-..
-
-Example `_pdf`, `_zip`: ::
-
-	# File 1: p:id=1&--orientation=Landscape&--page-size=A3
-	# File 2: p:id=form
-	# File 3: F:fileadmin/file.pdf
-	SELECT 't:PDF|a:Creating a new PDF|p:id=1&--orientation=Landscape&--page-size=A3|p:id=form|F:fileadmin/file.pdf' AS _pdf
-
-	# File 1: p:id=1
-	# File 2: u:http://www.example.com
-	# File 3: F:fileadmin/file.pdf
-	SELECT 't:PDF - 3 Files|a:Please be patient|p:id=1|u:http://www.example.com|F:fileadmin/file.pdf' AS _pdf
-
-	# File 1: p:id=1
-	# File 2: p:id=form
-	# File 3: F:fileadmin/file.pdf
-	SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|p:id=1|p:id=form|F:', p.pathFileName) AS _zip
-
-..
-
-Use the `--print-media-type` as wkhtml option to access the page with media type 'printer'. Depending on the website
-configuration this switches off navigation and background images.
-
-Rendering PDF letters
-'''''''''''''''''''''
-
-`wkhtmltopdf`, with the header and footer options, can be used to render multi page PDF letters (repeating header,
-pagination) in combination with dynamic content. Such PDFs might look-alike official letters, together with logo and signature.
-
-Best practice:
-
-#. Create a clean (=no menu, no website layout) letter layout in a separated T3 branch: ::
-
-	page = PAGE
-	page.typeNum = 0
-	page.includeCSS {
-	  10 = typo3conf/ext/qfq/Resources/Public/Css/qfq-letter.css
-	}
-
-	// Grant access to any logged in user or specific development IPs
-	[usergroup = *] || [IP = 127.0.0.1,192.168.1.* ]
-	  page.10 < styles.content.get
-	[else]
-	  page.10 = TEXT
-	  page.10.value = access forbidden
-	[global]
-
-#. Create a T3 `body` page (e.g. page alias: 'letterbody') with some content. Example static HTML content: ::
-
-	<div class="letter-receiver">
-	  <p>Address</p>
-	</div>
-	<div class="letter-sender">
-	 <p><b>firstName name</b><br>
-	  Phone +00 00 000 00 00<br>
-	  Fax +00 00 000 00 00<br>
-	 </p>
-	</div>
-
-	<div class="letter-date">
-	  Zurich, 01.12.2017
-	</div>
-
-	<div class="letter-body">
-	 <h1>Subject</h1>
-
-	 <p>Dear Mrs...</p>
-	 <p>Lucas ipsum dolor sit amet organa solo skywalker darth c-3p0 anakin jabba mara greedo skywalker.</p>
-
-	 <div class="letter-no-break">
-	 <p>Regards</p>
-	 <p>Company</p>
-	 <img class="letter-signature" src="">
-	 <p>Firstname Name<br>Function</p>
-	 </div>
-	</div>
-
-#. Create a T3 letter-`header` page (e.g. page alias: 'letterheader') , with only the header information: ::
-
-		<header>
-		<img src="fileadmin/logo.png" class="letter-logo">
-
-		<div class="letter-unit">
-		  <p class="letter-title">Department</p>
-		  <p>
-			 Company name<br>
-			 Company department<br>
-			 Street<br>
-			 City
-		  </p>
-		</div>
-		</header>
-
-#. Create a) a link (Report) to the PDF letter or b) attach the PDF (on the fly rendered) to a mail. Both will call the
-   `wkhtml` via the `download` mode and forwards the necessary parameter.
-
-Use in `report`: ::
-
-  sql = SELECT CONCAT('d:Letter.pdf|t:',p.firstName, ' ', p.name,
-                       '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&',
-                               '--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&',
-                               '--footer-right="Seite: [page]/[toPage]"&',
-                               '--footer-font-size=8&--footer-spacing=10') AS _pdf
-                FROM Person AS p ORDER BY p.id
-
-
-Sendmail. Parameter: ::
-
-	sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}} }}
-
-Replace the static content elements from 2. and 3. by QFQ Content elements as needed: ::
-
-  10.sql = SELECT '<div class="letter-receiver"><p>', p.name AS '_+br', p.street AS '_+br', p.city AS '_+br', '</p>'
-            FROM Person AS p WHERE p.id={{pId:S}}
-
-
-Export area
-'''''''''''
-
-To offer protected pages, e.g. referenced in download links, the regular FE_GROUPs can't be used, cause the download does
-not have the current user privileges (it's a separate process, started as the webserver user).
-
-Create a separated export tree in Typo3 Backend, which is IP access restricted. Only localhost or the FE_GROUP 'admin'
-is allowed to access: ::
-
-   [IP = {$tmp.restrictedIPRange} ][usergroup = admin]
-      page.10 < styles.content.get
-   [else]
-      page.10 = TEXT
-      page.10.value = Please access from localhost or log in as 'admin' user.
-   [global]
-
 .. _column_pageX:
 
 Columns: _page[X]
@@ -5558,7 +5336,7 @@ The colum name is composed of the string *page* and a trailing character to spec
 
 ::
 
-    SELECT "[options]" AS _page[<link type>]
+    10.sql = SELECT "[options]" AS _page[<link type>]
 
     with: [options] = [p:<page & param>][|t:<text>][|o:<tooltip>][|q:<question parameter>][|c:<class>][|g:<target>][|r:<render mode>]
 
@@ -5626,8 +5404,8 @@ These column offers a link, with a confirmation question, to delete one record (
 
 ::
 
-    SELECT "U:table=<tablename>&r=<record id>|q:<question>|..." AS _paged
-    SELECT "U:form=<formname>&r=<record id>|q:<question>|..." AS _paged
+    10.sql = SELECT "U:table=<tablename>&r=<record id>|q:<question>|..." AS _paged
+    10.sql = SELECT "U:form=<formname>&r=<record id>|q:<question>|..." AS _paged
 
 ..
 
@@ -5658,8 +5436,8 @@ Examples:
 
 ::
 
-    SELECT 'U:table=Person&r=123|q:Do you want delete John Doe?' AS _paged
-    SELECT 'U:form=person-main&r=123|q:Do you want delete John Doe?' AS _paged
+    10.sql = SELECT 'U:table=Person&r=123|q:Do you want delete John Doe?' AS _paged
+    10.sql = SELECT 'U:form=person-main&r=123|q:Do you want delete John Doe?' AS _paged
 
 .. _column_ppageX:
 
@@ -5698,7 +5476,7 @@ angle.
 
 ::
 
-    SELECT "<text>|[<angle>]|[<width>]|[<height>]|[<wrap tag>]" AS _vertical
+    10.sql = SELECT "<text>|[<angle>]|[<width>]|[<height>]|[<wrap tag>]" AS _vertical
 
 ..
 
@@ -5750,7 +5528,7 @@ Easily create Email links.
 ::
 
 
-    SELECT "<email address>|[<link text>]" AS _mailto
+    10.sql = SELECT "<email address>|[<link text>]" AS _mailto
 
 ..
 
@@ -5814,8 +5592,8 @@ Send emails. Every mail will be logged in the table `mailLog`. Attachments are s
 
 ::
 
-    SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
-    SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
+    10.sql = SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
+    10.sql = SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
 
 ..
 
@@ -5977,7 +5755,7 @@ Renders images. Allows to define an alternative text and a title attribute for t
 ::
 
 
-    SELECT "<path to image>|[<alt text>]|[<title text>]" AS _img
+    10.sql = SELECT "<path to image>|[<alt text>]|[<title text>]" AS _img
 
 ..
 
@@ -6061,10 +5839,11 @@ Runs batch files or executables on the webserver. In case of an error, returncod
 Column: _pdf | _file | _zip
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Most of the other Link-Class attributes can be used to customize the link.
-::
+Detailed explanation: download_
 
-    SELECT "[options]" AS _pdf, "[options]" AS _file, "[options]" AS _zip
+Most of the other Link-Class attributes can be used to customize the link. ::
+
+    10.sql = SELECT "[options]" AS _pdf, "[options]" AS _file, "[options]" AS _zip
 
     with: [options] = [d:<exportFilename][|p:<params>][|U:<params>][|u:<url>][|F:file][|t:<text>][|a:<message>][|o:<tooltip>][|c:<class>][|r:<render mode>]
 
@@ -6074,24 +5853,26 @@ Most of the other Link-Class attributes can be used to customize the link.
 * For column `_pdf` and `_zip`, the element sources `p:...`, `U:...`, `u:...`, `F:...` might repeated multiple times.
 * Example: ::
 
-		SELECT "F:fileadmin/test.pdf" as _pdf,  "F:fileadmin/test.pdf" as _file,  "F:fileadmin/test.pdf" as _zip
-		SELECT "p:id=export&r=1" as _pdf,  "p:id=export&r=1" as _file,  "p:id=export&r=1" as _zip
+		10.sql = SELECT "F:fileadmin/test.pdf" as _pdf,  "F:fileadmin/test.pdf" as _file,  "F:fileadmin/test.pdf" as _zip
+		10.sql = SELECT "p:id=export&r=1" as _pdf,  "p:id=export&r=1" as _file,  "p:id=export&r=1" as _zip
 
-		SELECT "t:Download PDF|F:fileadmin/test.pdf" as _pdf,  "t:Download PDF|F:fileadmin/test.pdf" as _file,  "t:Download ZIP|F:fileadmin/test.pdf" as _zip
-		SELECT "t:Download PDF|p:id=export&r=1" as _pdf,  "t:Download PDF|p:id=export&r=1" as _file,  "t:Download ZIP|p:id=export&r=1" as _zip
+		10.sql = SELECT "t:Download PDF|F:fileadmin/test.pdf" as _pdf,  "t:Download PDF|F:fileadmin/test.pdf" as _file,  "t:Download ZIP|F:fileadmin/test.pdf" as _zip
+		10.sql = SELECT "t:Download PDF|p:id=export&r=1" as _pdf,  "t:Download PDF|p:id=export&r=1" as _file,  "t:Download ZIP|p:id=export&r=1" as _zip
 
-		SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _pdf, "d:complete.zip|t:Download ZIP|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _zip
+		10.sql = SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _pdf, "d:complete.zip|t:Download ZIP|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _zip
 
-		SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test.pdf|p:id=export&r=1|u:www.example.com" AS _pdf
+		10.sql = SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test.pdf|p:id=export&r=1|u:www.example.com" AS _pdf
 
 .. _column_ppdf:
 
 Column: _Pdf | _File | _Zip
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Detailed explanation: download_
+
 A limited set of attributes is supported: ::
 
-    SELECT "[options]" AS _Pdf, "[options]" AS _File, "[options]" AS _Zip
+    10.sql = SELECT "[options]" AS _Pdf, "[options]" AS _File, "[options]" AS _Zip
 
     with: [options] = [<exportFilename>]|[<text>]|[<1: urlparam|file>]|[<2: urlparam|file>]| ... |[<n: urlparam|file>]
 
@@ -6205,31 +5986,273 @@ QFQ returns a HTML 'img'-tag: ::
 
   <img src="{{thumbnailDirPublic:Y}}/<md5 hash>.png">
 
-Typical
+.. _column-monitor:
 
-QFQ CSS Classes
----------------
+Column: _monitor
+^^^^^^^^^^^^^^^^
 
-* `qfq-table-50`, `qfq-table-80`, `qfq-table-100` - set min-width and column width to 'auto'
-* Background Color: `qfq-color-grey-1`, `qfq-color-grey-2`  (table, row, cell)
-* `qfq-100`: Makes an element 'width: 100%'.
-* `qfq-left`: Text align left.
+Detailed explanation: monitor_
 
-Bootstrap
-^^^^^^^^^
+**Syntax** ::
 
-* Table: `table`
-* Table > hover: `table-hover`
-* Table > condensed: `table-condensed`
+    10.sql = SELECT 'file:<filename>|tail:<number of last lines>|append:<0 or 1>|interval:<time in ms>|htmlId:<id>' AS _monitor
 
-E.g.::
++-------------+-------------------------------------------------------------------------------------------+---------------------------+
+|**Parameter**|**Description**                                                                            |**Default value/behaviour**|
++=============+===========================================================================================+===========================+
+|<filename>   |The path to the file. Relative to T3 installation directory or absolute.                   |none                       |
++-------------+-------------------------------------------------------------------------------------------+---------------------------+
+|<tail>       |Number of last lines to show                                                               |30                         |
++-------------+-------------------------------------------------------------------------------------------+---------------------------+
+|<append>     |0: Retrieved content replaces current. 1: Retrieved content will be added to current.      |0                          |
++-------------+-------------------------------------------------------------------------------------------+---------------------------+
+|<htmlId>     |Reference to HTML element to whose content replaced by the retrieve one.                   |monitor-1                  |
++-------------+-------------------------------------------------------------------------------------------+---------------------------+
 
-  10.sql = SELECT id, name, firstName, ...
-  10.head = <table class='table table-condensed qfq-table-50'>
 
-* `qfq-100`, `qfq-left` - makes e.g. a button full width and aligns the text left. ::
+.. _download:
 
-    10.sql = SELECT "p:home&r=0|t:Home|c:qfq-100 qfq-left" AS _pagev
+Download
+--------
+
+Download offers:
+
+* download a single file (any type),
+* concatenate several files (uploaded) and/or web pages (=HTML to PDF) into one PDF output file,
+* create a ZIP archive, filled with several files ('uploaded' or 'HTML to PDF'-converted).
+
+The downloads are SIP protected. Only the current user can use the link to download files.
+
+By using the `_link` columnname:
+
+* the option `d:...` initiate creating the download link and optional specifies an export filename,
+* the optional `M:...` (Mode) specifies the export type (file, pdf, zip),
+* setting `s:1` is mandatory for the download function,
+* the alttext `a:...` specifies a message in the download popup.
+
+By using `_pdf`,  `_Pdf`, `_file`, `_File`, `_zip`, `_Zip` as columnname, the options `d`, `m` and `s`
+will be set by automatically.
+
+All files will be read by PHP - therefore the directory might be protected against direct web access. This way is the
+preferred way to offer secure downloads via QFQ.
+
+In case the download needs a persistant URL (no SIP, no user session), a regular
+link, pointing directly to a file, have to be used - the download functionality described here is not appropriate for
+such a scenario.
+
+.. _download-parameter-files:
+
+Parameter and (element) sources
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* *download*: `d[:<exportFilename>]`
+
+  * *exportFilename* = <filename for save as> - Name, offered in the 'File save as' browser dialog. Default: 'output.<ext>'.
+
+    If there is no `exportFilename` defined, then the original filename is taken.
+
+    The user typically expects meaningful and distinct filenames for different download links.
+
+* *popupMessage*: `a:<text>` - will be displayed in the popup window during download. If the creating/download is fast, the window might disappear quickly.
+
+* *mode*: `M:<mode>`
+
+  * *mode* = <file | pdf | zip> - This parameter is optional and can be skipped in most situations. Mandatory
+    for 'zip'.
+
+      * If `M:file`, the mime type is derived dynamically from the specified file. In this mode, only one element source
+        is allowed per download link (no concatenation).
+
+      * In case of multiple element sources, only `pdf` or `zip` is supported.
+      * If `M:zip` is used together with `p:...`, `U:...` or `u:..`, those HTML pages will be converted to PDF. Those files
+        get generic filenames inside the archive.
+      * If not specified, the **default** 'Mode' depends on the number of specified element sources (=file or web page):
+
+        * If only one `file` is specifed, the default is `file`.
+        * If there is a) a page defined or b) multiple elements, the default is `pdf`.
+
+* *element sources* - for `M:pdf` or `M:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
+
+  * *file*: `F:<pathFileName>` - relative or absolute pathFileName offered for a) download (single), or to be concatenated
+    in a PDF or ZIP.
+  * *page*: `p:id=<t3 page>&<key 1>=<value 1>&<key 2>=<value 2>&...&<key n>=<value n>`.
+
+    * By default, the options given to wkhtml will *not* be encoded by a SIP!
+    * To encode the parameter via SIP: Add '_sip=1' to the URL GET parameter.
+
+      E.g. `p:id=form&_sip=1&form=Person&r=1`.
+
+      In that way, specific sources for the `download` might be SIP encrypted.
+
+    * Any current HTML cookies will be forwarded to/via `wkhtml`. This includes the current FE Login as well as any
+      QFQ session. Also the current User-Agent are faked via the `wkhtml` page request.
+
+    * If there are trouble with accessing FE_GROUP protected content, please check `wkhtmltopdf`_.
+
+  * *url*: `u:<url>` - any URL, pointing to an internal or external destination.
+
+  * *WKHTML Options* for `page`, `urlParam` or `url`:
+
+    * The 'HTML to PDF' will be done via `wkhtmltopdf`.
+    * All possible options, suitable for `wkhtmltopdf`, can be submitted in the `p:...`, `u:...` or `U:...` element source.
+      Check `wkhtmltopdf.txt <https://wkhtmltopdf.org/usage/wkhtmltopdf.txt>`_ for possible options. Be aware that
+      key/value tuple in the  documentation is separated by a space, but to respect the QFQ key/value notation of URLs,
+      the key/value tuple in `p:...`, `u:...` or `U:...` has to be separated by '='. Please see last example below.
+
+	Most of the other Link-Class attributes can be used to customize the link as well.
+
+Example `_link`: ::
+
+	# single `file`. Specifying a popup message window text is not necessary, cause a file directly accessed is fast.
+	SELECT "d:file.pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
+
+	# single `file`, with mode
+	SELECT "d:file.pdf|M:pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
+
+	# three sources: two pages and one file
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
+
+	# three sources: two pages and one file
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
+
+	# three sources: two pages and one file, parameter to wkhtml will be SIP encoded
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1&_sip=1|p:id=detail2&r=1&_sip=1|F:fileadmin/pdf/test.pdf" AS _link
+
+	# three sources: two pages and one file, the second page will be in landscape and pagesize A3
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1&--orientation=Landscape&--page-size=A3|F:fileadmin/pdf/test.pdf" AS _link
+
+..
+
+Example `_pdf`, `_zip`: ::
+
+	# File 1: p:id=1&--orientation=Landscape&--page-size=A3
+	# File 2: p:id=form
+	# File 3: F:fileadmin/file.pdf
+	SELECT 't:PDF|a:Creating a new PDF|p:id=1&--orientation=Landscape&--page-size=A3|p:id=form|F:fileadmin/file.pdf' AS _pdf
+
+	# File 1: p:id=1
+	# File 2: u:http://www.example.com
+	# File 3: F:fileadmin/file.pdf
+	SELECT 't:PDF - 3 Files|a:Please be patient|p:id=1|u:http://www.example.com|F:fileadmin/file.pdf' AS _pdf
+
+	# File 1: p:id=1
+	# File 2: p:id=form
+	# File 3: F:fileadmin/file.pdf
+	SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|p:id=1|p:id=form|F:', p.pathFileName) AS _zip
+
+..
+
+Use the `--print-media-type` as wkhtml option to access the page with media type 'printer'. Depending on the website
+configuration this switches off navigation and background images.
+
+Rendering PDF letters
+^^^^^^^^^^^^^^^^^^^^^
+
+`wkhtmltopdf`, with the header and footer options, can be used to render multi page PDF letters (repeating header,
+pagination) in combination with dynamic content. Such PDFs might look-alike official letters, together with logo and signature.
+
+Best practice:
+
+#. Create a clean (=no menu, no website layout) letter layout in a separated T3 branch: ::
+
+	page = PAGE
+	page.typeNum = 0
+	page.includeCSS {
+	  10 = typo3conf/ext/qfq/Resources/Public/Css/qfq-letter.css
+	}
+
+	// Grant access to any logged in user or specific development IPs
+	[usergroup = *] || [IP = 127.0.0.1,192.168.1.* ]
+	  page.10 < styles.content.get
+	[else]
+	  page.10 = TEXT
+	  page.10.value = access forbidden
+	[global]
+
+#. Create a T3 `body` page (e.g. page alias: 'letterbody') with some content. Example static HTML content: ::
+
+	<div class="letter-receiver">
+	  <p>Address</p>
+	</div>
+	<div class="letter-sender">
+	 <p><b>firstName name</b><br>
+	  Phone +00 00 000 00 00<br>
+	  Fax +00 00 000 00 00<br>
+	 </p>
+	</div>
+
+	<div class="letter-date">
+	  Zurich, 01.12.2017
+	</div>
+
+	<div class="letter-body">
+	 <h1>Subject</h1>
+
+	 <p>Dear Mrs...</p>
+	 <p>Lucas ipsum dolor sit amet organa solo skywalker darth c-3p0 anakin jabba mara greedo skywalker.</p>
+
+	 <div class="letter-no-break">
+	 <p>Regards</p>
+	 <p>Company</p>
+	 <img class="letter-signature" src="">
+	 <p>Firstname Name<br>Function</p>
+	 </div>
+	</div>
+
+#. Create a T3 letter-`header` page (e.g. page alias: 'letterheader') , with only the header information: ::
+
+		<header>
+		<img src="fileadmin/logo.png" class="letter-logo">
+
+		<div class="letter-unit">
+		  <p class="letter-title">Department</p>
+		  <p>
+			 Company name<br>
+			 Company department<br>
+			 Street<br>
+			 City
+		  </p>
+		</div>
+		</header>
+
+#. Create a) a link (Report) to the PDF letter or b) attach the PDF (on the fly rendered) to a mail. Both will call the
+   `wkhtml` via the `download` mode and forwards the necessary parameter.
+
+Use in `report`: ::
+
+  sql = SELECT CONCAT('d:Letter.pdf|t:',p.firstName, ' ', p.name,
+                       '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&',
+                               '--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&',
+                               '--footer-right="Seite: [page]/[toPage]"&',
+                               '--footer-font-size=8&--footer-spacing=10') AS _pdf
+                FROM Person AS p ORDER BY p.id
+
+
+Sendmail. Parameter: ::
+
+	sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}} }}
+
+Replace the static content elements from 2. and 3. by QFQ Content elements as needed: ::
+
+  10.sql = SELECT '<div class="letter-receiver"><p>', p.name AS '_+br', p.street AS '_+br', p.city AS '_+br', '</p>'
+            FROM Person AS p WHERE p.id={{pId:S}}
+
+
+Export area
+^^^^^^^^^^^
+
+To offer protected pages, e.g. referenced in download links, the regular FE_GROUPs can't be used, cause the download does
+not have the current user privileges (it's a separate process, started as the webserver user).
+
+Create a separated export tree in Typo3 Backend, which is IP access restricted. Only localhost or the FE_GROUP 'admin'
+is allowed to access: ::
+
+   [IP = {$tmp.restrictedIPRange} ][usergroup = admin]
+      page.10 < styles.content.get
+   [else]
+      page.10 = TEXT
+      page.10.value = Please access from localhost or log in as 'admin' user.
+   [global]
 
 .. _drag_and_drop:
 
@@ -6361,6 +6384,49 @@ QFQ iterates over the result set of `dragAndDropOrderSql`. The value of column `
  defined in part 2 (sort records) via `dragAndDropOrderSql`.
 
  If you find that the reorder does not work at expected, those two sql queries are not identically.
+
+QFQ CSS Classes
+---------------
+
+* `qfq-table-50`, `qfq-table-80`, `qfq-table-100` - set min-width and column width to 'auto'
+* Background Color: `qfq-color-grey-1`, `qfq-color-grey-2`  (table, row, cell)
+* `qfq-100`: Makes an element 'width: 100%'.
+* `qfq-left`: Text align left.
+
+Bootstrap
+---------
+
+* Table: `table`
+* Table > hover: `table-hover`
+* Table > condensed: `table-condensed`
+
+E.g.::
+
+  10.sql = SELECT id, name, firstName, ...
+  10.head = <table class='table table-condensed qfq-table-50'>
+
+* `qfq-100`, `qfq-left` - makes e.g. a button full width and aligns the text left. ::
+
+    10.sql = SELECT "p:home&r=0|t:Home|c:qfq-100 qfq-left" AS _pagev
+
+.. _monitor:
+
+Monitor
+-------
+
+Display a (log)file from the server, inside the browser, which updates automatically by a user defined interval. Access
+to the file is SIP protected. Any file on the server is possible.
+
+* On a Typo3 page, define a HTML element with a unique html-id. E.g.: ::
+
+    10.head = <pre id="monitor-1">Please wait</pre>
+
+* On the same Typo3 page, define a SQL column '_monitor' with the necessary parameter: ::
+
+    10.sql = SELECT 'file:fileadmin/protected/log/sql.log|tail:50|append:1|refresh:1000|htmlId:monitor-1' AS _monitor
+
+    # Short version with all defaults used.
+    10.sql = SELECT 'file:fileadmin/protected/log/sql.log' AS _monitor
 
 Report Examples
 ---------------
@@ -6930,6 +6996,15 @@ a more detailed message.
 
 The error might occur if there are problematic characters in config.qfq.php, like single or double ticks inside strings,
  wich are not enclosed (correctly).
+
+.. _`sendEmailProblem`:
+
+sendEmail: Error => TLS setup failed
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Switch off the TLS encryption. In `configuration`_ specify for *config.sendEMailOptions*: ::
+
+   -o tls=no
 
 .. _`javascriptProblem`:
 
