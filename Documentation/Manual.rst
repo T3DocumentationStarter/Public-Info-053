@@ -124,7 +124,7 @@ Print
 Different browser prints the same page in different variations. To prevent this, QFQ implements a small PHP wrapper
 `print.php` with uses `wkhtmltopdf` to convert HTML to PDF.
 
-Provide a `print this page`-link (replace {current pageId})::
+Provide a `print this page`-link (replace 'current pageId' )::
 
 	<a href="typo3conf/ext/qfq/qfq/api/print.php?id={current pageId}">Print this page</a>
 
@@ -134,7 +134,7 @@ Typoscript code to implement a print link on every page::
 
 	10 = TEXT
 	10 {
-		wrap = <a href="typo3conf/ext/qfq/qfq/api/print.php?id=|&type=2"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
+		wrap = <a href="typo3conf/ext/qfq/qfq/api/print.php?id=|&type=99"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
 		data = page:uid
 	}
 
@@ -1491,6 +1491,8 @@ Store: *TYPO3* (Bodytext) - T
  | feUserUid               | Logged in Typo3 FE User uid                                       |          |
  +-------------------------+-------------------------------------------------------------------+----------+
  | feUserGroup             | FE groups of logged in Typo3 FE User                              |          |
+ +-------------------------+-------------------------------------------------------------------+----------+
+ | beUser                  | Logged in Typo3 BE User                                           |          |
  +-------------------------+-------------------------------------------------------------------+----------+
  | beUserLoggedIn          | 'yes' | 'no' - Status if a BE-User is logged in                   |          |
  +-------------------------+-------------------------------------------------------------------+----------+
@@ -5570,21 +5572,20 @@ Easily create Email links.
 Column: _sendmail
 ^^^^^^^^^^^^^^^^^
 
-::
+Format: ::
 
-	t:<TO:email[,email]>|f:<FROM:email>|s:<subject>|b:<body>
-	 [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|r:<REPLY-TO:email>]
-	 [|A:<flag autosubmit: on/off>][|g:<grId>][|x:<xId>][|y:<xId2>][|z:<xId3>][|h:<mail header>]
-	 [|e:<subject encode: encode/decode/none>][E:<body encode: encode/decode/none>]
-	 [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
+    t:<TO:email[,email]>|f:<FROM:email>|s:<subject>|b:<body>
+        [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|r:<REPLY-TO:email>]
+        [|A:<flag autosubmit: on/off>][|g:<grId>][|x:<xId>][|y:<xId2>][|z:<xId3>][|h:<mail header>]
+        [|e:<subject encode: encode/decode/none>][E:<body encode: encode/decode/none>][|M:html]
+        [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
 
-The following parameters can also be written as complete words for ease of use:
+The following parameters can also be written as complete words for ease of use: ::
 
-::
-
-	to:<email[,email]>|from:<email>|subject:<subject>|body:<body>
-	 [|cc:<email[,email]]>[|bcc:<email[,email]]>[|reply-to:<email>]
-	 [|autosubmit:<on/off>][|grid:<grid>][|xid:<xId>][|xid2:<xId2>][|xid3:<xId3>][|header:<mail header>]
+    to:<email[,email]>|from:<email>|subject:<subject>|body:<body>
+        [|cc:<email[,email]]>[|bcc:<email[,email]]>[|reply-to:<email>]
+        [|autosubmit:<on/off>][|grid:<grid>][|xid:<xId>][|xid2:<xId2>][|xid3:<xId3>][|header:<mail header>]
+        [|M:html]
 
 Send emails. Every mail will be logged in the table `mailLog`. Attachments are supported.
 
@@ -5597,63 +5598,66 @@ Send emails. Every mail will be logged in the table `mailLog`. Attachments are s
 
 ..
 
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-|**Token**   | **Parameter**                          |**Description**                                                                                   |**Required**|
-+============+========================================+==================================================================================================+============+
-| f          | email                                  |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
-| from       |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| t          | email[,email]                          |**TO**: Comma separated list of receiver email addresses. Optional: `realname <john@doe.com>`     |    yes     |
-| to         |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| c          | email[,email]                          |**CC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
-| cc         |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| B          | email[,email]                          |**BCC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'    |            |
-| bcc        |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| r          | REPLY-TO:email                         |**Reply-to**: Email address to reply to (if different from sender)                                |            |
-| reply-to   |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| s          | Subject                                |**Subject**: Subject of the email                                                                 |    yes     |
-| subject    |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| b          | Body                                   |**Body**: Message - see also: `html-formatting`_                                                  |    yes     |
-| body       |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| h          | Mail header                            |**Custom mail header**: Separate multiple header with \\r\\n                                      |            |
-| header     |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| F          | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| u          | Attach created PDF of a given URL      |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| p          | Attach created PDF of a given T3 URL   |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| d          | Filename of the attachment             |**Attachment**: Useful for URL to PDF converted attachments. Repeatable.                          |            |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| C          | Concat multiple F|p|u| together        |**Attachment**: All following (until the next 'C') 'F|p|u' concatenated to one attachment.        |            |
-|            |                                        | Repeatable.                                                                                      |            |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| A          | flagAutoSubmit  'on' / 'off'           |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies             |            |
-| autosubmit |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| g          | grId                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-| grid       |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| x          | xId                                    |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-| xid        |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| y          | xId2                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-| xid2       |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| z          | xId3                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
-| xid3       |                                        |                                                                                                  |    yes     |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| e          | encode|decode|none                     |**Subject**: will be htmlspecialchar() encoded, decoded (default) or none (untouched)             |            |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| E          | encode|decode|none                     |**Body**: will be htmlspecialchar() encoded, decoded (default) or none (untouched).               |            |
-+------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+|**Token**     | **Parameter**                          |**Description**                                                                                   |**Required**|
+| short / long |
++==============+========================================+==================================================================================================+============+
+| f            | email                                  |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
+| from         |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| t            | email[,email]                          |**TO**: Comma separated list of receiver email addresses. Optional: `realname <john@doe.com>`     |    yes     |
+| to           |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| c            | email[,email]                          |**CC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'     |            |
+| cc           |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| B            | email[,email]                          |**BCC**: Comma separated list of receiver email addresses. Optional: 'realname <john@doe.com>'    |            |
+| bcc          |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| r            | REPLY-TO:email                         |**Reply-to**: Email address to reply to (if different from sender)                                |            |
+| reply-to     |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| s            | Subject                                |**Subject**: Subject of the email                                                                 |    yes     |
+| subject      |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| b            | Body                                   |**Body**: Message - see also: `html-formatting`_                                                  |    yes     |
+| body         |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| h            | Mail header                            |**Custom mail header**: Separate multiple header with \\r\\n                                      |            |
+| header       |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| F            | Attach file                            |**Attachment**: File to attach to the mail. Repeatable.                                           |            |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| u            | Attach created PDF of a given URL      |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| p            | Attach created PDF of a given T3 URL   |**Attachment**: Convert the given URL to a PDF and attach it the mail. Repeatable.                |            |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| d            | Filename of the attachment             |**Attachment**: Useful for URL to PDF converted attachments. Repeatable.                          |            |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| C            | Concat multiple F|p|u| together        |**Attachment**: All following (until the next 'C') 'F|p|u' concatenated to one attachment.        |            |
+|              |                                        | Repeatable.                                                                                      |            |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| A            | flagAutoSubmit  'on' / 'off'           |If 'on' (default), add mail header 'Auto-Submitted: auto-send' - suppress OoO replies             |            |
+| autosubmit   |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| g            | grId                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
+| grid         |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| x            | xId                                    |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
+| xid          |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| y            | xId2                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
+| xid2         |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| z            | xId3                                   |Will be copied to the mailLog record. Helps to setup specific logfile queries                     |            |
+| xid3         |                                        |                                                                                                  |    yes     |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| e            | encode|decode|none                     |**Subject**: will be htmlspecialchar() encoded, decoded (default) or none (untouched)             |            |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| E            | encode|decode|none                     |**Body**: will be htmlspecialchar() encoded, decoded (default) or none (untouched).               |            |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
+| M            | html                                   |**Body**: will be send as a HTML mail.                                                            |            |
++--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 
 * **e|E**: By default, QFQ stores values 'htmlspecialchars()' encoded. If such values have to send by email, the html entities are
   unwanted. Therefore the default setting for 'subject' und 'body' is to decode the values via 'htmlspecialchars_decode()'.
@@ -5689,7 +5693,7 @@ For debugging, please check `REDIRECT_ALL_MAIL_TO`_.
 
 **Mail Body HTML Formatting**
 
-In order to send an email with HTML formatting, such as bold text or bullet lists, simply start the email body with <html>.
+In order to send an email with HTML formatting, such as bold text or bullet lists, specify 'mode=html'.
 The subsequent contents will be interpreted as HTML and is rendered correctly by most email programs.
 
 .. _attachment:
@@ -6425,13 +6429,15 @@ to the file is SIP protected. Any file on the server is possible.
 
     10.sql = SELECT 'file:fileadmin/protected/log/sql.log|tail:50|append:1|refresh:1000|htmlId:monitor-1' AS _monitor
 
-    # Short version with all defaults used.
-    10.sql = SELECT 'file:fileadmin/protected/log/sql.log' AS _monitor
+
+* Short version with all defaults used to display system configured sql.log: ::
+
+    10.sql = SELECT 'file:{{sqlLog:Y}}' AS _monitor, '<pre id="monitor-1" style="white-space: pre-wrap;">Please wait</pre>'
 
 Report Examples
 ---------------
 
-The following section gives some examples of typical reports
+The following section gives some examples of typical reports.
 
 Basic Queries
 ^^^^^^^^^^^^^
@@ -6933,6 +6939,14 @@ Tips:
 
 QFQ specific
 ------------
+
+Page is white: no HTML code at all
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This should not happen.
+
+The PHP process stopped at all. Check the Apache error logfile, look for a stacktrace to find the latest function. Send
+a bug report.
 
 Problem with Query or variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
