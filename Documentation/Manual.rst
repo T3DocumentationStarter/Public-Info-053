@@ -1201,7 +1201,8 @@ affected by SQL injection. To prevent SQL injection, every variable is by defaul
 
 * Variables passed by the client (=Browser) are untrusted and use the default sanitize class 'digit' (if nothing else is
   specified). If alpha characters are submitted, the content violates `digit` and becomes therefore
-  `!!<name of sanitize class>!!` - there is no error message. Best is to always use SIP or digits.
+  `!!<name of sanitize class>!!` - there is no error message. Best is to always use SIP (value is trustful) or at least
+  digits for GET (=client) parameter (user might change those and therefore those are *not* trustful).
 
 Get Parameter
 -------------
@@ -1282,7 +1283,7 @@ E.g. for Apache set a htaccess rule: ::
 To offer download of those files, use the reserved columnname '_download' (see `download`_) or variants.
 
 **Important**: To protect the installation against executing of uploaded malicious script code, disable PHP for the final upload
-directory. E.g. `fileadmin`: ::
+directory. E.g. `fileadmin` (Apache): ::
 
 		<Directory "/var/www/html/fileadmin">
 			php_admin_flag engine Off
@@ -1294,10 +1295,19 @@ File upload
 -----------
 
 By default the mime type of every uploaded file is checked against a white list of allowed mime types. The mime type of
-a file can be (easily) faked by an attacker. This check is good to handle regular user file upload for specific file types. To
-prevent attacks against uploading and executing malicous code this won't help.
+a file can be (easily) faked by an attacker. This check is good to handle regular user file upload for specific file types
+but won't help to prevent attacks against uploading and executing malicous code.
 
 Instead prohibit the execution of user contributed files by the webserver config (`SecureDirectFileAccess`_).
+
+Typo3 Setup - best practice
+---------------------------
+
+* Activate notification emails for every BE login (if there are only few BE users). In case the backend has been hacked,
+  unusual login's (time or username) will appear: ::
+
+        [BE][warning_email_addr] = <your email>
+        [BE][warning_mode] = 1
 
 .. _`store`:
 
@@ -2945,10 +2955,12 @@ Type: text
 * *FormElement.parameter*:
 
   * *retype* = 1 (optional): Current input element will be rendered twice. The form can only submitted if both elements are equal.
-  * *retypeLabel* = <text> (optional): The label of the second element.
-  * *retypeNote* = <text> (optional): The note of the second element.
-  * *characterCountWrap* = <text1>|<text2> (optional). Displays a character counter below the input/textarea element. If
-    `text1` / `text2` is missing, just display `<current>/</max>`. Customization: `characterCountWrap=<div class=qfq-cc-style>Count: |</div>`
+
+    * *retypeLabel* = <text> (optional): The label of the second element.
+    * *retypeNote* = <text> (optional): The note of the second element.
+
+  * *characterCountWrap* = <div class="qfq-cc-style">Count: |</div>` (optional).
+    Displays a character counter below the input/textarea element.
   * Also check the  :ref:`fe-parameter-attributes` *data-...-error* to customize error messages shown by the validator.
   * *hideZero* = 0|1 (optional): `with hideZero=1` a '0' in the value will be replaced by an empty string.
   * *emptyMeansNull* = [0|1] (optional): with `emptyMeansNull` or `emptyMeansNull=1` a NULL value will be written if
