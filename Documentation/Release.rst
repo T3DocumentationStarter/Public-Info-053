@@ -33,8 +33,44 @@ Notes
 Features
 ^^^^^^^^
 
+Version 18.8.0
+--------------
+
+Date: 26.08.2018
+
+Notes
+^^^^^
+
+* Excel Export
+* CopyCat
+
+Features
+^^^^^^^^
+
+* #4922 / Excel Export - create Excel sheets from scratch or based on a template.
+* #3294 / Improve Typo3 QFQ backend layout. Add sparql syntax highlighting.
+* #5878 / Formelement.type=note with #!report - whitespace is trimmed.
+* Import/Merge form: A new form 'copyFormFromExt' (see file `copyFormFromExt.sql`) offers a one click import of external
+  QFQ forms (incl. renumbering of id's).
+* formEditor.sql: resized Form.title from 255 to 511 (requested by IK Tool)
+* Drag and Drop now offers the possibility to show the renumbered values.
+* Manual.rst: security hints, T3 Setup best practice, text input retype, charactercountwrap.
+* Config.qfq: central defaults for DATA_MATCH, DATA_ERROR
+* Bootstrap QFQ development: switched from bower to npm only.
+
+
+    F6314: HTML Mails enabled by specifying flag 'mode=html'.
+
 Bug Fixes
 ^^^^^^^^^
+
+* #5843 / File upload: limitation to file extensions are no case insensitive.
+* #6247 / Replace deprecated each function
+* #6281 / FormElement / column 'note': token '#!report' - STORE_RECORD does not work.
+* #6331 / File Upload: Wrong error message if filesize is much too big.
+* #6229 / Add QFQ icon to content element and content element wizard
+* AbstractException.php: fixed problem with htmlEntities() on link to 'Edit Form' and 'Edit FormElement'.
+
 
 Version 18.6.1
 --------------

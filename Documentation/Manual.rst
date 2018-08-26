@@ -89,11 +89,15 @@ The program is not included in QFQ and has to be manually installed.
   * The current version 0.12.4 might have trouble with https connections. Version 0.12.5-dev (github master branch)
     seems more reliable. Please contact the QFQ authors if you need a compiled Ubuntu version of wkhtmltopdf.
 
-In `configuration`_ specify the:
+In `configuration`_ specify the: ::
 
-* `cmdWkhtmltopdf=/opt/wkhtmltox/bin/wkhtmltopdf`.
-* `baseUrl=http://www.example.com/`.
+    cmdWkhtmltopdf=/opt/wkhtmltox/bin/wkhtmltopdf`.
+    baseUrl=http://www.example.com/`.
 
+If wkhtml has been compiled with dedicated libraries (not part of LD_LIBRARY_PATH), specify the LD_LIBRARY_PATH together
+with the path-filename: ::
+
+    cmdWkhtmltopdf=LD_LIBRARY_PATH=/opt/wkhtmltox/lib /opt/wkhtmltox/bin/wkhtmltopdf
 
 **Important**: To access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check! `wkhtml`
 will access the Typo3 page locally (localhost) and that IP address is different from the client (=user) IP.
@@ -240,7 +244,8 @@ Setup a *report* to manage all *forms*:
         # List of Forms: Do not show this list of forms if there is a form given by SIP.
         # Table header.
         sql = SELECT CONCAT('p:{{pageId:T}}&form=form') as _pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
-        head = <table class="table table-hover qfq-table-50">
+        head = {{'b|p:id={{pageAlias:T}}&form=copyFormFromExt|t:Copy form from ExtForm' AS _link}}
+               <table class="table table-hover qfq-table-50">
         tail = </table>
         rbeg = <thead><tr>
         rend = </tr></thead>
@@ -298,7 +303,7 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | cmdConvert                    | convert                                               | GraphicsMagics 'convert' is recommended.                                   |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| cmdWkhtmltopdf                | /usr/bin/wkhtmltopdf                                  | PathFilename of wkhtmltopdf.                                               |
+| cmdWkhtmltopdf                | /usr/bin/wkhtmltopdf                                  | PathFilename of wkhtmltopdf. Optional variables like LD_LIBRARY_PATH=...   |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | baseUrl                       | http://example.com                                    | URL where wkhtmltopdf will fetch the HTML (no parameter, those comes later)|
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -527,7 +532,7 @@ Fill STORE_SYSTEM by SQL
 A specified SELECT statement in `configuration`_ in variable `fillStoreSystemBySql1` (or `2`,
 or `3`) will be fired. The query should have 0 (nothing happens) or 1 row. All columns will be
 **added** to the existing STORE_SYSTEM. Existing variables will be overwritten. Be careful not to overwrite system values.
- 
+
 This option is useful to make generic custom values, saved in the database, accessible to all QFQ Report and Forms.
 Access such variables via `{{<varname>:Y}}`.
 
@@ -1271,19 +1276,25 @@ Secure direct file access
 -------------------------
 
 If the application uploads files, mostly it's not necessary and often a security issue, to offer a direct download of
-the uploaded files. Best is to create a directory, e.g. `<site path>/fileadmin/protected` and deny direct access via webbrowser to it.
-E.g. for Apache set a htaccess rule: ::
+the uploaded files. Best is to create a directory, e.g. `<site path>/fileadmin/protected` and deny direct access via
+webbrowser to it. E.g. for Apache set a rule: ::
 
-		<Directory "/var/www/html/fileadmin/protected">
-			Require all denied
-		</Directory>
+    <Directory "/var/www/html/fileadmin/protected">
+        Require all denied
+    </Directory>
 
-**Important**: all QFQ uploads should then save files in or below such a directory.
+If you only have access to `.htaccess`, create a file `<site path>/fileadmin/protected/.htaccess` with: ::
 
-To offer download of those files, use the reserved columnname '_download' (see `download`_) or variants.
+    <IfModule mod_authz_core.c>
+         Require all denied
+    </IfModule>
 
-**Important**: To protect the installation against executing of uploaded malicious script code, disable PHP for the final upload
-directory. E.g. `fileadmin` (Apache): ::
+**Important**: all QFQ uploads should save files in or below such a directory.
+
+To offer download of those files, use the reserved column name '_download' (see `download`_) or variants.
+
+**Important**: To protect the installation against executing of uploaded malicious script code, disable PHP for the final
+upload directory. E.g. `fileadmin` (Apache): ::
 
 		<Directory "/var/www/html/fileadmin">
 			php_admin_flag engine Off
@@ -2028,14 +2039,14 @@ After the user presses *Save*, *Close*, *Delete* or *New*, different actions are
 
 * `auto` (default) - the QFQ browser Javascript logic, decides to stay on the page or to force a redirection
   to a previous page. The decision depends on:
-  
+
   * *Close* goes back (feels like close) to the previous page. Note: if there is no history, QFQ won't close the tab,
      instead a message is shown.
   * *Save* stays on the current page.
 
 * `close` - goes back (feels like close) to the previous page. Note: if there is no history, QFQ won't close the tab,
      instead a message is shown.
-* `no` - no change, the browser remains on the current side. Close does not close the page. It just triggers a save if 
+* `no` - no change, the browser remains on the current side. Close does not close the page. It just triggers a save if
   there are modified data.
 * `url` - the browser redirects to the URL or T3 page named in `Forward URL / Page`. Independent if the user presses `save` or `close`.
 * `url-skip-history` - same as `url`, but the current location won't saved in the browser history.
@@ -2484,21 +2495,21 @@ Fields:
 |                     | 'beforeInsert', 'beforeUpdate', 'beforeDelete', 'afterLoad', 'afterSave', 'afterInsert', 'afterUpdate', 'afterDelete',            |
 |                     | 'sendMail')                                                                                                                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _`field-encode`   |
+|Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _field-encode     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Check Type           | enum('auto', 'alnumx',      | See: `sanitize-class`_                                                                              |
 |                     | 'digit', 'numerical',       |                                                                                                     |
 |                     | 'email', 'pattern',         |                                                                                                     |
 |                     | 'allbut', 'all')            |                                                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Check Pattern        | 'regexp'                    |_`field-checkpattern`: If $checkType=='pattern': pattern to match                                    |
+|Check Pattern        | 'regexp'                    | _`field-checkpattern`: If $checkType=='pattern': pattern to match                                   |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Order                | string                      | Display order of *FormElements* ('order' is a reserved keyword)  _`field-ord`                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|tabindex             | string                      |HTML tabindex attribute   _`field-tabindex`                                                          |
+|tabindex             | string                      |HTML tabindex attribute  _`field-tabindex`                                                           |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Size                 | string                      |Visible length of input element. Might be ommited, depending on the choosen form layout.             |
-|                     |                             |Format: <width>,<height> (in characters)   _`field-size`                                             |
+|                     |                             |Format: <width>,<height> (in characters)  _`field-size`                                              |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |BS Label Columns     | string                      | Number of bootstrap grid columns for label. By default empty, value inherits from the form.         |
 |                     |                             | _`field-bsLabelColumns`                                                                             |
@@ -2511,17 +2522,18 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Maxlength            | string                      |Maximum characters for input. _`field-maxLength`                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Note                 | string                      |Note of *FormElement*. Depending on layout model, right or below of the *FormElement*. _`field-note` |
+|Note                 | string                      |Note of *FormElement*. Depending on layout model, right or below of the *FormElement*.               |
+|                     |                             |Report syntax can also be used, see report-notation_                                                 |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Tooltip              | text                        |Display this text as tooltip on mouse over.  _`field-tooltip`                                        |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Placeholder          | string                      |Text, displayed inside the input element in light grey. _`field-placeholder`                         |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|value                | text                        |Default value: See `field-value`_                                                                    |
+|value                | text                        |Default value: See field-value_                                                                      |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |sql1                 | text                        |SQL query. See individual `FormEelement`. _`sql1`                                                    |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Parameter            | text                        |Might contain misc parameter. See `fe-parameter-attributes`_                                         |
+|Parameter            | text                        |Might contain misc parameter. See fe-parameter-attributes_                                           |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |feGroup              | string                      | Comma-separated list of Typo3 FE Group ID. NOT SURE IF THIS WILL BE IMPLEMENTED. Native             |
 |                     |                             | *FormElements*, fieldsets and pills can be assigned to feGroups. Group status: show, hidden,        |
@@ -2546,6 +2558,10 @@ For non primary records, this is the place to load an existing value. E.g. we're
 to edit, on the same form, a corresponding person email address (which is in a separate table): ::
 
   {{SELECT a.email FROM Address AS a WHERE a.pId={{id:R0}} ORDER BY a.id LIMIT 1}}
+
+Report syntax can also be used, see report-notation_.
+
+.. _`report-notation`:
 
 FE: 'Report' notation
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2905,7 +2921,7 @@ Checkboxes can be rendered in mode:
     There might be situations, where the user should be forced to select a value (e.g. specifying the gender). An unwanted
     default value can be suppressed by specifying an explicit definition on the FormElement field `value`::
 
-      {{<columnname>:RZ}}
+      {{<columnName>:RZ}}
 
     For existing records the shown value is as expected the value of the record. For new records, it's the value `0`,
     which is typically not one of the ENUM / SET values and therefore nothing is selected.
@@ -2959,9 +2975,9 @@ Type: text
     * *retypeLabel* = <text> (optional): The label of the second element.
     * *retypeNote* = <text> (optional): The note of the second element.
 
-  * *characterCountWrap* = <div class="qfq-cc-style">Count: |</div>` (optional).
+  * *characterCountWrap* = <span class="qfq-cc-style">Count: |</span> (optional).
     Displays a character counter below the input/textarea element.
-  * Also check the  :ref:`fe-parameter-attributes` *data-...-error* to customize error messages shown by the validator.
+  * Also check the  fe-parameter-attributes_ *data-...-error* to customize error messages shown by the validator.
   * *hideZero* = 0|1 (optional): `with hideZero=1` a '0' in the value will be replaced by an empty string.
   * *emptyMeansNull* = [0|1] (optional): with `emptyMeansNull` or `emptyMeansNull=1` a NULL value will be written if
     the value is an empty string
@@ -3153,7 +3169,7 @@ Type: radio
   * If there is a default configured on a table column, such a value is selected by default. If the user should actively
     choose an option, the 'preselection' can be omitted by specifying an explicit definition on the FormElement field `value`::
 
-      {{<columnname>:RZ}}
+      {{<columnName>:RZ}}
 
     For existing records the shown value is as expected the value of the record. For new records, it's the value `0`,
     which is typically not one of the ENUM values and therefore nothing is selected.
@@ -3221,7 +3237,7 @@ will be rendered inside the form as a HTML table.
   * Notice the **exclamation mark** after '{{' - this is necessary to return an array of elements, instead of a single string.
   * Exactly one column **'id'** has to exist; it specifies the primary record for the target form.
     In case the id should not be visible to the user, it has to be named **'_id'**.
-  * Columnname: *[title=]<title>[|[maxLength=]<number>][|nostrip][|icon][|link][|url][|mailto][|_rowClass][|_rowTooltip]*
+  * Column name: *[title=]<title>[|[maxLength=]<number>][|nostrip][|icon][|link][|url][|mailto][|_rowClass][|_rowTooltip]*
 
     * If the keyword is used, all parameter are position independent.
     * Parameter are separated by '|'.
@@ -3275,7 +3291,7 @@ will be rendered inside the form as a HTML table.
     * Example: *detail=id:personId,rowId:secId,&12:xId,&{{a}}:personId*  (rowId is a column of the current selected row defined by sql1)
     * By default, the given value will overwrite values on the target record. In most situations, this is the wished behaviour.
     * Exceptions of the default behaviour have to be defined on the target form in the corresponding *FormElement* in the
-      field *value* by changing the default Store priority definition. E.g. `{{<columnname>:RS0}}` - For existing records,
+      field *value* by changing the default Store priority definition. E.g. `{{<columnName>:RS0}}` - For existing records,
       the store `R` will provide a value. For new records, store `R` is empty and store S will be searched for a value:
       the value defined in `detail` will be choosen. At last the store '0' is defined as a fallback.
     * *source table column name*: E.g. A person form is opened with person.id=5 (r=5). The definition `detail=id:personId`
@@ -3304,13 +3320,13 @@ An upload element is based on a 'file browse'-button and a 'trash'-button (=dele
 The 'file browse'-button is displayed, if there is no file uploaded already.
 The 'trash'-button is displayed, if there is a file uploaded already.
 
-After clicking on the browse brutton, the user select a file from the local filesystem.
+After clicking on the browse button, the user select a file from the local filesystem.
 After choosing the file, the upload starts immediately, shown by a turning wheel. When the server received the whole file
 and accepts (see below) the file, the 'file browse'-button disappears and the filename is shown, followed by a 'trash'-button.
 Either the user is satisfied now or the user can delete the uploaded file (and maybe upload another one).
 
 Until this point, the file is cached on the server but not copied to the `fileDestination`. The user have to save the
-current record, either to finalize the upload and/or to delete a previous uploaded file.
+current record, either to finalize the upload and/or to delete a previously uploaded file.
 
 The FormElement behaves like a
 
@@ -3589,7 +3605,7 @@ Parameter: slaveId
     * Auto fill: name the action `action`-*FormElement* equal to an existing column (table from the current form definition).
       *slaveId* will be automatically filled with the value of the named column.
 
-      * If there is no such named columnname, set *slaveId* = `0`.
+      * If there is no such named column name, set *slaveId* = `0`.
 
     * Explicit definition: *slaveId* = `123` or *slaveId* = `{{SELECT id ...}}`
 
@@ -3664,7 +3680,7 @@ Situation 1: master.xId=slave.id (1:1)
 
 Situation 2: master.id=slave.xId (1:n)
 
- * Name the action element *different* to any columnname of the master record (or no name).
+ * Name the action element *different* to any column name of the master record (or no name).
  * Determine the slaveId: `slaveId={{SELECT id FROM slave WHERE slave.xxx={{...}} LIMIT 1}}`
 
    * {{slaveId}} == 0 ? 'sqlInsert' will be fired.
@@ -3752,7 +3768,7 @@ See also `copy-form`_.
 
   * *recordSourceTable* = `<tableName>` - Optional: table from where the records will be copied. Default: <recordDestinationTable>
   * *recordDestinationTable* = `<tableName>`  - table where the new records will be copied to.
-  * *translateIdColumn* = `<columnname>`  - columnname to update references of newly created id's.
+  * *translateIdColumn* = `<column name>`  - column name to update references of newly created id's.
 
 .. _form-magic:
 
@@ -4084,7 +4100,7 @@ corresponding `FormElements` all internal references needs to be updated as well
 
 On each FormElement.type=`paste` record, the column to be updated is defined via:
 
- * parameter: translateIdColumn = <columnname>
+ * parameter: translateIdColumn = <column name>
 
 For the 'copyForm' this would be 'feIdContainer'.
 
@@ -4688,13 +4704,35 @@ Table: Person
        slaveId={{id:R0}}
        sqlUpdate={{ UPDATE Person AS p SET p.name='{{cn:L:alnumx:s}}' WHERE p.id={{slaveId}} LIMIT 1 }}
 
-FAQ
----
+.. _import-merge-form
 
- * Q: A variable {{<var>}} is shown as empty string, but there should be a value.
+Import/merge form
+-----------------
 
-   * A: The sanitize rule is violeted and therefore the value has been removed. Set {{<var>:<store>:all}} as a test.
-     Only STORE_CLIENT and STORE_FORM will be sanitized.
+The form `copyFormFromExt` copies a form from table `ExtForm / ExtFormElement` to `Form / FormElement`. The import/merge
+form:
+
+* offers a drop down list with all forms of `ExtForm`,
+* an input element for the new form name,
+* create new Form.id
+* copied FormElements get the new Form.id.
+* the copied form will be opened in the FormEditor.
+
+Installation:
+
+* Play (do all sql statements on your QFQ database, e.g. via `mysql <dbname> < copyFormFromExt.sql` or `phpMyAdmin`) the
+  file  *<ext_dir>/qfq/sql/copyFormFromExt.sql*.
+* Insert a link/button 'Copy form from ExtForm' to open the import/merge form. A good place is the list of all forms
+(see `form-editor`_). E.g.: ::
+
+  10.head = {{'b|p:id={{pageAlias:T}}&form=copyFormFromExt|t:Copy form from ExtForm' AS _link }} ...
+
+If there are several T3/QFQ instances and if forms should be imported frequently/easily, set up a one shot
+'import Forms from db xyz' like: ::
+
+  10.sql = CREATE OR REPLACE table ExtForm SELECT * FROM <db xyz>.Form
+  20.sql = CREATE OR REPLACE table ExtFormElement SELECT * FROM <db xyz>.FormElement
+
 
 .. _`report`:
 
@@ -4765,7 +4803,7 @@ There is a set of **variables** that will get replaced before the SQL-Query gets
 
 ``{{<name>:R}}`` - use case of the above generic definition. See also `access-column-values`_.
 
-``{{<level>.<columnname>}}``
+``{{<level>.<columnName>}}``
   Similar to  ``{{<name>:R}}`` but more specific. There is no sanitize class, escape mode or default value.
 
 ``{{<level>.line.count}}`` - Current row index
@@ -4788,11 +4826,11 @@ Only SELECT and SHOW queries will fire subqueries.
 Processing of the resulting rows and columns:
 
 	* In general, all columns of all rows will be printed out sequentially.
-	* On a per column base, printing of columns can be suppressed by starting the columnname with an underscore '_'. E.g.
+	* On a per column base, printing of columns can be suppressed by starting the column name with an underscore '_'. E.g.
 	  `SELECT id AS _id`.
 
      This might be useful to store values, which will be used later on in another query via the `{{id:R}}` or
-     `{{<level>.columnname}}` variable. To suppress printing of a column, use a underscore as column name prefix. E.g.
+     `{{<level>.columnName}}` variable. To suppress printing of a column, use a underscore as column name prefix. E.g.
      `SELECT id AS _id`
 
 *Reserved column names* have a special meaning and will be processed in a special way. See
@@ -5097,6 +5135,8 @@ Special column names
 | _pdf, _file, _zip      |Shortcut version of the link interface for fast creation of `download`_ links. Used to offer single file download or to concatenate several PDFs and printout of websites to one PDF file.   |
 | _Pdf, _File, _Zip      |                                                                                                                                                                                             |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _yank                  | `copyToClipboard`_. Shortcut version of the link interface                                                                                                                                  |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _sendmail              |Send emails.                                                                                                                                                                                 |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _exec                  |Run batch files or executables on the webserver.                                                                                                                                             |
@@ -5123,6 +5163,14 @@ Special column names
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _monitor               |Constantly display a file. See `column-monitor`_.                                                                                                                                            |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _XLS                   |Used for Excel export. Append a `newline` character at the end of the string. Token must be part of string. See `excel-export`_.                                                             |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _XLSs                  |Used for Excel export. Prepend the token 's=' and append a `newline` character at the string. See `excel-export`_.                                                                           |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _XLSb                  |Used for Excel export. Like '_XLSs' but encode the string base64. See `excel-export`_.                                                                                                       |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _XLSn                  |Used for Excel export. Prepend 'n=' and append a `newline` character around the string. See `excel-export`_.                                                                                 |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _+???                  |The content will be wrapped in the tag '???'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                                |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |_<nonReservedName>      |Suppress output. Column names with leading underscore are used to select data from the database and make it available in other parts of the report without generating any output.            |
@@ -5147,6 +5195,9 @@ Column: _link
 |x  |   |Page          |p:<pageId>                         |p:impressum                |Prepend '?' or '?id=', no hostname qualifier (automatically set by browser), default value: {{pageId}}                                  |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |x  |   |Download      |d:[<exportFilename>]               |d:complete.pdf             |Link points to `api/download.php`. Additional parameter are encoded into a SIP. 'Download' needs an enabled SIP.  See `download`_.      |
++---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
+|x  |   |Copy to       |y:[some content]                   |y:this will be copied      |Click on it copies the value of 'y:' to the clipboard. Optional a file ('F:...') might be specified as source.                          |
+|   |   |clipboard     |                                   |                           |See `copyToClipboard`_.                                                                                                                 |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Text          |t:<text>                           |t:Firstname Lastname       |-                                                                                                                                       |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -5213,39 +5264,31 @@ If there are no special condition (like missing value, or suppressed links), ren
 But if the URL text is missing, or the URL is missing, OR the link should be rendered in sql row 1-10, but not 5, than
 render mode might dynamically control the rendered link.
 
-* Horizontal:
+* Column *Mode* is the render mode and controls how the link is rendered.
 
-  * If 'url & text' is given, column 2 shows the result.
-  * If only 'url' is given, column 3 shows the result.
-  * If only 'text' is given, column 4 shows the result.
-
-* Vertical:
-
-  * Column 0 is the render mode and controls how the link is rendered.
-
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
-|Mode       |Both: url & text    |Only: url          |Only: text|Description                                                            |
-+===========+====================+===================+==========+=======================================================================+
-|0 (default)|<a href=url>text</a>|<a href=url>url</a>|          |text or image will be shown, only if there is a url, page or mailto    |
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
-|1          |<a href=url>text</a>|<a href=url>url</a>|text      |Text or image will be shown, independet of there is a url              |
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
-|2          |<a href=url>text</a>|                   |          |no link if text is empty                                               |
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
-|3          |text                |url                |text      |no link, only text or image, incl. optional tooltip                    |
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
-|4          |url                 |url                |text      |no link, show text, if text is empty, show url, incl. optional tooltip |
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
-|5          |                    |                   |          |nothing at all                                                         |
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
-|6          | pure text          |                   |pure text |no link, pure text                                                     |
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
-|7          | pure url           |pure url           |          |no link, pure url                                                      |
-+-----------+--------------------+-------------------+----------+-----------------------------------------------------------------------+
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
+|Mode        |Given: url & text    |Given: only url     | Given: only text |Description                                                            |
++============+=====================+====================+==================+=======================================================================+
+|0 (default) |<a href=url>text</a> |<a href=url>url</a> |                  |text or image will be shown, only if there is a url, page or mailto    |
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
+|1           |<a href=url>text</a> |<a href=url>url</a> |text              |Text or image will be shown, independet of there is a url              |
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
+|2           |<a href=url>text</a> |                    |                  |no link if text is empty                                               |
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
+|3           |text                 |url                 |text              |no link, only text or image, incl. optional tooltip                    |
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
+|4           |url                  |url                 |text              |no link, show text, if text is empty, show url, incl. optional tooltip |
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
+|5           |                     |                    |                  |nothing at all                                                         |
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
+|6           | pure text           |                    |pure text         |no link, pure text                                                     |
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
+|7           | pure url            |pure url            |                  |no link, pure url                                                      |
++------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
 
 ::
 
-    10.sql = SELECT CONCAT('u:', p.homepage, IF(p.showHomepage='yes','|r:0', '|r:5') ) AS _link FROM Person AS p
+    10.sql = SELECT CONCAT('u:', p.homepage, IF(p.showHomepage='yes', '|r:0', '|r:5') ) AS _link FROM Person AS p
 
 
 Link Examples
@@ -5288,6 +5331,11 @@ Link Examples
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT "s:1|d:full.pdf|M:pdf|p:id=det1&r=12|p:id=det2|F:cv.pdf|       | <a href="typo3conf/ext/qfq/qfq/api/download.php?s=badcaffee1234">Download</a>                                                           |
 |         t:Download|a:Create complete PDF - please wait" as _link      |                                                                                                                                         |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT  "y:iatae3Ieem0jeet|t:Password|o:Clipboard|b" AS _link         | <button class="btn btn-info" onClick="new QfqNS.Clipboard({text: 'iatae3Ieem0jeet'});" title='Copy to clipboard'>Password</button>      |
++-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT  "y|s:1|F:dir/data.R|t:Data|o:Clipboard|b" AS _link            | <button class="btn btn-info" onClick="new QfqNS.Clipboard({uri: 'typo3conf/.../download.php?s=badcaffee1234'});"                        |
+|                                                                       | title='Copy to clipboard'>Data</button>                                                                                                 |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 
 .. _question:
@@ -5423,7 +5471,7 @@ These column offers a link, with a confirmation question, to delete one record (
 
 ..
 
-If the record to delete contains column(s), whose columnname match on `%pathFileName%` and such a
+If the record to delete contains column(s), whose column name match on `%pathFileName%` and such a
 column points to a real existing file, such a file will be deleted too. If the table contains records where the specific
 file is multiple times referenced, than the file is not deleted (it would break the still existing references). Multiple
 references are not found, if they use different colummnnames or tablenames.
@@ -5612,7 +5660,7 @@ Send emails. Every mail will be logged in the table `mailLog`. Attachments are s
 
 +--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 |**Token**     | **Parameter**                          |**Description**                                                                                   |**Required**|
-| short / long |
+| short / long |                                        |                                                                                                  |            |
 +==============+========================================+==================================================================================================+============+
 | f            | email                                  |**FROM**: Sender of the email. Optional: 'realname <john@doe.com>'                                |    yes     |
 | from         |                                        |                                                                                                  |    yes     |
@@ -6025,6 +6073,27 @@ Detailed explanation: monitor_
 |<htmlId>     |Reference to HTML element to whose content replaced by the retrieve one.                   |monitor-1                  |
 +-------------+-------------------------------------------------------------------------------------------+---------------------------+
 
+.. _copyToClipboard:
+
+Copy to clipboard
+^^^^^^^^^^^^^^^^^
+
++-------------------+--------------------------------+----------------------------------------------------------------------------+
+| Token             | Example                        | Comment                                                                    |
++===================+================================+============================================================================+
+| y[:<content>]     | y,  y:some content             | Initiates 'copy to clipboard' mode. Source might given text or page or url |
++-------------------+--------------------------------+----------------------------------------------------------------------------+
+| F:<pathFilename>  | F:fileadmin/protected/data.R   | pathFilename in DocumentRoot                                               |
++-------------------+--------------------------------+----------------------------------------------------------------------------+
+
+Example: ::
+
+    10.sql = SELECT 'y:hello world (yank)|t:content direct (yank)' AS _yank,
+                    'y:hello world (link)|t:content direct (link)' AS _link,
+                    CONCAT('F:', p.pathFileName,'|t:File (yank)|o:', p.pathFileName) AS _yank,
+                    CONCAT('y|F:', p.pathFileName,'|t:File (link)|o:', p.pathFileName) AS _link
+                FROM Person AS p
+                  
 
 .. _download:
 
@@ -6033,24 +6102,25 @@ Download
 
 Download offers:
 
-* download a single file (any type),
-* concatenate several files (uploaded) and/or web pages (=HTML to PDF) into one PDF output file,
-* create a ZIP archive, filled with several files ('uploaded' or 'HTML to PDF'-converted).
+* Single file - download a single file (any type),
+* PDF create - one or concatenate several files (uploaded) and/or web pages (=HTML to PDF) into one PDF output file,
+* ZIP archive - filled with several files ('uploaded' or 'HTML to PDF'-converted).
+* Excel - created from scratch or fill a template xlsx with database values.
 
 The downloads are SIP protected. Only the current user can use the link to download files.
 
-By using the `_link` columnname:
+By using the `_link` column name:
 
 * the option `d:...` initiate creating the download link and optional specifies an export filename,
-* the optional `M:...` (Mode) specifies the export type (file, pdf, zip),
+* the optional `M:...` (Mode) specifies the export type (file, pdf, zip, export),
 * setting `s:1` is mandatory for the download function,
 * the alttext `a:...` specifies a message in the download popup.
 
-By using `_pdf`,  `_Pdf`, `_file`, `_File`, `_zip`, `_Zip` as columnname, the options `d`, `m` and `s`
-will be set by automatically.
+By using `_pdf`,  `_Pdf`, `_file`, `_File`, `_zip`, `_Zip`, `_excel` as column name, the options `d`, `m` and `s`
+will be set.
 
-All files will be read by PHP - therefore the directory might be protected against direct web access. This way is the
-preferred way to offer secure downloads via QFQ.
+All files will be read by PHP - therefore the directory might be protected against direct web access. This is the
+preferred option to offer secure downloads via QFQ.
 
 In case the download needs a persistant URL (no SIP, no user session), a regular
 link, pointing directly to a file, have to be used - the download functionality described here is not appropriate for
@@ -6065,21 +6135,20 @@ Parameter and (element) sources
 
   * *exportFilename* = <filename for save as> - Name, offered in the 'File save as' browser dialog. Default: 'output.<ext>'.
 
-    If there is no `exportFilename` defined, then the original filename is taken.
+    If there is no `exportFilename` defined, then the original filename is taken (if there is one, else: output...).
 
-    The user typically expects meaningful and distinct filenames for different download links.
+    The user typically expects meaningful and distinct file names for different download links.
 
 * *popupMessage*: `a:<text>` - will be displayed in the popup window during download. If the creating/download is fast, the window might disappear quickly.
 
 * *mode*: `M:<mode>`
 
-  * *mode* = <file | pdf | zip> - This parameter is optional and can be skipped in most situations. Mandatory
-    for 'zip'.
+  * *mode* = <file | pdf | zip | excel>
 
       * If `M:file`, the mime type is derived dynamically from the specified file. In this mode, only one element source
         is allowed per download link (no concatenation).
 
-      * In case of multiple element sources, only `pdf` or `zip` is supported.
+      * In case of multiple element sources, only `pdf`, `zip` and `excel` (template mode) is supported.
       * If `M:zip` is used together with `p:...`, `U:...` or `u:..`, those HTML pages will be converted to PDF. Those files
         get generic filenames inside the archive.
       * If not specified, the **default** 'Mode' depends on the number of specified element sources (=file or web page):
@@ -6087,7 +6156,8 @@ Parameter and (element) sources
         * If only one `file` is specifed, the default is `file`.
         * If there is a) a page defined or b) multiple elements, the default is `pdf`.
 
-* *element sources* - for `M:pdf` or `M:zip`, all of the following three element sources might be specified multiple times. Any combination and order of the three options are allowed.
+* *element sources* - for `M:pdf` or `M:zip`, all of the following three element sources might be specified multiple times.
+    Any combination and order of the three options are allowed.
 
   * *file*: `F:<pathFileName>` - relative or absolute pathFileName offered for a) download (single), or to be concatenated
     in a PDF or ZIP.
@@ -6114,6 +6184,7 @@ Parameter and (element) sources
       Check `wkhtmltopdf.txt <https://wkhtmltopdf.org/usage/wkhtmltopdf.txt>`_ for possible options. Be aware that
       key/value tuple in the  documentation is separated by a space, but to respect the QFQ key/value notation of URLs,
       the key/value tuple in `p:...`, `u:...` or `U:...` has to be separated by '='. Please see last example below.
+    * If an option contains an '&' it must be escaped with double '\\'. See example.
 
 	Most of the other Link-Class attributes can be used to customize the link as well.
 
@@ -6136,6 +6207,9 @@ Example `_link`: ::
 
 	# three sources: two pages and one file, the second page will be in landscape and pagesize A3
 	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1&--orientation=Landscape&--page-size=A3|F:fileadmin/pdf/test.pdf" AS _link
+
+	# One source and a header file. Note: the parameter to the header URL is escaped with double backslash.
+	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail2&r=1&--orientation=Landscape&--header={{URL:R}}?indexp.php?id=head\\&L=1|F:fileadmin/pdf/test.pdf" AS _link
 
 ..
 
@@ -6160,6 +6234,8 @@ Example `_pdf`, `_zip`: ::
 
 Use the `--print-media-type` as wkhtml option to access the page with media type 'printer'. Depending on the website
 configuration this switches off navigation and background images.
+
+
 
 Rendering PDF letters
 ^^^^^^^^^^^^^^^^^^^^^
@@ -6270,38 +6346,160 @@ is allowed to access: ::
       page.10.value = Please access from localhost or log in as 'admin' user.
    [global]
 
+.. _excel-export:
+
+Excel export
+^^^^^^^^^^^^
+
+'On the fly'-creation of an excel file. The file is build in the moment when the user clicks on the download button.
+
+Mode:
+
+* `New`: The export file will be completely build from scratch.
+* `Template`: The export file is based on an earlier uploaded xlsx file (template). The template itself is unchanged.
+
+Injecting the data is done in the same way in both modes.
+
+If the export file has to be customized (colors, pictures, headlines, ...), the `Template` mode is the preferred option.
+IT's much easier to do all cusomizations via Excel and creating a template than by coding in QFQ / Excel export notation.
+
+Setup
+'''''
+
+* Create a special column name `_excel` (or `_link`) in QFQ/Report. As a source, define a T3 page, which have to deliver
+  the dynamic content (also: `excel-export-sample_`). ::
+
+    SELECT CONCAT('d:final.xlsx|M:excel|s:1|t:Excel (new)|p:?id=exceldata') AS _link
+
+* Create a T3 page which delivers the content.
+
+  * Disable all HTML header and wrapping code on that page. It's also a good idea to limit access to such page on localhost,
+    your development network and your webserver address. Typoscript setup: ::
+
+        config.disableAllHeaderCode = 1
+        tt_content.stdWrap >
+        page >
+        page = PAGE
+
+        [usergroup = *] || [IP = 127.0.0.1,192.168.1.*,<webserver IP>]
+            page.10 < styles.content.get
+        [else]
+            page.10 = TEXT
+            page.10.value = access forbidden
+        [global]
+
+  * Use the regular QFQ Report syntax to create some output.
+  * The newline at the end of every line needs to be CHAR(10). To make it simpler, the special column name `... AS _XLS`
+    (see _XLS, _XLSs, _XLSb, _XLSn) can be used.
+  * One option per line.
+  * Empty lines will be skipped.
+  * Lines starting with '#' will be skipped (comments). Inline comment signs are NOT recognized as comment sign.
+  * Separate <keyword> and <value> by '='.
+
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+| Keyword     | Example              | Description                                                                                       |
++=============+======================+===================================================================================================+
+| 'worksheet' | worksheet=main       | Select a worksheet in case the excel file has multiple of them.                                   |
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+| 'mode'      | mode=insert          | Values: insert,overwrite.                                                                         |
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+| 'position'  | position=A1          | Default is 'A1'. Use the excel notation.                                                          |
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+| 'newline'   | newline              | Start a new row. The column will be the one of the last 'position' statement.                     |
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+| 'str', 's'  | s=hello world        | Set the given string on the given position. The current position will be shift one to the right.  |
+|             |                      | If the string contains newlines, option'b' (base64) should be used.                               |
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+| 'b'         | b=aGVsbG8gd29ybGQK   | Same as 's', but the given string has to Base64 encoded and will be decoded before export.        |
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+| 'n'         | n=123                | Set number on the given position. The current position will be shift one to the right.            |
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+| 'f'         | f==SUM(A5:C6)        | Set a formular on the given position. The current position will be shift one to the right.        |
++-------------+----------------------+---------------------------------------------------------------------------------------------------+
+
+Create a output like this: ::
+
+    position=D11
+    s=Hello
+    s=World
+    s=First Line
+    newline
+    s=Second line
+    n=123
+
+This fills D11, E11, F11, D12
+
+In Report Syntax: ::
+
+    # With ... AS _XLS (token explicit given)
+    10.sql = SELECT 'position=D10' AS _XLS,
+                    's=Hello' AS _XLS,
+                    's=World' AS _XLS,
+                    's=First Line' AS _XLS,
+                    'newline' AS _XLS,
+                    's=Second line' AS _XLS,
+                    'n=123' AS _XLS,
+
+    # With ... AS _XLSs (token generated internally)
+    20.sql = SELECT 'position=D20' AS _XLS,
+                    'Hello' AS _XLSs,
+                    'World' AS _XLSs,
+                    'First Line' AS _XLSs,
+                    'newline' AS _XLS,
+                    'Second line' AS _XLSs,
+                    'n=123' AS _XLS,
+
+    # With ... AS _XLSb (token generated internally and content is base64 encoded)
+    30.sql = SELECT 'position=D30' AS _XLS,
+                     '<some content with special characters like newline/carriage return>' AS _XLSb
+
+.. _excel-export-sample:
+
+Excel export samples: ::
+
+    # From scratch (both are the same, one with '_excel' the other with '_link')
+    SELECT CONCAT('d:new.xlsx|t:Excel (new)|p:?id=exceldata') AS _excel
+    SELECT CONCAT('d:new.xlsx|t:Excel (new)|p:?id=exceldata|M:excel|s:1') AS _link
+
+    # Template
+    SELECT CONCAT('d:final.xlsx|t:Excel (template)|F:fileadmin/template.xlsx|p:?id=exceldata') AS _excel
+
+    # With parameter (via SIP) - get the Parameter on page 'exceldata' with '{{arg1:S}}' and '{{arg2:S}}'
+    SELECT CONCAT('d:final.xlsx|t:Excel (parameter)|p:?id=exceldata&_sip=1&arg1=hello&arg2=world') AS _excel
+
+
 .. _drag_and_drop:
 
 Drag and drop
 -------------
 
-Sort/order elements
-^^^^^^^^^^^^^^^^^^^
+Order elements
+^^^^^^^^^^^^^^
 
-Manually sorting and ordering of elements via `HTML5 drag and drop` is supported via QFQ. Any element to sort
+Ordering of elements via `HTML5 drag and drop` is supported via QFQ. Any element to order
 should be represented by a database record with an order column. If the elements are unordered, they will be ordered after
 the first 'drag and drop' move of an element.
 
-Functionality is divided into:
+Functionality divides into:
 
-* Display list: the records will be displayed via QFQ/report.
-* Sort records: updates of the order column are managed by a specific definition form. The form is not a regular form
+* Display: the records will be displayed via QFQ/report.
+* Order records: updates of the order column are managed by a specific definition form. The form is not a regular form
   (e.g. there are no FormElements), instead it's only a container to held the SQL update query as well as providing
   access control via SIP. The form is automatically called via AJAX.
 
 Part 1: Display list
 ''''''''''''''''''''
 
-Display the list of elements via a regular QFQ content record. All 'drag and drop' elements have to be nested by an HTML
-element:
+Display the list of elements via a regular QFQ content record. All 'drag and drop' elements together have to be nested by a HTML
+element. Such HTML element:
 
 * With `class="qfq-dnd-sort"`.
-* With a form name: `{{'form=<form name>' AS _data-dnd-api}}`
-* Only direct children of such element can be dragged.
+* With a form name: `{{'form=<form name>' AS _data-dnd-api}}` (will be replaced by QFQ)
+* Only *direct* children of such element can be dragged.
 * Every children needs a unique identifier `data-dnd-id="<unique>"`. Typically this is the corresponding record id.
 * The record needs a dedicated order column, which will be updated through API calls in time.
 
-A `<div>` example HTML output: ::
+A `<div>` example HTML output (HTML send to the browser): ::
 
     <div class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/qfq/api/dragAndDrop.php?s=badcaffee1234">
         <div class="anyClass" id="<uniq1>" data-dnd-id="55">
@@ -6324,13 +6522,13 @@ A typical QFQ report which generates those `<div>` HTML: ::
                    WHERE grId=28
                    ORDER BY n.ord
 
-      head = <div class="qfq-dnd-sort" data-dnd-api="{{'form=dndSortNote&grId=28|A:dnd-sort' AS _api}}">
+      head = <div class="qfq-dnd-sort" {{'form=dndSortNote&grId=28|A:dnd-sort' AS _data-dnd-api}}">
       tail = </div>
     }
 
 
 A `<table>` based setup is also possible. Note the attribute  `data-columns="3"` - those generates a dropzone
-which the same width as the outer table. ::
+which the same column width as the outer table. ::
 
     <table>
         <tbody class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/qfq/api/dragAndDrop.php?s=badcaffee1234" data-columns="3">
@@ -6358,10 +6556,32 @@ A typical QFQ report which generates those HTML: ::
       tail = </tbody><table>
     }
 
-Part 2: Sort records
-''''''''''''''''''''
+Show / update order value in the browser
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-A dedicated `Form`, without any `FormElements`, is used to define the database update definition.
+The 'drag and drop' action does not trigger a reload of the page. In case the order number is shown and the user does
+a 'drag and drop', the order number shows the old. To update the dragable elements with the latest order number, a
+predefined html id has to be assigned them. After an update, all changed order number (referenced by the html id) will
+be updated via AJAX.
+
+The html id per element is defined by `qfq-dnd-ord-id-<id>` where `<id>` is the record id. Same example as above, but
+with an updated `n.ord` column: ::
+
+    10 {
+      sql = SELECT '<tr id="anytag-', n.id,'" data-dnd-id="', n.id,'" data-columns="3">' , n.id AS '_+td', n.note AS '_+td',
+                   '<td id="qfq-dnd-ord-id-', n.id, '">', n.ord, '</td></tr>'
+                   FROM Note AS n
+                   WHERE grId=28
+                   ORDER BY n.ord
+
+      head = <table><tbody class="qfq-dnd-sort" {{'form=dndSortNote&grId=28' AS _data-dnd-api}} data-columns="3">
+      tail = </tbody><table>
+    }
+
+Part 2: Order records
+'''''''''''''''''''''
+
+A dedicated `Form`, without any `FormElements`, is used to define the reorder logic (database update definition).
 
 Fields:
 
@@ -6378,7 +6598,7 @@ Fields:
 | orderColumn = <column name>         | Optional. By default 'ord'.                                                    |
 +-------------------------------------+--------------------------------------------------------------------------------+
 | dragAndDropOrderSql =                                 | Query to selects the *same* records as the report in the     |
-| {{!SELECT n.id AS id, n.ord AS ord FROM Note AS n     | same *order!* Inconsistencies results in sort differences.   |
+| {{!SELECT n.id AS id, n.ord AS ord FROM Note AS n     | same *order!* Inconsistencies results in order differences.  |
 | ORDER BY n.ord}}                                      | The columns `id` and `ord` are *mandatory.*                  |
 +-------------------------------------------------------+--------------------------------------------------------------+
 
@@ -6390,6 +6610,8 @@ The form related to the example of part 1 ('div' or 'table'): ::
   Form.parameter: orderColumn = ord
   Form.parameter: dragAndDropOrderSql = {{!SELECT n.id AS id, n.ord AS ord FROM Note AS n WHERE n.grId={{grId:S0}} ORDER BY n.ord}}
 
+Re-Order:
+
 QFQ iterates over the result set of `dragAndDropOrderSql`. The value of column `id` have to correspond to the dragged HTML
  element (given by `data-dnd-id`). Reordering always start with `orderInterval` and is incremented by `orderInterval` with each
  record of the result set. The client reports a) the id of the dragged HTML element, b) the id of the hovered element and
@@ -6397,7 +6619,7 @@ QFQ iterates over the result set of `dragAndDropOrderSql`. The value of column `
  changes are applied where appropriate.
 
  Take care that the query of part 1 (display list) does a) select the same records and b) in the same order as the query
- defined in part 2 (sort records) via `dragAndDropOrderSql`.
+ defined in part 2 (order records) via `dragAndDropOrderSql`.
 
  If you find that the reorder does not work at expected, those two sql queries are not identically.
 
@@ -6841,7 +7063,7 @@ Usage
 ^^^^^
 
 The system `cron` service will call the `QFQ AutoCron` every minute. `QFQ AutoCron` checks if there is a pending job, by looking
-for jobs with `nextRun`<=NOW(). All found jobs will be fired - depending on their type, such jobs will send mail(s) or
+for jobs with `nextRun` <= `NOW()`. All found jobs will be fired - depending on their type, such jobs will send mail(s) or
 open a `webpage`. A `webpage` will mostly be a local T3 page with at least one QFQ record on it. Such a QFQ record might
 do some manipulation on the database or any other task.
 
@@ -6952,6 +7174,11 @@ Tips:
 QFQ specific
 ------------
 
+A variable {{<var>}} is empty
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The sanitize rule is violeted and therefore the value has been removed. Set {{<var>:<store>:all}} as a test.
+
 Page is white: no HTML code at all
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -6960,7 +7187,7 @@ This should not happen.
 The PHP process stopped at all. Check the Apache error logfile, look for a stacktrace to find the latest function. Send
 a bug report.
 
-Problem with Query or variables
+Problem with query or variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Specify the required sanitize class. Remember: for STORE_FORM and STORE_CLIENT the default is sanitize class is `digit`.
@@ -7021,7 +7248,7 @@ Search the given code in `typo3temp/logs/*`, in this example 20180612205917761fc
 a more detailed message.
 
 The error might occur if there are problematic characters in config.qfq.php, like single or double ticks inside strings,
- wich are not enclosed (correctly).
+wich are not enclosed (correctly).
 
 .. _`sendEmailProblem`:
 
