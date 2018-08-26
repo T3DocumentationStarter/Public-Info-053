@@ -22,8 +22,8 @@
 Release
 =======
 
-Version 0.future
-----------------
+Version 18.x.x
+--------------
 
 Date: <date>
 
@@ -33,10 +33,35 @@ Notes
 Features
 ^^^^^^^^
 
+Bug Fixes
+^^^^^^^^^
+
+
+Version 18.08.1
+---------------
+
+Date: 26.08.2018
+
+Features
+^^^^^^^^
+* #4432 / Every 'form submit' will be logged with raw data.
+* #4763 / Render vertical text more stable: '... AS _vertical'
+* #4996 / Log QFQ Version update
+* #5403 / Tooltip on pills are now supported
+* #5876 / Subrecord title of column 'Edit' & 'Delete' are now customizable.
+* #6249 / Subrecords can now be reordered via drag and drop.
+* #6333 / Add to qfq.log: IP Address, User Agent, QFQ Cookie, FE User
+
+Bug Fixes
+^^^^^^^^^
+
+* #6401 / Handle Backticks in sendmail
+* #6452 / Empty form title: no title row will be rendered anymore.
+
 Version 18.8.0
 --------------
 
-Date: 26.08.2018
+Date: 25.08.2018
 
 Notes
 ^^^^^
@@ -50,6 +75,7 @@ Features
 * #4922 / Excel Export - create Excel sheets from scratch or based on a template.
 * #3294 / Improve Typo3 QFQ backend layout. Add sparql syntax highlighting.
 * #5878 / Formelement.type=note with #!report - whitespace is trimmed.
+* #6314 / HTML Mails enabled by specifying flag 'mode=html'.
 * Import/Merge form: A new form 'copyFormFromExt' (see file `copyFormFromExt.sql`) offers a one click import of external
   QFQ forms (incl. renumbering of id's).
 * formEditor.sql: resized Form.title from 255 to 511 (requested by IK Tool)
@@ -57,9 +83,6 @@ Features
 * Manual.rst: security hints, T3 Setup best practice, text input retype, charactercountwrap.
 * Config.qfq: central defaults for DATA_MATCH, DATA_ERROR
 * Bootstrap QFQ development: switched from bower to npm only.
-
-
-    F6314: HTML Mails enabled by specifying flag 'mode=html'.
 
 Bug Fixes
 ^^^^^^^^^

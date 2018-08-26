@@ -328,6 +328,10 @@ Extension Manager: QFQ Configuration
 | sqlLog                        | fileadmin/protected/log/sql.log                       | Filename to log SQL commands: relative to <site path> or absolute. If the  |
 |                               |                                                       | directory does not exist, create it.                                       |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formSubmitLogMode             | all                                                   | *all*: every form submission will be logged.                               |
+|                               |                                                       | *none*: no logging.                                                        |
+|                               |                                                       | See `Form Submit Log page`_ for example qfq code to display the log.       |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | mailLog                       | fileadmin/protected/log/mail.log                      | Filename to log `sendEmail` commands: relative to <site path> or absolute. |
 |                               |                                                       | If the directory does not exist, create it.                                |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -735,25 +739,29 @@ version, the system tables will be automatically installed or updated.
 System tables
 ^^^^^^^^^^^^^
 
-+-------------+------------+------------+
-| Name        | Use        | Database   |
-+=============+============+============+
-| Clipboard   | Temporary  | QFQ        |
-+-------------+------------+------------+
-| Cron        | Persistent | QFQ        |
-+-------------+------------+------------+
-| Dirty       | Temporary  | QFQ | Data |
-+-------------+------------+------------+
-| Form        | Persistent | QFQ        |
-+-------------+------------+------------+
-| FormElement | Persistent | QFQ        |
-+-------------+------------+------------+
-| MailLog     | Persistent | QFQ | Data |
-+-------------+------------+------------+
-| Period      | Persistent | Data       |
-+-------------+------------+------------+
-| Split       | Persistent | Data       |
-+-------------+------------+------------+
++---------------+------------+------------+
+| Name          | Use        | Database   |
++===============+============+============+
+| Clipboard     | Temporary  | QFQ        |
++---------------+------------+------------+
+| Cron          | Persistent | QFQ        |
++---------------+------------+------------+
+| Dirty         | Temporary  | QFQ | Data |
++---------------+------------+------------+
+| Form          | Persistent | QFQ        |
++---------------+------------+------------+
+| FormElement   | Persistent | QFQ        |
++---------------+------------+------------+
+| FormSubmitLog | Persistent | QFQ | Data |
++---------------+------------+------------+
+| MailLog       | Persistent | QFQ | Data |
++---------------+------------+------------+
+| Period        | Persistent | Data       |
++---------------+------------+------------+
+| Split         | Persistent | Data       |
++---------------+------------+------------+
+
+See `Mail Log page`_ and `Form Submit Log page`_ for some Frontend views for these tables.
 
 * Check Bug #5459 - support of system tables in different DBs not supported.
 
@@ -919,6 +927,109 @@ configuration_
     * Replace the 'To' with the configured one.
     * Clear 'CC' and 'Bcc'
     * Write a note and the original configured receiver at the top of the email body.
+
+_`Mail Log page`
+
+Mail Log page
+-------------
+
+For debugging purposes you may like to add a Mail Log page in the frontend.
+The following QFQ code could be used for that purpose (put it in a QFQ PageContent element): ::
+
+    # Page parameters
+    1.sql = SELECT @grId := '{{grId:C0:digit}}' AS _grId
+    2.sql = SELECT @summary := IF('{{summary:CE:alnumx}}' = 'true', 'true', 'false') AS _s
+
+    # Filters
+    10 {
+      sql = SELECT gr.id, IF(gr.id = @grId, "' selected>", "'>"), gr.value, ' (Id: ', gr.id, ')'
+               FROM gGroup AS gr
+               INNER JOIN MailLog AS ml ON ml.grId = gr.id
+               GROUP BY gr.id
+      head = <form onchange='this.submit();' class='form-inline'><input type='hidden' name='id' value='{{pageId:T0}}'>Filter By Group: <select name='grId' class='form-control'><option value=''></option>
+      rbeg = <option value='
+      rend = </option>
+      tail = </select>
+    }
+    20 {
+      sql = SELECT IF(@summary = 'true', ' checked', '')
+      head = <div class='checkbox'><label><input type='checkbox' name='summary' value='true'
+      tail = >Summary</label></div></form>
+    }
+
+    # Mail Log
+    50 {
+      sql = SELECT id, '</td><td>', grId, '</td><td>', xId, '</td><td>',
+                REPLACE(receiver, ',', '<br>'), '</td><td>', REPLACE(sender, ',', '<br>'), '</td><td>',
+                DATE_FORMAT(modified, '%d.%m.%Y<br>%H:%i:%s'), '</td><td style="word-break:break-word;">',
+                CONCAT('<b>', subject, '</b><br>', IF(@summary = 'true', CONCAT(SUBSTR(body, 1, LEAST(IF(INSTR(body, '\n') = 0, 50, INSTR(body, '\n')), IF(INSTR(body, '<br>') = 0, 50, INSTR(body, '<br>')))-1), ' ...'), CONCAT('<br>', REPLACE(body, '\n', '<br>'))) )
+              FROM MailLog WHERE (grId = @grId OR @grId = 0)
+              ORDER BY modified DESC
+              LIMIT 100
+      head = <table class="table table-condensed table-hover"><tr><th>Id</th><th>grId</th><th>xId</th><th>To</th><th>From</th><th>Date</th><th>E-Mail</th></tr>
+      tail = </table>
+      rbeg = <tr><td>
+      rend = </td></tr>
+    }
+
+_`Form Submit Log page`
+
+Form Submit Log page
+--------------------
+
+For debugging purposes you may like to add a Form Submit Log page in the frontend.
+The following QFQ code could be used for that purpose (put it in a QFQ PageContent element): ::
+
+    # Filters
+    20.shead = <form onchange='this.submit()' class='form-inline'><input type='hidden' name='id' value='{{pageId:T0}}'>
+    20 {
+      sql = SELECT id, IF(id = '{{formId:SC0}}', "' selected>", "'>"), name
+            FROM Form ORDER BY name
+      head = <label for='formId'>Form:</label> <select name='formId' id='formId' class='form-control'><option value=0></option>
+      tail = </select>
+      rbeg = <option value='
+      rend = </option>
+    }
+    30 {
+      sql = SELECT feUser, IF(feUser = '{{feUser:SCE:alnumx}}', "' selected>", "'>"), feUser
+            FROM FormSubmitLog GROUP BY feUser ORDER BY feUser
+      head = <label for='feUser'>FE User:</label> <select name='feUser' id='feUser' class='form-control'><option value=''></option>
+      tail = </select>
+      rbeg = <option value='
+      rend = </option>
+    }
+    30.stail = </form>
+
+    # Show Log
+    50 {
+      sql = SELECT l.id,
+          CONCAT('<b>Form</b>: ', f.name,
+            '<br><b>Record Id</b>: ', l.recordId,
+            '<br><b>Fe User</b>: ', l.feUser,
+            '<br><b>Date</b>: ', l.created,
+            '<br><b>Page Id</b>: ', l.pageId,
+            '<br><b>Session Id</b>: ', l.sessionId,
+            '<br><b>IP Address</b>: ', l.clientIp,
+            '<br><b>User Agent</b>: ', l.userAgent,
+            '<br><b>SIP Data</b>: <div style="margin-left:20px;">', "<script>var data = JSON.parse('", l.sipData,
+              "'); for (var key in data) {
+              document.write('<b>' + key + '</b>: ' + data[key] + '<br>'); }</script>", '</div>'),
+          CONCAT("<script>var data = JSON.parse('", l.formData,
+            "'); for (var key in data) {
+              document.write('<b>' + key + '</b>: ' + data[key] + '<br>'); }</script>")
+          FROM FormSubmitLog AS l
+          LEFT JOIN Form AS f ON f.id = l.formId
+          WHERE (l.formId = '{{formId:SC0}}' OR '{{formId:SC0}}' = 0)
+            AND (l.feUser = '{{feUser:SCE:alnumx}}' OR '{{feUser:SCE:alnumx}}' = '')
+          ORDER BY l.created DESC LIMIT 100
+      head = <table class="table table-hover">
+             <tr><th>Id</th><th style="min-width:250px;">Environment</th><th>Submitted Data</th>
+      tail = </table>
+      rbeg = <tr>
+      renr = </tr>
+      fbeg = <td>
+      fend = </td>
+    }
 
 .. _variables:
 
@@ -2202,6 +2313,8 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | showIdInFormTitle           | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| formSubmitLogMode           | string | Overwrite default from configuration_                                                                    |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 * Example:
 
@@ -2382,6 +2495,7 @@ Type: pill (tab)
   * *modeSql*:
   * *type*: *pill*
   * *feIdContainer*: `0`  - Pill's can't be nested.
+  * *tooltip*: Optional tooltip on hover. Especially helpful if the pill is set to *readonly*.
   * *parameter*:
 
     * *maxVisiblePill*: `<nr>` - Number of Pill-Buttons shown. Undefined means unlimited. Excess Pill buttons will be
@@ -2975,7 +3089,7 @@ Type: text
     * *retypeLabel* = <text> (optional): The label of the second element.
     * *retypeNote* = <text> (optional): The note of the second element.
 
-  * *characterCountWrap* = <span class="qfq-cc-style">Count: |</span> (optional).
+  * *characterCountWrap* = <span class="qfq-cc-style">Count: | </span> (optional).
     Displays a character counter below the input/textarea element.
   * Also check the  fe-parameter-attributes_ *data-...-error* to customize error messages shown by the validator.
   * *hideZero* = 0|1 (optional): `with hideZero=1` a '0' in the value will be replaced by an empty string.
@@ -3300,6 +3414,33 @@ will be rendered inside the form as a HTML table.
       statements) might be used.
 
   * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-table-100'. If given, the default will be overwritten.
+  * *subrecordColumnTitleEdit*: Optional. Will be rendered as the column title for the new/edit column.
+  * *subrecordColumnTitleDelete*: Optional. Will be rendered as the column title for the delete column.
+
+**Subrecord DragAndDrop**
+
+Subrecords inherently support drag-and-drop, see also `drag_and_drop`_.
+The following parameters can be used in the `parameter` field to customize/activate drag-and-drop:
+
+* *orderInterval*: The order interval to be used, default is 10.
+* *dndTable*: The table that contains the records to be ordered.
+  If not given, the table name of the form specified via `form=...` is used.
+* *orderColumn*: The dedicated order column in the specified dndTable (needs to match a column in the table definition).
+  Default is `ord`.
+
+If `dndTable` is an actual table with a column `orderColumn`, QFQ automatically applies drag-and-drop logic
+to the rendered subrecord. It does so by using the subrecord field *sql1*. The `sql1` query should
+therefore include both a column id (or _id) and ord (or _ord).
+
+Tips:
+
+* If you want to deactivate a drag-and-drop that QFQ automatically renders, set the `orderColumn` to a non-existing column.
+  E.g., `orderColumn = nonExistingColumn`. This will deactivate drag-and-drop.
+* In order to evaluate the `sql1` query dynamically during a drag-and-drop event, the fill store R (with the current form)
+  is loaded. Currently, SIP parameters and other variables are not supplied to be evaluated during a drag-and-drop event.
+  This may be added later upon request.
+* If the subrecord is rendered with drag-and-drop active, but the order is not affected upon reload, there is
+  most likely a problem with evaluating the `sql1` query at runtime.
 
 Type: time
 ^^^^^^^^^^
@@ -3796,7 +3937,7 @@ Parameter
 * FormElement.type = subrecord
 
   Subrecord's will automatically create `new`, `edit` and `delete` links. To inject parameter in those automatically created
-  links, use `FormElement.parameter.detail` . See `subrecord-option`.
+  links, use `FormElement.parameter.detail` . See subrecord-option_.
 
 
 * FormElement.type = extra
@@ -4704,7 +4845,7 @@ Table: Person
        slaveId={{id:R0}}
        sqlUpdate={{ UPDATE Person AS p SET p.name='{{cn:L:alnumx:s}}' WHERE p.id={{slaveId}} LIMIT 1 }}
 
-.. _import-merge-form
+.. _`import-merge-form`:
 
 Import/merge form
 -----------------
@@ -4722,10 +4863,10 @@ Installation:
 
 * Play (do all sql statements on your QFQ database, e.g. via `mysql <dbname> < copyFormFromExt.sql` or `phpMyAdmin`) the
   file  *<ext_dir>/qfq/sql/copyFormFromExt.sql*.
-* Insert a link/button 'Copy form from ExtForm' to open the import/merge form. A good place is the list of all forms
-(see `form-editor`_). E.g.: ::
+* Insert a link/button 'Copy form from ExtForm' to open the import/merge form. A good place is the list of all forms (see `form-editor`_).
+  E.g.: ::
 
-  10.head = {{'b|p:id={{pageAlias:T}}&form=copyFormFromExt|t:Copy form from ExtForm' AS _link }} ...
+    10.head = {{'b|p:id={{pageAlias:T}}&form=copyFormFromExt|t:Copy form from ExtForm' AS _link }} ...
 
 If there are several T3/QFQ instances and if forms should be imported frequently/easily, set up a one shot
 'import Forms from db xyz' like: ::
@@ -5531,14 +5672,14 @@ Column: _Paged
 Column: _vertical
 ^^^^^^^^^^^^^^^^^
 
-Render text vertically. This is useful for tables with limited column width. The vertical rendering is achieved via CSS tranformations (rotation) defined in the style attribute of the wrapping tag. You can optionally specify the rotation
-angle.
+Render text vertically. This is useful for tables with limited column width. The vertical rendering is achieved via CSS tranformations
+(rotation) defined in the style attribute of the wrapping tag. You can optionally specify the rotation angle.
 
 **Syntax**
 
 ::
 
-    10.sql = SELECT "<text>|[<angle>]|[<width>]|[<height>]|[<wrap tag>]" AS _vertical
+    10.sql = SELECT "<text>|[<angle>]" AS _vertical
 
 ..
 
@@ -5549,13 +5690,9 @@ angle.
 +-------------+-------------------------------------------------------------------------------------------------------+-----------------+
 |<angle>      |How many degrees should the text be rotated? The angle is measured clockwise from baseline of the text.|*270*            |
 +-------------+-------------------------------------------------------------------------------------------------------+-----------------+
-|<width>      |Width (of what?). Needs to have a CSS_unit (e.g. px, em) specified. (Implemented?)                     |*1em*            |
-+-------------+-------------------------------------------------------------------------------------------------------+-----------------+
-|<height>     |Height (of what?). Needs to have a CSS-unit (e.g. px, em) specified. (Implemented?)                    |none             |
-+-------------+-------------------------------------------------------------------------------------------------------+-----------------+
-|<wraptag>    |What tag should be used to wrap the vertical text? Possible options are *div*, *span*, etc.            |*div*            |
-+-------------+-------------------------------------------------------------------------------------------------------+-----------------+
 
+The text is surrounded by some HTML tags in an effort to make other elements position appropriately around it.
+This works best for angles close to 270 or 90.
 
 **Minimal Example**
 
@@ -5563,18 +5700,8 @@ angle.
 
 
     10.sql = SELECT "Hallo" AS _vertical
-
-..
-
-
-
-**Advanced Examples**
-
-::
-
-
-    10.sql = SELECT "Hallo|90" AS _vertical
-    20.sql = SELECT "Hallo|90|3em|7em|span" AS _vertical
+    20.sql = SELECT "Hallo|90" AS _vertical
+    20.sql = SELECT "Hallo|-75" AS _vertical
 
 ..
 
@@ -6522,13 +6649,13 @@ A typical QFQ report which generates those `<div>` HTML: ::
                    WHERE grId=28
                    ORDER BY n.ord
 
-      head = <div class="qfq-dnd-sort" {{'form=dndSortNote&grId=28|A:dnd-sort' AS _data-dnd-api}}">
+      head = <div class="qfq-dnd-sort" {{'form=dndSortNote&grId=28' AS _data-dnd-api}}">
       tail = </div>
     }
 
 
-A `<table>` based setup is also possible. Note the attribute  `data-columns="3"` - those generates a dropzone
-which the same column width as the outer table. ::
+A `<table>` based setup is also possible. Note the attribute  `data-columns="3"` - this generates a dropzone
+which is the same column width as the outer table. ::
 
     <table>
         <tbody class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/qfq/api/dragAndDrop.php?s=badcaffee1234" data-columns="3">
@@ -6544,7 +6671,7 @@ which the same column width as the outer table. ::
         </tbody>
     </table>
 
-A typical QFQ report which generates those HTML: ::
+A typical QFQ report which generates this HTML: ::
 
     10 {
       sql = SELECT '<tr id="anytag-', n.id,'" data-dnd-id="', n.id,'" data-columns="3">' , n.id AS '_+td', n.note AS '_+td', n.ord AS '_+td', '</tr>'
@@ -6621,7 +6748,7 @@ QFQ iterates over the result set of `dragAndDropOrderSql`. The value of column `
  Take care that the query of part 1 (display list) does a) select the same records and b) in the same order as the query
  defined in part 2 (order records) via `dragAndDropOrderSql`.
 
- If you find that the reorder does not work at expected, those two sql queries are not identically.
+ If you find that the reorder does not work at expected, those two sql queries are not identical.
 
 QFQ CSS Classes
 ---------------
