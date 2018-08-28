@@ -1375,9 +1375,9 @@ Client Parameter via SIP
 ------------------------
 
 Links with URL parameters, targeting to the local website, are typically SIP encoded. Instead of transferring the parameter
-as part of the URL, only one uniqe GET parameter 's' is appended at the link. The parameter 's' is uniq (equal to a
+as part of the URL, only one unique GET parameter 's' is appended at the link. The parameter 's' is unique (equal to a
 timestamp) for the user. Assigned variables are stored as a part of the PHP user session on the server.
-Two users might have the same value of parameter 's', but the content is completely independet.
+Two users might have the same value of parameter 's', but the content is completely independent.
 
 Variables needed by Typo3 remains on the link and are not 'sip-encoded'.
 
@@ -2737,10 +2737,12 @@ See also at specific *FormElement* definitions.
 | unchecked              | string |                                                                                                          |
 | label2                 | string |                                                                                                          |
 | itemList               | string |                                                                                                          |
-| emptyHide              | string |                                                                                                          |
-| emptyItemAtStart       | string |                                                                                                          |
-| emptyItemAtEnd         | string |                                                                                                          |
+| emptyHide              | -      |                                                                                                          |
+| emptyItemAtStart       | -      |                                                                                                          |
+| emptyItemAtEnd         | -      |                                                                                                          |
 | buttonClass            | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| acceptZeroAsRequired   | string | 0|1 - Accept a '0' as a valid input. Default '0' (=0 is not a valid input)                               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | dateFormat             | string | yyyy-mm-dd | dd.mm.yyyy                                                                                  |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -3970,7 +3972,7 @@ Multi Language Form
 QFQ Forms might be configured for up to 5 different languages. Per language there is one extra field in the *Form editor*.
 Which field represents which language is configured in configuration_.
 
-* The Typo3 installation needs to be configured to handle different languages - this is independet of QFQ and not covered
+* The Typo3 installation needs to be configured to handle different languages - this is independent of QFQ and not covered
   here. QFQ will use the Typo3 internal variable 'pageLanguage', which typically correlates to the URL parameter 'L' in the URL.
 * In configuration_ the Typo3 language index (value of 'L') and a language label have to be configured for each language.
   Only than, the additional language fields in the *Form editor* will be shown.
@@ -5324,7 +5326,7 @@ Column: _link
 
 * Most URLs will be rendered via class link.
 * Column names like `_pagee`, `_mailto`, ... are wrapper to class link.
-* The parameters for link contains a prefix to make them position-independet.
+* The parameters for link contains a prefix to make them position-independent.
 
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |URL|IMG|Meaning       |Qualifier                          |Example                    |Description                                                                                                                             |
@@ -5402,30 +5404,30 @@ Render mode
 
 The following table might be hard to read - but it's really useful to understand. It solves a lot of different situations.
 If there are no special condition (like missing value, or suppressed links), render mode 0 is sufficient.
-But if the URL text is missing, or the URL is missing, OR the link should be rendered in sql row 1-10, but not 5, than
+But if the URL text is missing, or the URL is missing, OR the link should be rendered in sql row 1-10, but not 5, then
 render mode might dynamically control the rendered link.
 
 * Column *Mode* is the render mode and controls how the link is rendered.
 
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
-|Mode        |Given: url & text    |Given: only url     | Given: only text |Description                                                            |
-+============+=====================+====================+==================+=======================================================================+
-|0 (default) |<a href=url>text</a> |<a href=url>url</a> |                  |text or image will be shown, only if there is a url, page or mailto    |
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
-|1           |<a href=url>text</a> |<a href=url>url</a> |text              |Text or image will be shown, independet of there is a url              |
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
-|2           |<a href=url>text</a> |                    |                  |no link if text is empty                                               |
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
-|3           |text                 |url                 |text              |no link, only text or image, incl. optional tooltip                    |
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
-|4           |url                  |url                 |text              |no link, show text, if text is empty, show url, incl. optional tooltip |
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
-|5           |                     |                    |                  |nothing at all                                                         |
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
-|6           | pure text           |                    |pure text         |no link, pure text                                                     |
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
-|7           | pure url            |pure url            |                  |no link, pure url                                                      |
-+------------+---------------------+--------------------+------------------+-----------------------------------------------------------------------+
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
+|Mode        |Given: url & text    |Given: only url     | Given: only text |Description                                                                |
++============+=====================+====================+==================+===========================================================================+
+|0 (default) |<a href=url>text</a> |<a href=url>url</a> |                  |text or image will be shown, only if there is a url, page or mailto        |
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
+|1           |<a href=url>text</a> |<a href=url>url</a> |text              |text or image will be shown, independently of whether there is a url or not|
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
+|2           |<a href=url>text</a> |                    |                  |no link if text is empty                                                   |
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
+|3           |text                 |url                 |text              |no link, only text or image, incl. optional tooltip                        |
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
+|4           |url                  |url                 |text              |no link, show text, if text is empty, show url, incl. optional tooltip     |
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
+|5           |                     |                    |                  |nothing at all                                                             |
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
+|6           | pure text           |                    |pure text         |no link, pure text                                                         |
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
+|7           | pure url            |pure url            |                  |no link, pure url                                                          |
++------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
 
 ::
 
@@ -7396,5 +7398,3 @@ Open the 'Webdeveloper Tools' (FF: F12, Chrome/Opera: Right mouse click > Inspec
 
 
 .. _`webserverErrorLog`:
-
-

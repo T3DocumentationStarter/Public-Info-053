@@ -37,7 +37,24 @@ Bug Fixes
 ^^^^^^^^^
 
 
-Version 18.08.1
+Version 18.8.2
+--------------
+
+Date: 28.8.18
+
+Features
+^^^^^^^^
+
+* F6563 / Accept 0 as required.
+
+Bug Fixes
+^^^^^^^^^
+
+* DatabaseUpdateData.php: add missed 'on the fly' update for Form.title, changed in FormEditor.sql in 18.8.1
+* 6562 / sendmail: redirect all mail - the sender is replaced too.
+* Manual.rst: several typos fixed
+
+Version 18.8.1
 ---------------
 
 Date: 26.08.2018
@@ -66,8 +83,8 @@ Date: 25.08.2018
 Notes
 ^^^^^
 
-* Excel Export
-* CopyCat
+* Excel export
+* Copy to clipboard
 
 Features
 ^^^^^^^^
