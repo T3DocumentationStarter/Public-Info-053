@@ -472,6 +472,9 @@ config.qfq.php
 | LDAP_1_RDN                    | LDAP_1_RDN='ou=Admin,ou=example,dc=com'               | Credentials for non-anonymous LDAP access. At the moment only one set of   |
 | LDAP_1_PASSWORD               | LDAP_1_PASSWORD=mySecurePassword                      |                                                                            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| T3_DB_NAME                    | T3_DB_NAME=specialt3dbname                            | Only necessary for inline report editing if the t3 database is not         |
+|                               |                                                       | anologous to the Data db name (but ending in _t3) - see `inline-report`_.  |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 
 
 
@@ -503,11 +506,11 @@ Example: *typo3conf/config.qfq.php*: ::
 
 After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
 
-+----------------+-----------------------------------------------------------------------------------+
-| _dbNameData    | Can be used to dynamically access the current selected database: {{dbNameData:Y}} |
-+----------------+-----------------------------------------------------------------------------------+
-| _dbNameQfq     | Can be used to dynamically access the current selected database: {{dbNameQfq:Y}}  |
-+----------------+-----------------------------------------------------------------------------------+
++----------------+------------------------------------------------------------------------------------+
+| _dbNameData    | Can be used to dynamically access the current selected database: {{_dbNameData:Y}} |
++----------------+------------------------------------------------------------------------------------+
+| _dbNameQfq     | Can be used to dynamically access the current selected database: {{_dbNameQfq:Y}}  |
++----------------+------------------------------------------------------------------------------------+
 
 .. _`CustomVariables`:
 
@@ -4992,6 +4995,29 @@ The parsed bodytext could be displayed by activating 'showDebugInfo' (:ref:`debu
 A small symbol with a tooltip will be shown, where the content record will be displayed on the webpage.
 Note: :ref:`debug` information will only be shown with *showDebugInfo: yes* in configuration_.
 
+
+.. _`inline-report`:
+
+Inline Report editing
+---------------------
+
+For quick changes it can be bothersome to go to the TYPO3 backend to update the page content and reload the page.
+For this reason, QFQ offers an inline report editing feature whenever there is a TYPO3 BE user logged in. A small
+link symbol will appear on the right-hand side of each report record. Please note that the TYPO3 Frontend cache
+is also deleted upon each inline report save.
+
+In order for the inline report editing to work, QFQ needs to be able to access the T3 database. By default this database
+is assumed to be accessible with the same credentials as specified with indexData and is assumed to be named similarly to
+the indexData db name, but ending in _t3 instead of _db (e.g., mydb_db and mydb_t3).
+For a standard installation and db setup, this should be the case.
+
+You can however specify a custom T3 db name in config-qfq-php_:
+
+::
+
+    T3_DB_NAME = customT3DbName
+
+
 Structure
 ---------
 
@@ -5418,7 +5444,8 @@ render mode might dynamically control the rendered link.
 +------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
 |2           |<a href=url>text</a> |                    |                  |no link if text is empty                                                   |
 +------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
-|3           |text                 |url                 |text              |no link, only text or image, incl. optional tooltip                        |
+|3           |text                 |url                 |text              |no link, only text or image, incl. Optional tooltip. For Bootstrap buttons |
+|            |                     |                    |                  | r:3 will set the button to disable and no link/sip is rendered.           |
 +------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
 |4           |url                  |url                 |text              |no link, show text, if text is empty, show url, incl. optional tooltip     |
 +------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
@@ -5433,6 +5460,13 @@ render mode might dynamically control the rendered link.
 
     10.sql = SELECT CONCAT('u:', p.homepage, IF(p.showHomepage='yes', '|r:0', '|r:5') ) AS _link FROM Person AS p
 
+Tip:
+
+An easy way to switch between different options of rendering a link, incl. Bootstrap buttons, is to use the render mode.
+
+* no render mode or 'r:0' - the full functional link/button.
+* 'r:3' - the link/button is rendered with text/image/glyph/tooltip ... but without a HTML a-tag! For Bootstrap button, the button get the 'disabled' class.
+* 'r:5' - no link/button at all.
 
 Link Examples
 ^^^^^^^^^^^^^
@@ -6080,6 +6114,30 @@ A limited set of attributes is supported: ::
 		SELECT "complete.pdf|Download PDF|fileadmin/test1.pdf|fileadmin/test2.pdf|id=export&r=1" AS _Pdf
 
 
+.. _column-save-pdf:
+
+Column: _savePdf
+^^^^^^^^^^^^^^^^
+
+Generated PDFs can be stored directly on the server with this functionality. The link query consists of the following parameters:
+
+* One or more element sources (such as `F:`, `U:`, `p:`, see download-parameter-files_), including possible wkhtmltopdf parameters
+* The export filename and path as `d:` - for security reasons, this path has to start with *fileadmin/*
+
+Tips:
+
+* Please note that this option does not render anything in the front end, but is executed each time it is parsed.
+  You may want to add a check to prevent multiple execution.
+* It is not advised to generate the filename with user input for security reasons.
+* If the target file already exists it will be overwriten. To save individual files, choose a new filename,
+  for example by adding a timestamp.
+
+Examples: ::
+
+	SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf" AS _savePdf
+	SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf|U:id=test&--orientation=landscape" AS _savePdf
+
+
 .. _column-thumbnail:
 
 Column: _thumbnail
@@ -6245,7 +6303,7 @@ By using the `_link` column name:
 * setting `s:1` is mandatory for the download function,
 * the alttext `a:...` specifies a message in the download popup.
 
-By using `_pdf`,  `_Pdf`, `_file`, `_File`, `_zip`, `_Zip`, `_excel` as column name, the options `d`, `m` and `s`
+By using `_pdf`,  `_Pdf`, `_file`, `_File`, `_zip`, `_Zip`, `_excel` as column name, the options `d`, `M` and `s`
 will be set.
 
 All files will be read by PHP - therefore the directory might be protected against direct web access. This is the
@@ -6253,7 +6311,7 @@ preferred option to offer secure downloads via QFQ.
 
 In case the download needs a persistant URL (no SIP, no user session), a regular
 link, pointing directly to a file, have to be used - the download functionality described here is not appropriate for
-such a scenario.
+such a scenario. If necessary, column-save-pdf_ can be used to generate such a file.
 
 .. _download-parameter-files:
 
@@ -6480,14 +6538,21 @@ is allowed to access: ::
 Excel export
 ^^^^^^^^^^^^
 
-'On the fly'-creation of an excel file. The file is build in the moment when the user clicks on the download button.
+Hint: For up/downloading of excel files (no modification), check the generic Form
+`input-upload`_ element and the report 'download' (`column_pdf`_) function.
 
-Mode:
+This chapter explains how to create Excel files on the fly.
+
+The Excel file is build in the moment when the user request it by clicking on a
+download link.
+
+Mode building:
 
 * `New`: The export file will be completely build from scratch.
 * `Template`: The export file is based on an earlier uploaded xlsx file (template). The template itself is unchanged.
 
-Injecting the data is done in the same way in both modes.
+Injecting data into the Excel file is done in the same way in both modes: a Typo3 page (rendered without any HTML header
+or tags) contains one or more Typo3 QFQ records. Those QFQ records will create plain ASCII output.
 
 If the export file has to be customized (colors, pictures, headlines, ...), the `Template` mode is the preferred option.
 IT's much easier to do all cusomizations via Excel and creating a template than by coding in QFQ / Excel export notation.
@@ -7298,7 +7363,7 @@ Tips:
 * On general errors:
 
 	* Always check the Javascript console of your browser, see `javascriptProblem`_.
-	* Always check the Webserver logfiles, see `webserverErrorLog`_.
+	* Always check the Webserver logfiles.
 
 QFQ specific
 ------------
@@ -7397,4 +7462,3 @@ Open the 'Webdeveloper Tools' (FF: F12, Chrome/Opera: Right mouse click > Inspec
 'console' and reload the page. Inspect the messages.
 
 
-.. _`webserverErrorLog`:

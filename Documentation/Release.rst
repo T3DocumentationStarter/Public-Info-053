@@ -37,6 +37,29 @@ Bug Fixes
 ^^^^^^^^^
 
 
+
+Version 18.9.0
+--------------
+
+Date: 07.09.2018
+
+Features
+^^^^^^^^
+
+* #6357 / Save pdf on server
+* #5381 / Stored procedures can be called from QFQ Reports
+* #4996 / Log QFQ Update with timestamp.
+* #6255 / Inline Report Editing - now with SIP and save.php api
+
+Bug Fixes
+^^^^^^^^^
+* #6465 / Allow newlines in form action queries (e.g. sqlInsert)
+* #4654 / Better FE color highlighting (UX)
+* #5689 / Default BS Columns for FormElement match Form setting
+* #6484 / Download Links mit css class
+* #6576 / download buttons are now rendered disabled with render mode r:3
+* Cookie Sitepath: wrong detected in case of API calls.
+
 Version 18.8.2
 --------------
 
