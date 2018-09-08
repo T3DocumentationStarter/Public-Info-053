@@ -23,7 +23,7 @@ General
 =======
 
 * Project homepage: https://qfq.io
-* Latest releases: https://w3.math.uzh.ch/qfq/
+* Latest releases: https://qfq.io/download
 * Development: https://git.math.uzh.ch/typo3/qfq
 * Slack: https://qfq-io.slack.com/
 
