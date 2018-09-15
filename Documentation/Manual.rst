@@ -203,6 +203,9 @@ Setup CSS & JS
 		file3 = typo3conf/ext/qfq/Resources/Public/Css/jqx.base.css
 		file4 = typo3conf/ext/qfq/Resources/Public/Css/jqx.bootstrap.css
 		file5 = typo3conf/ext/qfq/Resources/Public/Css/qfq-bs.css
+
+		# Needed for tablesorter
+		file6 = typo3conf/ext/qfq/Resources/Public/Css/tablesorter-bootstrap.css
 	}
 
 	page.includeJS {
@@ -218,7 +221,12 @@ Setup CSS & JS
 
 		# Only needed in case FormElement 'annotate' is used.
 		file10 = typo3conf/ext/qfq/Resources/Public/JavaScript/fabric.min.js
-        file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
+		file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
+
+		# Needed for tablesorter
+		file12 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.tablesorter.combined.min.js
+		file13 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.tablesorter.pager.min.js
+		file14 = typo3conf/ext/qfq/Resources/Public/JavaScript/widget-columnSelector.min.js
 	}
 
 
@@ -787,13 +795,13 @@ Base: T3 & QFQ
 
 QFQ typically interacts with one database, the QFQ database. The database used by Typo3 is typically a separate one.
 Theoretically it might be the same (never tested), but it's strongly recommended to use a separated QFQ database to have
-no problems on Typo3 updates and to have a clean separation between Typo3 and QFQ
+no problems on Typo3 updates and to have a clean separation between Typo3 and QFQ.
 
 QFQ: System & Data
 ''''''''''''''''''
 
-QFQ itself can be separated in 'QFQ system' (see `system-tables`_) and 'QFQ data' databases (>=1). The 'QFQ system' stores
-the forms, record locking, log tables and so on - `QFQ data` is for the rest.
+QFQ itself can be separated in 'QFQ system' (see `system-tables`_) and 'QFQ data' databases (even more than one are
+possible). The 'QFQ system' stores the forms, record locking, log tables and so on - `QFQ data` is for the rest.
 
 A `Multi Database` setup is given, if 'QFQ system' is different from 'QFQ data'.
 
@@ -811,7 +819,7 @@ in `indexQfq`. If specific forms or reports should use a different database than
 
 A `Form` will:
 
-* load the own definition from `indexQfq` (table `Form` and `FormElement`),
+* load the form-definition from `indexQfq` (table `Form` and `FormElement`),
 * loads and save data from/in `indexData` (config.qfq.php) / `dbIndex` (form.parameter.dbIndex),
 * retrieve extra information via `dbIndexExtra` - this is useful to offer information from a database and save them in a
   different one.
@@ -862,7 +870,7 @@ Different QFQ versions, shared database
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When using different QFQ versions and a shared 'QFQ data'-database, there is some risk of conflicting
-'QFQ system' tables. Best is to always use the same QFQ version on all instances ot use a Multi Database setup.
+'QFQ system' tables. Best is to always use the same QFQ version on all instances or use a Multi Database setup.
 
 .. _debug:
 
@@ -2031,6 +2039,8 @@ Definition
 |Note                     | Personal editor notes. _`form-note`                                                                                                                |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Table                    | Primary table of the form. _`form-tablename`                                                                                                       |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|Primary Key              | Primary key of the indicated table. Only needed if != 'id'. _`form-primary-key`                                                                    |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Required Parameter NEW   | Name of required SIP parameter to create a new record (r=0), separated by comma. '#' as comment delimiter. See `form-requiredParameter`_           |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -3470,6 +3480,21 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
   * fileSplit, fileDestinationSplit, tableNameSplit: see split-pdf-upload_
 
+  * Excel Import: QFQ offers functionality to directly import excel data into the database. This functionality can
+    optionally be combined with saving the file by using the above parameters like `fileDestination`.
+
+    * *importToTable*: <mariadb.tablename> - **Required**. Providing this parameter activates the import. If the table
+      doesn't exist, it will be created.
+    * *importToColumn*: <col1>,<col2>,... - If none provided, the Excel column names A, B, ... are used. Note: These
+      have to match the table's column names if the table already exists.
+    * *importRegion*: [tab],[startColumn],[startRow],[endColumn],[endRow]|... - All parts are optional (default:
+      entire 1st sheet). Tab can either be given as an index (1-based) or a name. start/endColumn can be given either
+      numerically (1, 2, ...) or by column name (A, B, ...). Note that you can specify several regions to import.
+    * *importMode*: `append` (default) | `replace` - The data is either appended or replace in the specified table.
+    * *importType*: `auto` (default) | `xls` | `xlsx` | `ods` | `csv` - Define what kind of data should be expected by the
+      Spreadsheet Reader. `auto` should work fine in most cases.
+
+
 Immediately after the upload finished (before the user press save), the file will be checked on the server for it's
 content or file extension (see 'accept').
 
@@ -3782,8 +3807,9 @@ Type: sendmail
   * *sendMailXId* = `<string>` - Will be copied to the mailLog record. Helps to setup specific logfile queries.
   * *sendMailXId2* = `<string>` - Will be copied to the mailLog record. Helps to setup specific logfile queries.
   * *sendMailXId3* = `<string>` - Will be copied to the mailLog record. Helps to setup specific logfile queries.
-  * *sendMailSubjectHtmlEntity* = `<string>` - **encode|decode|none** - the mail subject will htmlspecialchar() encoded / decoded (default) or none (untouched).
-  * *sendMailBodyHtmlEntity*= `<string>`  - **encode|decode|none** - the mail body will htmlspecialchar() encoded, decoded (default) or none (untouched).
+  * *sendMailMode* = `<string>` - **html** - if set, the e-mail body will be rendered as html.
+  * *sendMailSubjectHtmlEntity* = `<string>` - **encode|decode|none** - the mail subject will be htmlspecialchar() encoded / decoded (default) or none (untouched).
+  * *sendMailBodyHtmlEntity*= `<string>`  - **encode|decode|none** - the mail body will be htmlspecialchar() encoded, decoded (default) or none (untouched).
 
 * To use values of the submitted form, use the STORE_FORM. E.g. `{{name:F:allbut}}`
 * To use the `id` of a new created or already existing primary record, use the STORE_RECORD. E.g. `{{id:R}}`.
@@ -5706,7 +5732,7 @@ Format: ::
     t:<TO:email[,email]>|f:<FROM:email>|s:<subject>|b:<body>
         [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|r:<REPLY-TO:email>]
         [|A:<flag autosubmit: on/off>][|g:<grId>][|x:<xId>][|y:<xId2>][|z:<xId3>][|h:<mail header>]
-        [|e:<subject encode: encode/decode/none>][E:<body encode: encode/decode/none>][|M:html]
+        [|e:<subject encode: encode/decode/none>][E:<body encode: encode/decode/none>][|mode:html]
         [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
 
 The following parameters can also be written as complete words for ease of use: ::
@@ -5714,7 +5740,7 @@ The following parameters can also be written as complete words for ease of use: 
     to:<email[,email]>|from:<email>|subject:<subject>|body:<body>
         [|cc:<email[,email]]>[|bcc:<email[,email]]>[|reply-to:<email>]
         [|autosubmit:<on/off>][|grid:<grid>][|xid:<xId>][|xid2:<xId2>][|xid3:<xId3>][|header:<mail header>]
-        [|M:html]
+        [|mode:html]
 
 Send emails. Every mail will be logged in the table `mailLog`. Attachments are supported.
 
@@ -6746,6 +6772,58 @@ E.g.::
 * `qfq-100`, `qfq-left` - makes e.g. a button full width and aligns the text left. ::
 
     10.sql = SELECT "p:home&r=0|t:Home|c:qfq-100 qfq-left" AS _pagev
+
+Tablesorter
+-----------
+
+QFQ includes a third-party client-side table sorter. tablesorter 2.31.0 is used, see official docs here: https://mottie.github.io/tablesorter/docs/index.html
+
+To turn any table into a sortable table, use this simple setup:
+
+* Ensure that your QFQ installation is importing the appropriate js/css files, see setup-css-js_.
+* Add the `class="tablesorter"` to your `<table>` element.
+* Make sure your `<table>` has a `<thead>` and `<tbody>`.
+
+In addition to the *tablesorter* class, there are the following additional options:
+
+* Adding the class `tablesorter-filter` enables table filtering.
+* Adding the class `tablesorter-pager` adds table paging functionality. With this option the html for the page navigation
+  is dynamically injected.
+* Adding the class `tablesorter-column-selector` adds a column selector widget. With this option the html for the column
+  selector is dynamically injected.
+
+For additional customization there are the following options:
+
+* Add the desired classes or data attributes to your table html, e.g.:
+
+  * `data-sorter="false"` on a <th> to disable sorting on that column
+  * `class="filter-false"` on a <th> to hide the filter field for that column
+  * see docs for more options: https://mottie.github.io/tablesorter/docs/index.html
+
+* You can pass in a default configuration object for the main `tablesorter()` function by using the attribute
+  `data-tablesorter-config` on the table.
+  Use JSON syntax when passing in your own configuration, such as:
+
+    data-tablesorter-config='{"theme":"bootstrap","widthFixed":true,"headerTemplate":"{content} {icon}","dateFormat":"ddmmyyyy","widgets":["uitheme","filter","saveSort","columnSelector"],"widgetOptions":{"filter_columnFilters":true,"filter_reset":".reset","filter_cssFilter":"form-control","columnSelector_mediaquery":false} }'
+
+* If the above customization options are not enough, you can output your own HTML for the pager and/or column selector,
+  as well as your own `$(document).ready()` function with the desired config. In this case, it is recommended not to
+  use the above *tablesorter* classes since the QFQ javascript code could interfere with your javascript code.
+
+Example: ::
+
+    10 {
+      sql = SELECT id, CONCAT('form&form=person&r=', id) AS _Pagee, lastName, title FROM person
+      head = <table class="table tablesorter tablesorter-filter tablesorter-pager tablesorter-column-selector">
+          <thead><tr><th>Id</th><th data-sorter="false" class="filter-false">Edit</th>
+          <th>Name</th><th class="filter-select" data-placeholder="Select a title">Title</th>
+          </tr></thead><tbody>
+      tail = </tbody></table>
+      rbeg = <tr>
+      rend = </tr>
+      fbeg = <td>
+      fend = </td>
+    }
 
 .. _monitor:
 

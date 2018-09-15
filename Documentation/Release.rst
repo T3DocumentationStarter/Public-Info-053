@@ -36,6 +36,47 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 18.9.1
+--------------
+
+Date: 15.09.2018
+
+Notes
+^^^^^
+
+* Report
+
+  * Type of nesting delimiter in 'report' now limited to '{', '[', '(', '['
+  * Hide/reuse report content later: `10.content=hide` and later `1000.head = {{10.content}}`
+
+* New Excel import - copy Excel files directly into a DB table.
+* Forms with named primary key different than 'id' are now supported.
+
+Features
+^^^^^^^^
+
+* #1261 / Tablesorter, incl. saved sort, combined column sort, filters, pagination
+* #3129 / suggestion for subrecord title design
+* #4922 / Excel import
+* #6300 / Disable preview button for requiredNew forms
+* #6314 / HTML Mode & sendMailSubjectHtmlEntity for Forms.
+* #6481 / Add custom primary key option to Forms.
+* #6645 / better error message for incomplete download as link
+* #6650 / Report hide content (line) - use later via a variable. First version - problem with enclosed ticks.
+* #6653 / Add save button class/glyphicon/tooltip for submit button
+* Thesis code correction
+* Update QFQ download URL
+
+Bug Fixes
+^^^^^^^^^
+
+* AbtractBuildForm.php: fix problem with subrecords in MultiDB Environment.
+* #2340 / Report: Problematic Bracket - form now on, only ''{[(<'' will change the nesting token.
+* #3333 / Fixed subquery recognition in reports '10.sql, 10.1.sql ...'
+* #4837 / Don't display hidden pills
+* #5467 / Fill Record Store when evaluating min/max parameters
+* #6621 / Fix shifted subrecord head
+* #6646 / Fix broken extraInfoButton for some FEs
 
 
 Version 18.9.0
