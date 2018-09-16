@@ -36,6 +36,44 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+
+Version 18.9.2
+--------------
+
+Date: 16.09.2018
+
+Notes
+^^^^^
+
+* To use the new 'tablesorter' feature, please add 'tablesorter-bootstrap.css', 'jquery.tablesorter.combined.min.js',
+  'jquery.tablesorter.pager.min.js', 'widget-columnSelector.min.js' in your Typo3 template record.
+  See https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html#setup-css-js
+
+    * *Existing* QFQ installations: update your CSS/JS includes! The new tablesorter jquery plugin might break (JS errors
+      seen on the console) your installation, if it isn't included!
+
+    * If you use the extension 'UZH Corporate Design Template':
+
+      * Update to the latest version 18.9.0.
+      * Add constants in the Typo3 template record 'ext: main': ::
+
+            cd.extra.css.file5 = typo3conf/ext/qfq/Resources/Public/Css/tablesorter-bootstrap.css
+
+            cd.extra.js.file10 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.tablesorter.combined.min.js
+            cd.extra.js.file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.tablesorter.pager.min.js
+            cd.extra.js.file12 = typo3conf/ext/qfq/Resources/Public/JavaScript/widget-columnSelector.min.js
+
+* STORE_USER: check the examples - great new feature to temporary save user settings.
+
+Features
+^^^^^^^^
+
+* #6721 / STORE_USER: variables per browser session
+* #6690 / Tablesorter for subrecords
+
+Bug Fixes
+^^^^^^^^^
+
 Version 18.9.1
 --------------
 
@@ -109,7 +147,7 @@ Date: 28.8.18
 Features
 ^^^^^^^^
 
-* F6563 / Accept 0 as required.
+* #6563 / Accept 0 as required.
 
 Bug Fixes
 ^^^^^^^^^

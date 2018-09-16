@@ -198,35 +198,32 @@ Setup CSS & JS
 	}
 
 	page.includeCSS {
-		file1 = typo3conf/ext/qfq/Resources/Public/Css/bootstrap.min.css
-		file2 = typo3conf/ext/qfq/Resources/Public/Css/bootstrap-theme.min.css
-		file3 = typo3conf/ext/qfq/Resources/Public/Css/jqx.base.css
-		file4 = typo3conf/ext/qfq/Resources/Public/Css/jqx.bootstrap.css
-		file5 = typo3conf/ext/qfq/Resources/Public/Css/qfq-bs.css
-
-		# Needed for tablesorter
-		file6 = typo3conf/ext/qfq/Resources/Public/Css/tablesorter-bootstrap.css
+		file01 = typo3conf/ext/qfq/Resources/Public/Css/bootstrap.min.css
+		file02 = typo3conf/ext/qfq/Resources/Public/Css/bootstrap-theme.min.css
+		file03 = typo3conf/ext/qfq/Resources/Public/Css/jqx.base.css
+		file04 = typo3conf/ext/qfq/Resources/Public/Css/jqx.bootstrap.css
+		file05 = typo3conf/ext/qfq/Resources/Public/Css/qfq-bs.css
+		file06 = typo3conf/ext/qfq/Resources/Public/Css/tablesorter-bootstrap.css
 	}
 
 	page.includeJS {
-		file01 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.min.js
-		file02 = typo3conf/ext/qfq/Resources/Public/JavaScript/bootstrap.min.js
-		file03 = typo3conf/ext/qfq/Resources/Public/JavaScript/validator.min.js
-		file04 = typo3conf/ext/qfq/Resources/Public/JavaScript/jqx-all.js
-		file05 = typo3conf/ext/qfq/Resources/Public/JavaScript/globalize.js
-		file06 = typo3conf/ext/qfq/Resources/Public/JavaScript/tinymce.min.js
-		file07 = typo3conf/ext/qfq/Resources/Public/JavaScript/EventEmitter.min.js
+        file01 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.min.js
+        file02 = typo3conf/ext/qfq/Resources/Public/JavaScript/bootstrap.min.js
+        file03 = typo3conf/ext/qfq/Resources/Public/JavaScript/validator.min.js
+        file04 = typo3conf/ext/qfq/Resources/Public/JavaScript/jqx-all.js
+        file05 = typo3conf/ext/qfq/Resources/Public/JavaScript/globalize.js
+        file06 = typo3conf/ext/qfq/Resources/Public/JavaScript/tinymce.min.js
+        file07 = typo3conf/ext/qfq/Resources/Public/JavaScript/EventEmitter.min.js
         file08 = typo3conf/ext/qfq/Resources/Public/JavaScript/typeahead.bundle.min.js
-		file09 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.min.js
+        file09 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.min.js
+        file10 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.tablesorter.combined.min.js
+        file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.tablesorter.pager.min.js
+        file12 = typo3conf/ext/qfq/Resources/Public/JavaScript/widget-columnSelector.min.js
 
-		# Only needed in case FormElement 'annotate' is used.
-		file10 = typo3conf/ext/qfq/Resources/Public/JavaScript/fabric.min.js
-		file11 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
+        # Only needed in case FormElement 'annotate' is used.
+        file20 = typo3conf/ext/qfq/Resources/Public/JavaScript/fabric.min.js
+        file21 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
 
-		# Needed for tablesorter
-		file12 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.tablesorter.combined.min.js
-		file13 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.tablesorter.pager.min.js
-		file14 = typo3conf/ext/qfq/Resources/Public/JavaScript/widget-columnSelector.min.js
 	}
 
 
@@ -643,7 +640,7 @@ SIPs
 The following is a technical background information. Not needed to just use QFQ.
 
 The SIPs (=Server Id Pairs) are uniq timestamps, created/registered on the fly for a specific browser session (=user). Every SIP is
-registered on the server (= stored in a PHP Session) and contains one or more key/value pairs. The key/value pairs never leave
+registered on the server (= stored in a browser session) and contains one or more key/value pairs. The key/value pairs never leave
 the server. The SIPs will be used:
 
 * to protect values not to be spoofed by anyone,
@@ -1458,41 +1455,44 @@ Store
 
 Only variables that are known in a specified store can be substituted.
 
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- |Name |Description                                                                             | Content                                                                    |
- +=====+========================================================================================+============================================================================+
- | F   | :ref:`STORE_FORM`: data not saved in database yet.                                     | All native *FormElements*. Recent values from the Browser.                 |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | S   | :ref:`STORE_SIP`: Client parameter 's' will indicate the current SIP, which will be    | sip, r (recordId), form                                                    |
- |     | loaded from the SESSION repo to the SIP-Store.                                         |                                                                            |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | R   | :ref:`STORE_RECORD`: Record - the current record loaded in the form                    | All columns of the current record from the current table                   |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | B   | :ref:`STORE_BEFORE`: Record - the current record loaded in the form before any update  | All columns of the current record from the current table                   |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | P   | Parent record. E.g.: on multi & copy forms the current record of the outer query,      | All columns of the MultiSQL Statement from the table for the current row   |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | D   | Default values column : The *table.column* specified *default value*.                  |                                                                            |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | M   | Column type: The *table.column* specified *type*                                       |                                                                            |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | C   | :ref:`STORE_CLIENT`: POST variable, if not found: GET variable                         | Parameter sent from the Client (=Browser).                                 |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | T   | :ref:`STORE_TYPO3`: a) Bodytext (ttcontent record), b) Typo3 internal variables        | See Typo3 tt_content record configuration                                  |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | V   | :ref:`STORE_VARS`: Generic variables                                                   |                                                                            |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | L   | :ref:`STORE_LDAP`: Will be filled on demand during processing of a *FormElement*       | Custom specified list of LDAP attributes                                   |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | 0   | *Zero* - allways value: 0, might be helpful if a variable is empty or undefined and    | Any key                                                                    |
- |     | will be used in an SQL statement.                                                      |                                                                            |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | E   | *Empty* - allways an empty string, might be helpful if a variable is empty or undefined| Any key                                                                    |
- |     | and will be used in an SQL statement                                                   |                                                                            |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
- | Y   | :ref:`STORE_SYSTEM`: a) Database, b) helper vars for logging/debugging:                |                                                                            |
- |     | SYSTEM_SQL_RAW ... SYSTEM_FORM_ELEMENT_COLUMN, c) Any custom fields: CONTACT, HELP, ...|                                                                            |
- +-----+----------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ |Name |Description                                                                             | Content                                                                        |
+ +=====+========================================================================================+================================================================================+
+ | B   | :ref:`STORE_BEFORE`: Record - the current record loaded in the form before any update. | All columns of the current record from the current table. See `STORE_BEFORE`_. |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | C   | :ref:`STORE_CLIENT`: POST variable, if not found: GET variable.                        | Parameter sent from the Client (=Browser). See `STORE_CLIENT`_.                |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | D   | Default values column : The *table.column* specified *default value*.                  |                                                                                |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | E   | *Empty* - allways an empty string, might be helpful if a variable is empty or undefined| Any key                                                                        |
+ |     | and will be used in an SQL statement.                                                  |                                                                                |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | F   | :ref:`STORE_FORM`: data not saved in database yet.                                     | All native *FormElements*. Recent values from the Browser. See: `STORE_FORM`_  |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | L   | :ref:`STORE_LDAP`: Will be filled on demand during processing of a *FormElement*.      | Custom specified list of LDAP attributes. See `STORE_LDAP`_.                   |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | M   | Column type: The *table.column* specified *type*.                                      |                                                                                |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | P   | Parent record. E.g.: on multi & copy forms the current record of the outer query.      | All columns of the MultiSQL Statement from the table for the current row       |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | R   | :ref:`STORE_RECORD`: Record - the current record loaded in the form.                   | All columns of the current record from the current table. See `STORE_RECORD`_. |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | S   | :ref:`STORE_SIP`: Client parameter 's' will indicate the current SIP, which will be    | sip, r (recordId), form. See `STORE_SIP`_.                                     |
+ |     | loaded from the SESSION repo to the SIP-Store.                                         |                                                                                |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | T   | :ref:`STORE_TYPO3`: a) Bodytext (ttcontent record), b) Typo3 internal variables.       | See Typo3 tt_content record configuration. See `STORE_TYPO3`_.                 |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | U   | :ref:`STORE_USER`: per user variables, valid as long as the browser session lives.     | Set via report: '...' AS '_=<var name>' See: `STORE_USER`_,                    |
+ |     |                                                                                        | `store_user_examples`_                                                         |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | V   | :ref:`STORE_VARS`: Generic variables.                                                  | See `STORE_VARS`_.                                                             |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | Y   | :ref:`STORE_SYSTEM`: a) Database, b) helper vars for logging/debugging:                |  See `STORE_SYSTEM`_.                                                          |
+ |     | SYSTEM_SQL_RAW ... SYSTEM_FORM_ELEMENT_COLUMN, c) Any custom fields: CONTACT, HELP, ...|                                                                                |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
+ | 0   | *Zero* - allways value: 0, might be helpful if a variable is empty or undefined and    | Any key                                                                        |
+ |     | will be used in an SQL statement.                                                      |                                                                                |
+ +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
 
 * Default *<prio>*: *FSRVD* - Form / SIP / Record / Vars / Table definition.
 * Hint: Preferable, parameter should be submitted by SIP, not by Client (=URL).
@@ -1726,6 +1726,21 @@ Store: *SYSTEM* - Y
 
 See configuration_ for a list of all settings.
 
+
+
+.. _STORE_USER:
+
+Store: *USER* - U
+-----------------
+
+* Sanitized: *no*
+
+At start of a new browser session (=user calls the website the first time or was logged out before) the store is empty.
+As soon as a value is set in the store, it remains as long as the browser session is alive (=until user logs out).
+
+Values can be set via report '... AS "_=<var name>"'
+
+See also: `store_user_examples`_
 
 .. _LDAP:
 
@@ -3330,7 +3345,11 @@ will be rendered inside the form as a HTML table.
     * *Constant '&'*: Indicate a 'constant' value. E.g. `&12:xId` or `{{...}}` (all possibilities, incl. further SELECT
       statements) might be used.
 
-  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-table-100'. If given, the default will be overwritten.
+  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-subrecord-table'. If given, the default will be overwritten.
+    This parameter is helpful if you want to add tablesorting to your subrecord - example: ::
+
+	  subrecordTableClass = table table-hover qfq-subrecord-table tablesorter tablesorter-pager
+
   * *subrecordColumnTitleEdit*: Optional. Will be rendered as the column title for the new/edit column.
   * *subrecordColumnTitleDelete*: Optional. Will be rendered as the column title for the delete column.
 
@@ -5271,7 +5290,9 @@ Special column names
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _XLSn                  |Used for Excel export. Prepend 'n=' and append a `newline` character around the string. See `excel-export`_.                                                                                 |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _+???                  |The content will be wrapped in the tag '???'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                                |
+| _+html-tag attributes  |The content will be wrapped with '<html-tag attributes>'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                    |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _=varname              |The content will be saved in store 'user' under 'varname'. Retrieve it later via {{varname:U}}. See `STORE_USER`_, `store_user_examples`_                                                    |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |_<nonReservedName>      |Suppress output. Column names with leading underscore are used to select data from the database and make it available in other parts of the report without generating any output.            |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -6776,9 +6797,9 @@ E.g.::
 Tablesorter
 -----------
 
-QFQ includes a third-party client-side table sorter. tablesorter 2.31.0 is used, see official docs here: https://mottie.github.io/tablesorter/docs/index.html
+QFQ includes a third-party client-side table sorter: https://mottie.github.io/tablesorter/docs/index.html
 
-To turn any table into a sortable table, use this simple setup:
+To turn any table into a sortable table:
 
 * Ensure that your QFQ installation is importing the appropriate js/css files, see setup-css-js_.
 * Add the `class="tablesorter"` to your `<table>` element.
@@ -6786,23 +6807,22 @@ To turn any table into a sortable table, use this simple setup:
 
 In addition to the *tablesorter* class, there are the following additional options:
 
-* Adding the class `tablesorter-filter` enables table filtering.
-* Adding the class `tablesorter-pager` adds table paging functionality. With this option the html for the page navigation
+* Class `tablesorter-filter` enables row filtering.
+* Class `tablesorter-pager` adds table paging functionality. A page navigation
   is dynamically injected.
-* Adding the class `tablesorter-column-selector` adds a column selector widget. With this option the html for the column
-  selector is dynamically injected.
+* Class `tablesorter-column-selector` adds a column selector widget.
 
-For additional customization there are the following options:
+Customization:
 
 * Add the desired classes or data attributes to your table html, e.g.:
 
-  * `data-sorter="false"` on a <th> to disable sorting on that column
-  * `class="filter-false"` on a <th> to hide the filter field for that column
+  * `data-sorter="false"` on a '<th>' to disable sorting on that column
+  * `class="filter-false"` on a '<th>' to hide the filter field for that column
   * see docs for more options: https://mottie.github.io/tablesorter/docs/index.html
 
 * You can pass in a default configuration object for the main `tablesorter()` function by using the attribute
   `data-tablesorter-config` on the table.
-  Use JSON syntax when passing in your own configuration, such as:
+  Use JSON syntax when passing in your own configuration, such as: ::
 
     data-tablesorter-config='{"theme":"bootstrap","widthFixed":true,"headerTemplate":"{content} {icon}","dateFormat":"ddmmyyyy","widgets":["uitheme","filter","saveSort","columnSelector"],"widgetOptions":{"filter_columnFilters":true,"filter_reset":".reset","filter_cssFilter":"form-control","columnSelector_mediaquery":false} }'
 
@@ -7148,6 +7168,86 @@ FormElement) forms: ::
 	  head = <h3>Recent Forms</h3>
 	  rsep = ,&ensp;
 	}
+
+.. _`store_user_examples`:
+
+STORE_USER examples
+^^^^^^^^^^^^^^^^^^^
+
+Keep variables per user session.
+
+Two pages (pass variable)
+'''''''''''''''''''''''''
+
+Sometimes it's useful to have variables per user (=browser session). Set a variable on page 'A' and retrieve the value
+on page 'B'.
+
+Page 'A' - set the variable: ::
+
+    10.sql = SELECT 'hello' AS '_=greeting'
+
+Page 'B' - get the value: ::
+
+    10.sql = SELECT '{{greeting:UE}}'
+
+If page 'A' has never been opened with the current browser session, nothing is printed (STORE_EMPTY gives an empty string).
+If page 'A' is called, page 'B' will print 'hello'.
+
+One page (collect variables)
+''''''''''''''''''''''''''''
+
+A page will be called with several SIP variables, but not at all at the same time. To still get all variables at any time: ::
+
+    # Normalize
+    10.sql = SELECT '{{order:USE:::sum}}' AS _=order, '{{step:USE:::5}}' AS _step, '{{direction:USE:::ASC}}' AS _direction
+
+    # Different links
+    20.sql = SELECT 'p:{{pageAlias:T}}&order=count|t:Order by count|b|s' AS _link,
+                    'p:{{pageAlias:T}}&order=sum|t:Order by sum|b|s' AS _link,
+                    'p:{{pageAlias:T}}&step=10|t:Step=10|b|s' AS _link,
+                    'p:{{pageAlias:T}}&step=50|t:Step=50|b|s' AS _link,
+                    'p:{{pageAlias:T}}&direction=ASC|t:Order by up|b|s' AS _link,
+                    'p:{{pageAlias:T}}&direction=DESC|t:Order by down|b|s' AS _link
+
+    30.sql = SELECT * FROM items ORDER BY {{order:U}} {{direction:U}} LIMIT {{step:U}}
+
+Simulate/switch user: feUser
+''''''''''''''''''''''''''''
+
+Just set the STORE_USER variable 'feUser'.
+
+All places with `{{feUser:Y}}` has to be replaced by `{{feUser:UY}}`: ::
+
+    # Normalize
+    10.sql = SELECT '{{feUser:UT}}' AS _=feUser
+
+    # Offer switching feUser
+    20.sql = SELECT 'p:{{pageAlias:T}}&feUser=account1|t:Become "account1"|b|s' AS _link,
+                    'p:{{pageAlias:T}}&feUser={{feUser:T}}|t:Back to own identity|b|s' AS _link,
+
+
+Semester switch (remember last choice)
+''''''''''''''''''''''''''''''''''''''
+
+A current semester is defined via configuration in STORE_SYSTEM '{{semId:Y}}'. The first column in 10.sql
+`'{{semId:SUY}}' AS '_=semId'` saves
+the semester to STORE_USER via '_=semId'. The priority 'SUY' takes either the latest choose (STORE_SIP) or reuse the
+last used (STORE_USER) or (first time call during browser session) takes the default from config (STORE_SYSTEM): ::
+
+    # Semester switch
+    10 {
+      sql = SELECT '{{semId:SUY}}' AS '_=semId',
+                   CONCAT('p:{{pageAlias:T}}&semId=', sp.id, '|t:', sp.name, '|s|b|G:glyphicon-chevron-left') AS _link,
+                           ' <button class="btn disabled ',   IF({{semId:Y0}}=sc.id, 'btn-success', 'btn-default'), '">',sc.name, '</button> ',
+                           CONCAT('p:{{pageAlias:T}}&semId=', sn.id, '|t:', sn.name, '|s|b|G:glyphicon-chevron-right|R') AS _link
+                       FROM semester AS sc
+                       LEFT JOIN semester AS sp ON sp.id=sc.id-1
+                       LEFT JOIN semester AS sn ON sc.id+1=sn.id AND sn.show_semester_from<=CURDATE()
+                       WHERE sc.id={{semId:SUY}} AND '{{form:SE}}'=''
+                       ORDER BY sc.semester_von
+      head = <div class="btn-group" style="position: absolute; top: 15px; right: 25px;">
+      tail = </div><p></p>
+    }
 
 .. _`system`:
 
