@@ -10,7 +10,7 @@
 .. --------------------------------------------------
 .. Best Practice T3 reST  https://docs.typo3.org/typo3cms/drafts/github/xperseguers/RstPrimer/
 .. External Links: `Bootstrap <http://getbootstrap.com/>`_:
-.. Add Images: https://wiki.typo3.org/ReST_Syntax#Images
+.. Add Images: https://wiki.typo3.org/ReST_Syntax#Images ...
 ..
 .. -*- coding: utf-8 -*- with BOM.
 
@@ -164,7 +164,7 @@ Thumbnail
 Thumbnails will be rendered via GraphicsMagick (http://www.graphicsmagick.org/) 'convert' and 'inkscape' (https://inkscape.org).
 'inkscape' is only used for '.svg' files.
 
-The Typo3 grafic eco-system is not used at all by QFQ.
+The Typo3 graphic eco-system is not used at all by QFQ.
 
 Usage: `column-thumbnail`_.
 
@@ -600,7 +600,7 @@ The specified DB User needs privileges to the database of at least: SELECT / INS
 
 To apply automatically QFQ-'DB UPDATE' the following rights are mandatory too: CREATE / ALTER
 
-To get access to the Typo3 installation, 'dbuser' should also have acces to the Typo3 Database with at least SELECT / INSERT / UPDATE / DELETE.
+To get access to the Typo3 installation, 'dbuser' should also have access to the Typo3 Database with at least SELECT / INSERT / UPDATE / DELETE.
 
 
 
@@ -1370,7 +1370,7 @@ Honeypot
 
 Every QFQ Form contains 'honeypot'-HTML input elements (HTML: hidden & readonly). Which of them to use is configured in
 `configuration`_ (default:   'username', 'password' and 'email'). On every start of QFQ (form, report, save, ...),
-these variables are tested if they are non-empty. In such a case a probably malicous bot has send the request and the
+these variables are tested if they are non-empty. In such a case a probably malicious bot has send the request and the
 request will not be processed.
 
 If any of the default configured variable names are needed (which will never be the case for QFQ), an explicit variable name
@@ -1464,7 +1464,7 @@ Only variables that are known in a specified store can be substituted.
  +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
  | D   | Default values column : The *table.column* specified *default value*.                  |                                                                                |
  +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
- | E   | *Empty* - allways an empty string, might be helpful if a variable is empty or undefined| Any key                                                                        |
+ | E   | *Empty* - always an empty string, might be helpful if a variable is empty or undefined | Any key                                                                        |
  |     | and will be used in an SQL statement.                                                  |                                                                                |
  +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
  | F   | :ref:`STORE_FORM`: data not saved in database yet.                                     | All native *FormElements*. Recent values from the Browser. See: `STORE_FORM`_  |
@@ -1490,7 +1490,7 @@ Only variables that are known in a specified store can be substituted.
  | Y   | :ref:`STORE_SYSTEM`: a) Database, b) helper vars for logging/debugging:                |  See `STORE_SYSTEM`_.                                                          |
  |     | SYSTEM_SQL_RAW ... SYSTEM_FORM_ELEMENT_COLUMN, c) Any custom fields: CONTACT, HELP, ...|                                                                                |
  +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
- | 0   | *Zero* - allways value: 0, might be helpful if a variable is empty or undefined and    | Any key                                                                        |
+ | 0   | *Zero* - always value: 0, might be helpful if a variable is empty or undefined and     | Any key                                                                        |
  |     | will be used in an SQL statement.                                                      |                                                                                |
  +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
 
@@ -1510,7 +1510,7 @@ Store: *FORM* - F
 * Represents the values in the form, typically before saving them.
 * Used for:
 
-  * *FormElements* who will be rerendered, after a parent *FormElement* has been changed by the user.
+  * *FormElements* which will be rerendered, after a parent *FormElement* has been changed by the user.
   * *FormElement* actions, before saving the form.
   * Values will be sanitized by the class configured in corresponding the *FormElement*. By default, the sanitize class is `alnumx`.
 
@@ -1542,7 +1542,7 @@ Store: *SIP* - S
  +-------------------------+-----------------------------------------------------------+
  | table                   | current table name                                        |
  +-------------------------+-----------------------------------------------------------+
- | urlparam                | all non Typo3 paramter in one string                      |
+ | urlparam                | all non Typo3 parameter in one string                     |
  +-------------------------+-----------------------------------------------------------+
  | <user defined>          | additional user defined link parameter                    |
  +-------------------------+-----------------------------------------------------------+
@@ -1606,7 +1606,7 @@ Store: *CLIENT* - C
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | REMOTE_ADDR             | Client IP address                                                                                                                        |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
- | '$_SERVER[*]'           | All other variables accessable by *$_SERVER[]*. Only the often used have a pre-defined sanitize class.                                   |
+ | '$_SERVER[*]'           | All other variables accessible by *$_SERVER[]*. Only the often used have a pre-defined sanitize class.                                   |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | form                    | Unique name of current form                                                                                                              |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1768,17 +1768,17 @@ To decide which Parameter should be placed on *Form.parameter* and which on *For
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | ldapAttributes              | cn, email                        | List of attributes to save in STORE_LDAP                      | x    | x           | FSL      |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| ldapSearch                  | (mail=john.doe@example.com)      | Regular LDAP search expresssion                               | x    | x           | FSL      |
+| ldapSearch                  | (mail=john.doe@example.com)      | Regular LDAP search expression                                | x    | x           | FSL      |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | ldapTimeLimit               | 3 (default)                      | Maximum time to wait for an answer of the LDAP Server         | x    | x           | TA, FSL  |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| ldapUseBindCredentials      | ldapUseBindCredentials=1         | Use LDAP_1_* crendentials from config-qfq-php_ for ldap_bind()| x    | x           | TA, FSL  |
+| ldapUseBindCredentials      | ldapUseBindCredentials=1         | Use LDAP_1_* credentials from config-qfq-php_ for ldap_bind() | x    | x           | TA, FSL  |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadLdap               | -                                | Enable LDAP as 'Typeahead' data source                        |      | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| typeAheadLdapSearch         | `(|(cn=*?*)(mail=*?*))`          | Regular LDAP search expresssion, returns upto typeAheadLimit  | x    | x           | TA       |
+| typeAheadLdapSearch         | `(|(cn=*?*)(mail=*?*))`          | Regular LDAP search expression, returns upto typeAheadLimit   | x    | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| typeAheadLdapSearchPrefetch | `(mail=?)`                       | Regular LDAP search expresssion, typically return one record  | x    | x           | TA       |
+| typeAheadLdapSearchPrefetch | `(mail=?)`                       | Regular LDAP search expression, typically return one record   | x    | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadLdapSearchPerToken | -                                | Split search value in token and OR-combine every search with  | x    | x           | TA       |
 |                             |                                  |  the individual tokens                                        |      |             |          |
@@ -1831,8 +1831,8 @@ To examine all possible values of an LDAP server, use the commandline tool `ldap
 
   ldapsearch -x -h directory.example.com -L -b ou=Addressbook,dc=example,dc=com "(mail=john.doe@example.com)"
 
-All occurences of a '?' in *ldapSearch* will be replaced by the user data typed in via the text-*FormElement*.
-The typed data will be escaped to fullfill LDAP search limitations.
+All occurrences of a '?' in *ldapSearch* will be replaced by the user data typed in via the text-*FormElement*.
+The typed data will be escaped to fulfill LDAP search limitations.
 Regular *Form* variables might be used on all parameter and will be evaluated during form load (!) - *not* at the time when
 the user types something.
 
@@ -1854,7 +1854,7 @@ To identify the exact *id*, an additional search filter is necessary: `typeAhead
 Prefetch
 ^^^^^^^^
 
-After 'form load' with an existing record, the user epects to see the previous saved data. In case there is an *id* to
+After 'form load' with an existing record, the user expects to see the previous saved data. In case there is an *id* to
 *value* translation, the *value* does not exist in the database, instead it has to be fetched again dynamically.
 A precise LDAP or SQL query has to be defined to force this:
 
@@ -1871,7 +1871,7 @@ PerToken
 Sometimes a LDAP server only provides attributes like 'sn' and 'givenName', but not 'displayName' or another practial
 combination of multiple attributes - than it is difficult to search for 'firstname' *and* (=human AND) 'lastname'.
 E.g. 'John Doe', results to search like `(|(sn=*John Doe*)(givenName=*John Doe*))` which will be probably always be empty.
-Instead, the user input has to be splitted in token and the search string has to repeated for every token.
+Instead, the user input has to be split in token and the search string has to repeated for every token.
 
 * *Form.parameter* or *FormElement.parameter*:
 
@@ -1916,7 +1916,7 @@ Important: LDAP access might slow down the *Form* processing on load, update or 
 to be multiplied by the number of accesses. E.g. a broken LDAP connection and 3 *FormElements* with *FSL*
 results to 9 seconds delay on save. Also be prepared not to receive the expected data.
 
-* *FormElement.parameter.fillStoreLdap* - activate the mode *Fill S* - no value is needed, the existence is suffucient.
+* *FormElement.parameter.fillStoreLdap* - activate the mode *Fill S* - no value is needed, the existence is sufficient.
 * *Form.parameter* or *FormElement.parameter*:
 
   * *ldapServer* = `directory.example.com`
@@ -1949,7 +1949,7 @@ General
 
     * Fields of the primary table acts like a *simple* form, all other fields have to be specified with *action/afterSave* records.
 
-  * *Multi* form: the form acts simultanously on more than one record. All records use the same *FormElements*.
+  * *Multi* form: the form acts simultaneously on more than one record. All records use the same *FormElements*.
 
     * The *FormElements* are defined as a regular *simple* / or *advanced* form, plus a SQL Query, which selects and
       iterates over all records. Those records will be loaded at the same time.
@@ -2009,7 +2009,7 @@ If a `Form` acts on further records (e.g. via FE action), those records are not 
 
 If a user tries to delete a record and another user already owns a lock on that record, the delete action is denied.
 
-If there are different locking modes in mulitiple forms, the most restricting mode applies for the current lock.
+If there are different locking modes in multiple forms, the most restricting mode applies for the current lock.
 
 Exclusive
 ^^^^^^^^^
@@ -2121,7 +2121,7 @@ Depending on `r`, the following access permission will be taken:
   * is *always* the preferred way. With 'sip' it's not necessary to differ between logged in or not, cause the SIP
     only  exist and is only valid, if it's created via QFQ/report earlier. This means 'creating' the SIP implies
     'access granted'. The grant will be revoked when the QFQ session is destroyed - this happens when a user loggs out or
-    the webbrowser is closed.
+    the web browser is closed.
 
 * `logged_in` / `logged_out`: for forms which might be displayed without a SIP, but maybe on a protected or even
   unprotected page. *The option is probably not often used.*
@@ -2132,7 +2132,7 @@ Depending on `r`, the following access permission will be taken:
     the form.
 
   * `permitEdit=always`: Public accessible forms will allow users to update existing data. This
-    is dangerous, cause the URL paramater (recordId) 'r' might be changed by the user (URL manipulating) and therefore
+    is dangerous, cause the URL parameter (recordId) 'r' might be changed by the user (URL manipulating) and therefore
     the user might see and/or change data from other users. *The option is probably not often used.*
 
 * `never`: such a form is not allowed to be loaded.
@@ -2392,7 +2392,7 @@ classPill
 * Typical use: adjust the background color of the `pill title` area.
 * Predefined background colors: `qfq-color-white`, `qfq-color-grey-1` (dark), `qfq-color-grey-2` (light),
   `qfq-color-blue-1` (dark), `qfq-color-blue-2`. (light)
-* `classPill` is only visible on forms with container elemants of type 'Pill'.
+* `classPill` is only visible on forms with container elements of type 'Pill'.
 
 classBody
 '''''''''
@@ -2574,7 +2574,7 @@ Column: primary record
 ''''''''''''''''''''''
 
 If the columns `<name>%d` are real columns on the primary table, saving and delete (=empty string) are done automatically.
-E.g. if there are upto five elements `grade1, ..., grade5` and the user inputs only the first three, the remaining will be set
+E.g. if there are up to five elements `grade1, ..., grade5` and the user inputs only the first three, the remaining will be set
 to an empty string.
 
 Column: non primary record
@@ -2658,7 +2658,7 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |tabindex             | string                      |HTML tabindex attribute  _`field-tabindex`                                                           |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Size                 | string                      |Visible length of input element. Might be ommited, depending on the choosen form layout.             |
+|Size                 | string                      |Visible length of input element. Might be omitted, depending on the chosen form layout.              |
 |                     |                             |Format: <width>,<height> (in characters)  _`field-size`                                              |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |BS Label Columns     | string                      | Number of bootstrap grid columns for label. By default empty, value inherits from the form.         |
@@ -2819,8 +2819,12 @@ See also at specific *FormElement* definitions.
 | accept                 | string |                                                                                                          |
 | maxFileSize            | string |                                                                                                          |
 | fileDestination        | string |                                                                                                          |
-| slaveId                | string |                                                                                                          |
 | fileReplace            | string |                                                                                                          |
+| autoOrient             | string |                                                                                                          |
+| autoOrientCmd          | string |                                                                                                          |
+| autoOrientMimeType     | string |                                                                                                          |
+| chmod                  | string |                                                                                                          |
+| slaveId                | string |                                                                                                          |
 | sqlBefore              | string |                                                                                                          |
 | sqlInsert              | string |                                                                                                          |
 | sqlUpdate              | string |                                                                                                          |
@@ -3414,8 +3418,8 @@ Inside the *Form editor* it's shown as a 'native FormElement'.
 During saving the current record, it behaves like an action FormElement
 and will be processed after saving the primary record and before any action FormElements are processed.
 
-* *FormElement.value* = `<string>` - By default, the full path of any already uploaded file is shown. To show something different, e.g.
-  only the filename, define: ::
+* *FormElement.value* = `<string>` - By default, the full path of any already uploaded file is shown. To show something
+  different, e.g. only the filename, define: ::
 
 	 a) {{filenameBase:V}}
 	 b) {{SELECT SUBSTRING_INDEX( '{{pathFileName:R}}', '/', -1)  }}
@@ -3477,7 +3481,7 @@ See also `downloadButton`_ to offer a download of an uploaded file.
       record, if table columns `fileSize` and/or `mimeType` exist.
 
       * If there are more than one Upload FormElement in a form, the automatically update for `fileSize` and/or `mimeType`
-        are not useful - the columns only handle
+        are not done automatically.
 
     * In :ref:`Upload advanced mode`  the `fileSize` and / or `mimeType`  have to be updated with an explicit SQL statement::
 
@@ -3485,6 +3489,20 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
   * *fileReplace* = `always` - If `fileDestination` exist - replace it by the new one.
 
+  * *chmod* = <unix file permission mode> - e.g. `660` for owner and group read and writeable. Only the numeric mode is allowed.
+
+  * autoOrient: images might contain EXIF data (e.g. captured via mobile phones) incl. an orientation tag like TopLeft,
+    BottomRight and so on. Web-Browser and other grafic programs often understand and respect those information and rotate
+    such images automatically. If not, the image might be displayed in an unwanted oritentation.
+    With active option 'autoOrient', QFQ tries to normalize such images via 'convert' (part of ImageMagick). Especially
+    if images are processed by the QFQ internal 'Fabric'-JS it's recommended to normalize images first. The normalization
+    process does not solve all orientation problems.
+
+      * *autoOrient* = [0|1]
+      * *autoOrientCmd* = 'convert -auto-orient {{fileDestination:V}} {{fileDestination:V}}.new; mv {{fileDestination:V}}.new {{fileDestination:V}}'
+      * *autoOrientMimeType* = image/jpeg,image/png,image/tiff
+
+    If the defaults for `autoOrientCmd` and `autoOrientMimeType` are sufficient, it's not necessary to specify them.
 
 .. _`downloadButton`:
 
@@ -3532,7 +3550,7 @@ Only column(name)s which contains `pathFileName` as part of their name, are chec
 
 If there are other records, which references the same file, such files are not deleted.
 It's a very basic check: just the current column of the current table is compared. In general it's not a good idea to
-have mutliple references to a single file. Therefore this check is just a fallback.
+have multiple references to a single file. Therefore this check is just a fallback.
 
 .. _Upload simple mode:
 
@@ -3747,7 +3765,7 @@ Situation 1: master.xId=slave.id (1:1)
    * {{slaveId}} == 0 ? 'sqlInsert' will be fired.
    * {{slaveId}} != 0 ? 'sqlUpdate' will be fired.
 
- * In case of fireing 'sqlInsert', the 'slave.id' of the new created record are copied to master.xId (the database will
+ * In case of firing 'sqlInsert', the 'slave.id' of the new created record are copied to master.xId (the database will
    be updated automatically).
 
  * If the automatic update of the master record is not suitable, the action element should have no name or a name
@@ -3853,7 +3871,7 @@ See also `copy-form`_.
   * Pay attention to '!'.
   * For every row, a new record is created in `recordDestinationTable`.
   * Column 'id' is not copied.
-  * The `recordSourceTable` together with columne `id` will identify the source record.
+  * The `recordSourceTable` together with column `id` will identify the source record.
   * Columns not specified, will be copied 1:1 from source to destination.
   * Columns specified, will overwrite the source value.
 
@@ -3933,21 +3951,21 @@ Example
 Assuming the Typo3 page has the
 
 * default language, L=0
-* english, L=1
-* spain, L=2
+* English, L=1
+* Spanish, L=2
 
 Configuration in configuration_: ::
 
 		formLanguageAId = 1
-		formLanguageALabel = english
+		formLanguageALabel = English
 
 		formLanguageBId = 2
-		formLanguageBLabel = spain
+		formLanguageBLabel = Spanish
 
 The default language is not covered in configuration_.
 
-The *Form editor* now shows on the pill 'Basic' (Form und FormEditor) for both languages each an additional parameter
-input field. Any input field in the *Form editor* can be redeclared in the correspondig language parameter field. Any
+The *Form editor* now shows on the pill 'Basic' (Form and FormEditor) for both languages each an additional parameter
+input field. Any input field in the *Form editor* can be redeclared in the corresponding language parameter field. Any
 missing definition means 'take the default'. E.g.:
 
 * Form: 'person'
@@ -4103,7 +4121,7 @@ the following (switch off all non named):
 Copy Form
 ---------
 
-Records (=master) and child records can be duplicated (=copied) by a regular `Form`, extended by `FormElemens` of type 'paste'.
+Records (=master) and child records can be duplicated (=copied) by a regular `Form`, extended by `FormElements` of type 'paste'.
 A 'copy form' works either in:
 
 * 'copy and paste now' mode: the 'select' and 'paste' `Form` is merged in one form, only one master record is possible,
@@ -4187,7 +4205,7 @@ form with the following parameter
 Table self referencing records
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Records might contain references to other recrods in the same table. E.g. native FormElements might assigned to a fieldSet,
+Records might contain references to other records in the same table. E.g. native FormElements might assigned to a fieldSet,
 templateGroup or pill, a fieldSet might assigned to other fieldsets or pills and so on. When duplicating a `Form` and the
 corresponding `FormElements` all internal references needs to be updated as well.
 
@@ -4242,7 +4260,7 @@ Support for record locking is given with mode:
   * Including a timeout (default 15 mins dirtyRecordTimeoutSeconds in configuration_) for maximum lock time.
 
 * *advisory*: user is only warned, but allowed to overwrite.
-* *none*: no bookeeping about locks.
+* *none*: no bookkeeping about locks.
 
 For 'new' records (r=0) there is no locking at all.
 
@@ -4464,7 +4482,7 @@ Relation: `Person.id = Address.personId`
 Icons Template Group
 ^^^^^^^^^^^^^^^^^^^^
 
-This example will display grafics instead of text 'add' and 'remove'. Also there is a distance between the templateGroups.
+This example will display graphics instead of text 'add' and 'remove'. Also there is a distance between the templateGroups.
 
  * FormElement.parameter::
 
@@ -4484,7 +4502,7 @@ Chart
   * in the specific tt_content record (shown below in the example) or
   * system wide via Typo3 Template record.
 
-* By splitting HTML and JavaScript code over several lines, take care not accidently to create a 'nesting'-end token.
+* By splitting HTML and JavaScript code over several lines, take care not accidentally to create a 'nesting'-end token.
   Check the line after `10.tail =`. It's '}' alone on one line. This is a valid 'nesting'-end token!. There are two options
   to circumvent this:
 
@@ -6293,7 +6311,7 @@ Parameter and (element) sources
         get generic filenames inside the archive.
       * If not specified, the **default** 'Mode' depends on the number of specified element sources (=file or web page):
 
-        * If only one `file` is specifed, the default is `file`.
+        * If only one `file` is specified, the default is `file`.
         * If there is a) a page defined or b) multiple elements, the default is `pdf`.
 
 * *element sources* - for `M:pdf` or `M:zip`, all of the following three element sources might be specified multiple times.
@@ -6561,7 +6579,7 @@ Setup
 +-------------+----------------------+---------------------------------------------------------------------------------------------------+
 | 'n'         | n=123                | Set number on the given position. The current position will be shift one to the right.            |
 +-------------+----------------------+---------------------------------------------------------------------------------------------------+
-| 'f'         | f==SUM(A5:C6)        | Set a formular on the given position. The current position will be shift one to the right.        |
+| 'f'         | f==SUM(A5:C6)        | Set a formula on the given position. The current position will be shift one to the right.         |
 +-------------+----------------------+---------------------------------------------------------------------------------------------------+
 
 Create a output like this: ::
@@ -7009,7 +7027,7 @@ Two columns
 ::
 
 
-    # Add the formatting information as a coloum
+    # Add the formatting information as a column
     10.sql = SELECT p.firstName, " " , p.lastName, "<br>" FROM exp_person AS p
 
 ..
@@ -7199,7 +7217,7 @@ One page (collect variables)
 A page will be called with several SIP variables, but not at all at the same time. To still get all variables at any time: ::
 
     # Normalize
-    10.sql = SELECT '{{order:USE:::sum}}' AS _=order, '{{step:USE:::5}}' AS _step, '{{direction:USE:::ASC}}' AS _direction
+    10.sql = SELECT '{{order:USE:::sum}}' AS '_=order', '{{step:USE:::5}}' AS _step, '{{direction:USE:::ASC}}' AS _direction
 
     # Different links
     20.sql = SELECT 'p:{{pageAlias:T}}&order=count|t:Order by count|b|s' AS _link,
@@ -7219,7 +7237,7 @@ Just set the STORE_USER variable 'feUser'.
 All places with `{{feUser:Y}}` has to be replaced by `{{feUser:UY}}`: ::
 
     # Normalize
-    10.sql = SELECT '{{feUser:UT}}' AS _=feUser
+    10.sql = SELECT '{{feUser:UT}}' AS '_=feUser'
 
     # Offer switching feUser
     20.sql = SELECT 'p:{{pageAlias:T}}&feUser=account1|t:Become "account1"|b|s' AS _link,
@@ -7347,7 +7365,7 @@ do some manipulation on the database or any other task.
 
 A job with `nextRun`=0 or `inProgress`!=0 won't never be started.
 
-Due to checking `inProgress`, jobs will never run in parallel, even if a job needs more than 1 minute (intervall system
+Due to checking `inProgress`, jobs will never run in parallel, even if a job needs more than 1 minute (interval system
 cron).
 
 Job: repeating

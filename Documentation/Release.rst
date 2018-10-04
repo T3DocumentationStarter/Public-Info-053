@@ -37,6 +37,29 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 18.10.0
+---------------
+
+Date: 04.10.2018
+
+Notes
+^^^^^
+
+Features
+^^^^^^^^
+
+* #6894 / Upload: chmod for file creation.
+* #6886 / Upload: Auto Orient - implementation.
+* #6721: Log switching {{feUser:U}} to qfq.log. Log {{feUser:U}} to sql.log.
+* #5458: Add '{{feUser:U}}' to be shown on exception.
+* Manual.rst: Fix missing single tick in special column name '_=<var>'
+* Report: Variables copied to STORE_USER via "... AS '_=<varname>'" are now available in STORE_RECORD by {{<varname>:R}}
+
+Bug Fixes
+^^^^^^^^^
+
+* #6902 / Drag and drop in subrecords: expect 1 row got nothing.
+
 Version 18.9.2
 --------------
 
