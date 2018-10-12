@@ -191,22 +191,22 @@ Setup CSS & JS
 ^^^^^^^^^^^^^^
 ::
 
-	page.meta {
-	  X-UA-Compatible = IE=edge
-	  X-UA-Compatible.attribute = http-equiv
-	  viewport=width=device-width, initial-scale=1
-	}
+    page.meta {
+        X-UA-Compatible = IE=edge
+        X-UA-Compatible.attribute = http-equiv
+        viewport=width=device-width, initial-scale=1
+    }
 
-	page.includeCSS {
-		file01 = typo3conf/ext/qfq/Resources/Public/Css/bootstrap.min.css
-		file02 = typo3conf/ext/qfq/Resources/Public/Css/bootstrap-theme.min.css
-		file03 = typo3conf/ext/qfq/Resources/Public/Css/jqx.base.css
-		file04 = typo3conf/ext/qfq/Resources/Public/Css/jqx.bootstrap.css
-		file05 = typo3conf/ext/qfq/Resources/Public/Css/qfq-bs.css
-		file06 = typo3conf/ext/qfq/Resources/Public/Css/tablesorter-bootstrap.css
-	}
+    page.includeCSS {
+        file01 = typo3conf/ext/qfq/Resources/Public/Css/bootstrap.min.css
+        file02 = typo3conf/ext/qfq/Resources/Public/Css/bootstrap-theme.min.css
+        file03 = typo3conf/ext/qfq/Resources/Public/Css/jqx.base.css
+        file04 = typo3conf/ext/qfq/Resources/Public/Css/jqx.bootstrap.css
+        file05 = typo3conf/ext/qfq/Resources/Public/Css/qfq-bs.css
+        file06 = typo3conf/ext/qfq/Resources/Public/Css/tablesorter-bootstrap.css
+    }
 
-	page.includeJS {
+    page.includeJS {
         file01 = typo3conf/ext/qfq/Resources/Public/JavaScript/jquery.min.js
         file02 = typo3conf/ext/qfq/Resources/Public/JavaScript/bootstrap.min.js
         file03 = typo3conf/ext/qfq/Resources/Public/JavaScript/validator.min.js
@@ -223,8 +223,7 @@ Setup CSS & JS
         # Only needed in case FormElement 'annotate' is used.
         file20 = typo3conf/ext/qfq/Resources/Public/JavaScript/fabric.min.js
         file21 = typo3conf/ext/qfq/Resources/Public/JavaScript/qfq.fabric.min.js
-
-	}
+    }
 
 
 .. _form-editor:
@@ -2738,35 +2737,25 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | Name                   | Type   | Note                                                                                                     |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-pattern-error     | string | Pattern violation: Text for error message                                                                |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-required-error    | string | Required violation: Text for error message                                                               |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-match-error       | string | Match violation: Text for error message                                                                  |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| data-error             | string | Violation of 'check-type': Text for error message                                                        |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| htmlBefore             | string | HTML Code wrapped before the complete *FormElement*                                                      |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| htmlAfter              | string | HTML Code wrapped after the complete *FormElement*                                                       |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| wrapRow                | string | If specified, skip default wrapping (`<div class='col-md-?'>`). Instead the given string is used.        |
-+------------------------+--------+                                                                                                          |
-| wrapLabel              | string |                                                                                                          |
-+------------------------+--------+                                                                                                          |
-| wrapInput              | string |                                                                                                          |
-+------------------------+--------+                                                                                                          |
-| wrapNote               | string |                                                                                                          |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| extraButtonLock        | none   | No value. Show a 'lock' on the right side of the input element. See `extraButtonLock`_                   |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| extraButtonPassword    | none   | No value. Show an 'eye' on the right side of the input element. See `extraButtonPassword`_               |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| extraButtonInfo        | string | Text. Show an 'i' on the right side of the input element. See `extraButtonInfo`_                         |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| extraButtonInfoClass   | string | By default empty. Specify any class to be assigned to wrap extraButtonInfo                               |
+| acceptZeroAsRequired   | string | 0|1 - Accept a '0' as a valid input. Default '0' (=0 is not a valid input)                               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | autofocus              | string | See `input-option-autofocus`_                                                                            |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| capture                | string | See `input-upload`_                                                                                      |
+| accept                 | string |                                                                                                          |
+| maxFileSize            | string |                                                                                                          |
+| fileDestination        | string |                                                                                                          |
+| fileReplace            | string |                                                                                                          |
+| autoOrient             | string |                                                                                                          |
+| autoOrientCmd          | string |                                                                                                          |
+| autoOrientMimeType     | string |                                                                                                          |
+| chmodFile / chmodDir   | string |                                                                                                          |
+| slaveId                | string |                                                                                                          |
+| sqlBefore              | string |                                                                                                          |
+| sqlInsert              | string |                                                                                                          |
+| sqlUpdate              | string |                                                                                                          |
+| sqlDelete              | string |                                                                                                          |
+| sqlAfter               | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | checkBoxMode           | string | See `input-checkbox`_, `input-radio`_, `input-select`_                                                   |
 | checked                | string |                                                                                                          |
@@ -2778,35 +2767,38 @@ See also at specific *FormElement* definitions.
 | emptyItemAtEnd         | -      |                                                                                                          |
 | buttonClass            | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| acceptZeroAsRequired   | string | 0|1 - Accept a '0' as a valid input. Default '0' (=0 is not a valid input)                               |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | dateFormat             | string | yyyy-mm-dd | dd.mm.yyyy                                                                                  |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| data-pattern-error     | string | Pattern violation: Text for error message                                                                |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| data-required-error    | string | Required violation: Text for error message                                                               |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| data-match-error       | string | Match violation: Text for error message                                                                  |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| data-error             | string | Violation of 'check-type': Text for error message                                                        |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | decimalFormat          | string | [precision,scale] Limits and formats input to a decimal number with the specified precision and scale.   |
 |                        |        | If no precision and scale are specified, the decimal format is pulled from the table definition.         |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| showSeconds            | string | 0|1 - Shows the seconds on form load. Default: 0                                                         |
+| htmlAfter              | string | HTML Code wrapped after the complete *FormElement*                                                       |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| timeIsOptional         | string | 0|1 - Used for datetime input. 0 (default): Time is required - 1: Entering a time is optional            |
-|                        |        | (defaults to 00:00:00 if none entered).                                                                  |
+| htmlBefore             | string | HTML Code wrapped before the complete *FormElement*                                                      |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| showZero               | string | 0|1 - Empty timestamp: '0'(default) - nothing shown, '1' - the string '0000-00-00 00:00:00' is displayed |
+| extraButtonLock        | none   | No value. Show a 'lock' on the right side of the input element. See `extraButtonLock`_                   |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| retype                 | string | See `input-text`_                                                                                        |
-| retypeLabel            | string |                                                                                                          |
-| retypeNote             | string |                                                                                                          |
-| characterCountWrap     | string |                                                                                                          |
-| hideZero               | string |                                                                                                          |
-| emptyMeansNull         | string |                                                                                                          |
+| extraButtonPassword    | none   | No value. Show an 'eye' on the right side of the input element. See `extraButtonPassword`_               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| typeAheadLimit         | string | See `input-typeahead`_                                                                                   |
-| typeAheadMinLength     | string |                                                                                                          |
-| typeAheadSql           | string |                                                                                                          |
-| typeAheadSqlPrefetch   | string |                                                                                                          |
+| extraButtonInfo        | string | Text. Show an 'i' on the right side of the input element. See `extraButtonInfo`_                         |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| extraButtonInfoClass   | string | By default empty. Specify any class to be assigned to wrap extraButtonInfo                               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | editor-plugins         | string | See `input-editor`_                                                                                      |
 | editor-toolbar         | string |                                                                                                          |
 | editor-statusbar       | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| fileButtonText         | string | Overwrite default 'Choose File'                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| fillStoreVar           | string | Fill the STORE_VAR with custom values. See `STORE_VARS`_.                                                |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | form                   | string | See `subrecord-option`_                                                                                  |
 | page                   | string |                                                                                                          |
@@ -2815,30 +2807,41 @@ See also at specific *FormElement* definitions.
 | detail                 | string |                                                                                                          |
 | subrecordTableClass    | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| capture                | string | See `input-upload`_                                                                                      |
-| accept                 | string |                                                                                                          |
-| maxFileSize            | string |                                                                                                          |
-| fileDestination        | string |                                                                                                          |
-| fileReplace            | string |                                                                                                          |
-| autoOrient             | string |                                                                                                          |
-| autoOrientCmd          | string |                                                                                                          |
-| autoOrientMimeType     | string |                                                                                                          |
-| chmod                  | string |                                                                                                          |
-| slaveId                | string |                                                                                                          |
-| sqlBefore              | string |                                                                                                          |
-| sqlInsert              | string |                                                                                                          |
-| sqlUpdate              | string |                                                                                                          |
-| sqlDelete              | string |                                                                                                          |
-| sqlAfter               | string |                                                                                                          |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| fileButtonText         | string | Overwrite default 'Choose File'                                                                          |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| fillStoreVar           | string | Fill the STORE_VAR with custom values. See `STORE_VARS`_.                                                |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | min                    | s/d/n  | Minimum and/or maximum allowed values for input field. Can be used for numbers, dates, or strings.       |
 +------------------------+--------+                                                                                                          |
 | max                    | s/d/n  | *Always use the international format 'yyyy-mm-dd[ hh:mm[:ss]]*                                           |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| processReadOnly        | [n]    | [0|1] By default FE's with type='readonly' are not processed during 'save'.                              |
+|                        |        | This option forces to process during 'save' them as well.                                                |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| retype                 | string | See `input-text`_                                                                                        |
+| retypeLabel            | string |                                                                                                          |
+| retypeNote             | string |                                                                                                          |
+| characterCountWrap     | string |                                                                                                          |
+| hideZero               | string |                                                                                                          |
+| emptyMeansNull         | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| showSeconds            | string | 0|1 - Shows the seconds on form load. Default: 0                                                         |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| showZero               | string | 0|1 - Empty timestamp: '0'(default) - nothing shown, '1' - the string '0000-00-00 00:00:00' is displayed |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| timeIsOptional         | string | 0|1 - Used for datetime input. 0 (default): Time is required - 1: Entering a time is optional            |
+|                        |        | (defaults to 00:00:00 if none entered).                                                                  |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| typeAheadLimit         | string | See `input-typeahead`_                                                                                   |
+| typeAheadMinLength     | string |                                                                                                          |
+| typeAheadSql           | string |                                                                                                          |
+| typeAheadSqlPrefetch   | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| wrapRow                | string | If specified, skip default wrapping (`<div class='col-md-?'>`). Instead the given string is used.        |
++------------------------+--------+                                                                                                          |
+| wrapLabel              | string |                                                                                                          |
++------------------------+--------+                                                                                                          |
+| wrapInput              | string |                                                                                                          |
++------------------------+--------+                                                                                                          |
+| wrapNote               | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+
 
  * `s/d/n`: string or date or number.
 
@@ -3489,7 +3492,9 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
   * *fileReplace* = `always` - If `fileDestination` exist - replace it by the new one.
 
-  * *chmod* = <unix file permission mode> - e.g. `660` for owner and group read and writeable. Only the numeric mode is allowed.
+  * *chmodFile* = <unix file permission mode> - e.g. `660` for owner and group read and writeable. Only the numeric mode is allowed.
+  * *chmodDir* = <unix file permission mode> - e.g. `770` for owner and group read, writeable and executable. Only the
+     numeric mode is allowed. Will be applied to all new created directories.
 
   * autoOrient: images might contain EXIF data (e.g. captured via mobile phones) incl. an orientation tag like TopLeft,
     BottomRight and so on. Web-Browser and other grafic programs often understand and respect those information and rotate

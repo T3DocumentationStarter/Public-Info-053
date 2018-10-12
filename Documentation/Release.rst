@@ -37,6 +37,28 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 18.10.1
+---------------
+
+Date: 12.10.18
+
+Notes
+^^^^^
+
+Features
+^^^^^^^^
+
+* #5578 / Safari only handles one filetype in upload dialog.
+* #6991 / Optional process 'readonly' FE during save. New FE parameter 'processReadOnly = 0|1'.
+
+Bug Fixes
+^^^^^^^^^
+
+* #6880 / Fixed Exceptions with too many details to end user.
+* 'Drag and drop' failed due to fillStoreForm requests {{form:S}} which was not necessary for drag and drop.
+* Upload: rename 'chmod' to 'chmodFile'. Implement 'chmodDir'. Permissions applied for all new created directories.
+* Upload: replace 'rename' with 'copy/unlink'
+
 Version 18.10.0
 ---------------
 
