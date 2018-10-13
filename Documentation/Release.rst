@@ -37,10 +37,44 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 18.10.2
+---------------
+
+Date: 13.10.2018
+
+Notes
+^^^^^
+
+Features
+^^^^^^^^
+
+* #2509 / Render encrypted mailto as single link
+* #3281 / Trim form inputs
+* #4649 / Add sqlBefore & sqlAfter to sendmail FE, move validate() before sqlBefore()/sqlAfter().
+* #4922 / Some minor improvements to the excel import
+* #5112 / Add incompatibility warning for encode specialchar and checkType allbut…
+* #5450 / MySQL Exception: underline faulty area
+* #6596 / uid ExcelExport / PDF
+* #6944 / Add double comma SQL Hint
+
+
+Bug Fixes
+^^^^^^^^^
+
+* #3529 / No double urldecode() of GET parameters
+* #3613 / Label input note layout
+* #3850 / Change set input maxlength
+* #4545 / After delete: reload page with original parameters
+* #4751 / Add bulleted und numbered lists back to tinyMCE Editor
+* #4765 / Extend tooltip visibility for checkboxes and radio buttons
+* #6911 / Only fire afterInsert on new record (also fix afterUpdate, beforeInsert,…
+* #6929 / Treat single file argument like several file argument (savePdf: copy,…
+
+
 Version 18.10.1
 ---------------
 
-Date: 12.10.18
+Date: 12.10.2018
 
 Notes
 ^^^^^
@@ -72,10 +106,10 @@ Features
 
 * #6894 / Upload: chmod for file creation.
 * #6886 / Upload: Auto Orient - implementation.
-* #6721: Log switching {{feUser:U}} to qfq.log. Log {{feUser:U}} to sql.log.
-* #5458: Add '{{feUser:U}}' to be shown on exception.
+* #6721 / Log switching {{feUser:U}} to qfq.log. Log {{feUser:U}} to sql.log.
+* #5458 / Add '{{feUser:U}}' to be shown on exception.
 * Manual.rst: Fix missing single tick in special column name '_=<var>'
-* Report: Variables copied to STORE_USER via "... AS '_=<varname>'" are now available in STORE_RECORD by {{<varname>:R}}
+* Report / Variables copied to STORE_USER via "... AS '_=<varname>'" are now available in STORE_RECORD by {{<varname>:R}}
 
 Bug Fixes
 ^^^^^^^^^

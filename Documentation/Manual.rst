@@ -1251,7 +1251,7 @@ For QFQ variables and FormElements:
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
 | **numerical**    | Form | Query | [0-9.-+]                                                                                |
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **allbut**       | Form | Query | All characters allowed, but not [ ]  { } % & \ #. The used regexp: '^[^\[\]{}%&\\#]+$', |
+| **allbut**       | Form | Query | All characters allowed, but not [ ]  { } % \ #. The used regexp: '^[^\[\]{}%\\#]+$',    |
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
 | **all**          | Form | Query | no sanitizing                                                                           |
 +------------------+------+-------+-----------------------------------------------------------------------------------------+
@@ -2644,14 +2644,14 @@ Fields:
 |                     | 'beforeInsert', 'beforeUpdate', 'beforeDelete', 'afterLoad', 'afterSave', 'afterInsert', 'afterUpdate', 'afterDelete',            |
 |                     | 'sendMail')                                                                                                                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _field-encode     |
+|Encode               | 'none', 'specialchar'       | With 'specialchar' (default) the chars <>"'& will be encoded to their htmlentity. _`field-encode`   |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Check Type           | enum('auto', 'alnumx',      | See: `sanitize-class`_                                                                              |
 |                     | 'digit', 'numerical',       |                                                                                                     |
 |                     | 'email', 'pattern',         |                                                                                                     |
 |                     | 'allbut', 'all')            |                                                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Check Pattern        | 'regexp'                    | _`field-checkpattern`: If $checkType=='pattern': pattern to match                                   |
+|Check Pattern        | 'regexp'                    | _`field-checktype`: If $checkType=='pattern': pattern to match                                      |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Order                | string                      | Display order of *FormElements* ('order' is a reserved keyword)  _`field-ord`                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
@@ -2840,6 +2840,9 @@ See also at specific *FormElement* definitions.
 | wrapInput              | string |                                                                                                          |
 +------------------------+--------+                                                                                                          |
 | wrapNote               | string |                                                                                                          |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| trim                   | string | By default, whitespace is trimmed. To disable, use 'trim=none'. You can also specify custom trim         |
+|                        |        | characters: 'trim=\\ ' only trims spaces.                                                                |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 
@@ -3071,7 +3074,7 @@ SQL
   * *typeAheadSql* = `SELECT ... AS 'id', ... AS 'value' WHERE name LIKE ? OR firstName LIKE ? LIMIT 100`
 
     * If there is only one column in the SELECT statement, that one will be used and there is no dict (key/value pair).
-    * If there is no column `id` or no column `value`, than the first column becomes `id` and the second column becomes `value`.
+    * If there is no column `id` or no column `value`, then the first column becomes `id` and the second column becomes `value`.
     * The query will be fired as a 'prepared statement'.
     * The value, typed by the user, will be replaced on all places where a `?` appears.
     * All `?` will be automatically surrounded by '%'. Therefore wildcard search is implemented: `... LIKE '%<?>%' ...`
@@ -3109,7 +3112,7 @@ Type: editor
 
 * The default setting in *FormElement.parameter* is::
 
-    editor-plugins=code link searchreplace table textcolor textpattern visualchars
+    editor-plugins=code link lists searchreplace table textcolor textpattern visualchars
     editor-toolbar=code searchreplace undo redo | styleselect link table | fontselect fontsizeselect | bullist numlist outdent indent | forecolor backcolor bold italic editor-menubar=false
     editor-statusbar=false
 
@@ -3524,10 +3527,13 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
   * Excel Import: QFQ offers functionality to directly import excel data into the database. This functionality can
     optionally be combined with saving the file by using the above parameters like `fileDestination`.
+    The data is imported without formatting. Please note that this means Excel dates will be imported as a number
+    (e.g. 43214), which is the serial value date in Excel. To convert such a number to a MariaDb date, use:
+    `DATE_ADD('1899-12-30', INTERVAL serialValue DAY)`.
 
     * *importToTable*: <mariadb.tablename> - **Required**. Providing this parameter activates the import. If the table
       doesn't exist, it will be created.
-    * *importToColumn*: <col1>,<col2>,... - If none provided, the Excel column names A, B, ... are used. Note: These
+    * *importToColumns*: <col1>,<col2>,... - If none provided, the Excel column names A, B, ... are used. Note: These
       have to match the table's column names if the table already exists.
     * *importRegion*: [tab],[startColumn],[startRow],[endColumn],[endRow]|... - All parts are optional (default:
       entire 1st sheet). Tab can either be given as an index (1-based) or a name. start/endColumn can be given either
@@ -3852,6 +3858,7 @@ Type: sendmail
   * *sendMailMode* = `<string>` - **html** - if set, the e-mail body will be rendered as html.
   * *sendMailSubjectHtmlEntity* = `<string>` - **encode|decode|none** - the mail subject will be htmlspecialchar() encoded / decoded (default) or none (untouched).
   * *sendMailBodyHtmlEntity*= `<string>`  - **encode|decode|none** - the mail body will be htmlspecialchar() encoded, decoded (default) or none (untouched).
+  * *sqlBefore* / *sqlAfter* = `<string>` - can be used like with other action elements (will be fired before/after sending the e-mail).
 
 * To use values of the submitted form, use the STORE_FORM. E.g. `{{name:F:allbut}}`
 * To use the `id` of a new created or already existing primary record, use the STORE_RECORD. E.g. `{{id:R}}`.
@@ -6319,8 +6326,8 @@ Parameter and (element) sources
         * If only one `file` is specified, the default is `file`.
         * If there is a) a page defined or b) multiple elements, the default is `pdf`.
 
-* *element sources* - for `M:pdf` or `M:zip`, all of the following three element sources might be specified multiple times.
-    Any combination and order of the three options are allowed.
+* *element sources* - for `M:pdf` or `M:zip`, all of the following element sources may be specified multiple times.
+    Any combination and order of these options are allowed.
 
   * *file*: `F:<pathFileName>` - relative or absolute pathFileName offered for a) download (single), or to be concatenated
     in a PDF or ZIP.
@@ -6339,6 +6346,12 @@ Parameter and (element) sources
     * If there are trouble with accessing FE_GROUP protected content, please check `wkhtmltopdf`_.
 
   * *url*: `u:<url>` - any URL, pointing to an internal or external destination.
+
+  * *uid*: `uid:<int>` - the tt_contents.uid of a QFQ PageContent record (shown on hover in the backend). This will render
+    only the raw QFQ processed bodytext of the specified PageContent, without additional tags, styles, or CSS includes.
+    QFQ will retrieve the PageContent's bodytext from the Typo3 database, parse it, and render it as a PDF. Parameters can be
+    passed: `uid:<int>[?arg1=value1][&arg2=value2][...]` and will be available in the SIP store for the QFQ PageContent,
+    or passed as wkhtmltopdf arguments, if applicable.
 
   * *WKHTML Options* for `page`, `urlParam` or `url`:
 
@@ -6531,33 +6544,23 @@ Injecting data into the Excel file is done in the same way in both modes: a Typo
 or tags) contains one or more Typo3 QFQ records. Those QFQ records will create plain ASCII output.
 
 If the export file has to be customized (colors, pictures, headlines, ...), the `Template` mode is the preferred option.
-IT's much easier to do all cusomizations via Excel and creating a template than by coding in QFQ / Excel export notation.
+It's much easier to do all customizations via Excel and creating a template than by coding in QFQ / Excel export notation.
 
 Setup
 '''''
 
-* Create a special column name `_excel` (or `_link`) in QFQ/Report. As a source, define a T3 page, which have to deliver
-  the dynamic content (also: `excel-export-sample_`). ::
+* Create a special column name `_excel` (or `_link`) in QFQ/Report. As a source, define a T3 PageContent, which has to
+  deliver the dynamic content (also `_excel-export-sample`). ::
 
-    SELECT CONCAT('d:final.xlsx|M:excel|s:1|t:Excel (new)|p:?id=exceldata') AS _link
+    SELECT CONCAT('d:final.xlsx|M:excel|s:1|t:Excel (new)|uid:43') AS _link
 
-* Create a T3 page which delivers the content.
+* Create a T3 PageContent which delivers the content.
 
-  * Disable all HTML header and wrapping code on that page. It's also a good idea to limit access to such page on localhost,
-    your development network and your webserver address. Typoscript setup: ::
-
-        config.disableAllHeaderCode = 1
-        tt_content.stdWrap >
-        page >
-        page = PAGE
-
-        [usergroup = *] || [IP = 127.0.0.1,192.168.1.*,<webserver IP>]
-            page.10 < styles.content.get
-        [else]
-            page.10 = TEXT
-            page.10.value = access forbidden
-        [global]
-
+  * It is recommended to use the `uid:<int>` syntax for excel imports, because there should be no html code on the
+    resulting content. QFQ will retrieve the PageContent's bodytext from the Typo3 database, parse it, and pass the
+    result as the instructions for filling the excel file.
+  * Parameters can be passed: `uid:43?param=value&param2=value2` and will be accessible in the SIP Store (S) in the
+    QFQ PageContent.
   * Use the regular QFQ Report syntax to create some output.
   * The newline at the end of every line needs to be CHAR(10). To make it simpler, the special column name `... AS _XLS`
     (see _XLS, _XLSs, _XLSb, _XLSn) can be used.
@@ -6628,14 +6631,14 @@ In Report Syntax: ::
 Excel export samples: ::
 
     # From scratch (both are the same, one with '_excel' the other with '_link')
-    SELECT CONCAT('d:new.xlsx|t:Excel (new)|p:?id=exceldata') AS _excel
-    SELECT CONCAT('d:new.xlsx|t:Excel (new)|p:?id=exceldata|M:excel|s:1') AS _link
+    SELECT CONCAT('d:new.xlsx|t:Excel (new)|uid:54') AS _excel
+    SELECT CONCAT('d:new.xlsx|t:Excel (new)|uid:54|M:excel|s:1') AS _link
 
     # Template
-    SELECT CONCAT('d:final.xlsx|t:Excel (template)|F:fileadmin/template.xlsx|p:?id=exceldata') AS _excel
+    SELECT CONCAT('d:final.xlsx|t:Excel (template)|F:fileadmin/template.xlsx|uid:24') AS _excel
 
     # With parameter (via SIP) - get the Parameter on page 'exceldata' with '{{arg1:S}}' and '{{arg2:S}}'
-    SELECT CONCAT('d:final.xlsx|t:Excel (parameter)|p:?id=exceldata&_sip=1&arg1=hello&arg2=world') AS _excel
+    SELECT CONCAT('d:final.xlsx|t:Excel (parameter)|uid:32&arg1=hello&arg2=world') AS _excel
 
 
 .. _drag_and_drop:
