@@ -36,14 +36,37 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 18.x.x
+--------------
+
+Date: 29.10.2018
+
+Notes
+^^^^^
+
+* QFQ now recommends ImageMagick instead of GraphicsMagic, due to much better 'auto orient' (JPEG) capabilities.
+
+Features
+^^^^^^^^
+
+* #4901 / Implement 'delete split files' if primary file is deleted (record) or replaced against a new one.
+* #4901 / Implement 'fileSplitOptions'.
+* #4901 / Implement PDF split based on IM 'convert' (jpeg).
+* #7012 / Memory limit for file download - replace file_get_content() by readfile().
+* #7112 / fabric: configure default color.
+* thumbnail: empty path filename is no ignored, instead of throwing an exception. This is the same behaviour as
+  building links - no definition means 'no link', and not 'error'.
+* Refactor chmod(), unlink(), rename(), rmdir(), copy() to use by QFQ version which throws an exception.
+
+Bug Fixes
+^^^^^^^^^
+
+* #3613 - Revert due to bug in dynamic show/hide (Revision 0bb99fd, Revision 77096ca7) -
 
 Version 18.10.2
 ---------------
 
 Date: 13.10.2018
-
-Notes
-^^^^^
 
 Features
 ^^^^^^^^
@@ -76,9 +99,6 @@ Version 18.10.1
 
 Date: 12.10.2018
 
-Notes
-^^^^^
-
 Features
 ^^^^^^^^
 
@@ -97,9 +117,6 @@ Version 18.10.0
 ---------------
 
 Date: 04.10.2018
-
-Notes
-^^^^^
 
 Features
 ^^^^^^^^
@@ -149,9 +166,6 @@ Features
 
 * #6721 / STORE_USER: variables per browser session
 * #6690 / Tablesorter for subrecords
-
-Bug Fixes
-^^^^^^^^^
 
 Version 18.9.1
 --------------
@@ -307,7 +321,7 @@ Notes
 Features
 ^^^^^^^^
 
-* sqlHint: Note if a query fails and contains some not replaced variables.
+* sqlHint / Note if a query fails and contains some not replaced variables.
 * #4438 / Log attack detected: will be logged now to fileadmin/protected/log/qfq.log.
 * #4041 / Subrecord: Spalte 'id' automatisch mit '<span class="text-muted">' wrappen.
 * #5885 / show 'sql.log' in FE.

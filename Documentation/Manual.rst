@@ -64,7 +64,7 @@ Preparation for Ubuntu 14.04::
 
 	sudo apt-get install php5-mysqlnd php5-intl
 	sudo apt-get install pdftk file                  # for file upload and PDF
-	sudo apt-get install inkscape graphicsmagick     # to render thumbnails
+	sudo apt-get install inkscape imagemagick     # to render thumbnails
 	sudo php5enmod mysqlnd
 	sudo service apache2 restart
 
@@ -72,7 +72,7 @@ Preparation for Ubuntu 16.04::
 
 	sudo apt install php7.0-intl
 	sudo apt install pdftk libxrender1 file pdf2svg  # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf), PDF split
-	sudo apt install inkscape graphicsmagick         # to render thumbnails
+	sudo apt install inkscape imagemagick            # to render thumbnails
 
 .. _wkhtml:
 
@@ -161,7 +161,7 @@ The Typo3 sendmail eco-system is not used at all by QFQ.
 Thumbnail
 ^^^^^^^^^
 
-Thumbnails will be rendered via GraphicsMagick (http://www.graphicsmagick.org/) 'convert' and 'inkscape' (https://inkscape.org).
+Thumbnails will be rendered via ImageMagick (https://www.imagemagick.org/) 'convert' and 'inkscape' (https://inkscape.org).
 'inkscape' is only used for '.svg' files.
 
 The Typo3 graphic eco-system is not used at all by QFQ.
@@ -3128,15 +3128,19 @@ Type: editor
 Type: annotate
 ^^^^^^^^^^^^^^
 
-The `Formelement`.type=`annotate` is a simple grafic editor which can be used to annotate images. All modifications to
-a image is saved into a JSON fabric.js data string. The current `FormElement` value is the JSON fabric.js data string.
+The `Formelement`.type=`annotate` is a simple grafic editor which, for example, can be used to annotate images. All modifications to
+an image are saved as a JSON fabric.js data string in the current FormElement column.
+
 An image, specified by `FormElement.parameter`: imageSource={{pathFileName}}, will be displayed in the background. On
-form load both, the image and an optional already given JSON fabric.js data string, will be displayed. The original image
-file is not modified.
+form load, both, the image and an optional already given JSON fabric.js data string, will be displayed. The image is SIP
+protected and will be loaded on demand.
+
+The original image file is not modified. The user drawings are stored in the fabric.js data string.
 
 * *FormElement.parameter*:
 
-  * *imageSource* ={{pathFileName2}}     -  Background image.
+  * *imageSource* ={{pathFileName2}} -  Background image. E.g. `fileadmin/images/scan.jpg`.
+  * *defaultPenColor* = <rgb hex value> -  Pen default color, after loading the fabric element. Default is '0000FF' (blue).
 
 By using the the `FormElement` `annotate`, the JS code `fabric.min.js` and `qfq.fabric.min.js` has to be included.
 See setup-css-js_.
@@ -3566,7 +3570,7 @@ have multiple references to a single file. Therefore this check is just a fallba
 .. _Upload simple mode:
 
 Upload simple mode
-;;;;;;;;;;;;;;;;;;
+''''''''''''''''''
 
 Requires: *'upload'-FormElement.name = 'column name'* of an column in the primary table.
 
@@ -3584,7 +3588,7 @@ Multiple 'upload'-FormElements per form are possible. Each of it needs an own ta
 .. _Upload advanced mode:
 
 Upload advanced mode
-;;;;;;;;;;;;;;;;;;;;
+''''''''''''''''''''
 
 Requires: *'upload'-FormElement.name* is unknown as a column in the primary table.
 
@@ -3629,23 +3633,32 @@ A typical name for such an 'upload'-FormElement, to show that the name does not 
 .. _split-pdf-upload:
 
 Split PDF Upload
-;;;;;;;;;;;;;;;;
+''''''''''''''''
 
-Additional to the upload, it's possible to split the uploaded file (only PDF files) into several SVG files, one file per
-page. The split is done via http://www.cityinthesky.co.uk/opensource/pdf2svg/.
+Additional to the upload, it's possible to split the uploaded file (only PDF files) into several SVG or JPEG files, one
+file per PDF page. The split is done via http://www.cityinthesky.co.uk/opensource/pdf2svg/ or Image Magick `convert`.
 
  * *FormElement.parameter*:
 
-   * *fileSplit* = `<type>` - Activate the splitting process. Only possible value: `fileSplit=svg`.
-   * *fileDestinationSplit* = `<pathFileName (pattern)>` - Target directory and filename pattern for the created & split'ed files. E.g. ::
+   * *fileSplit* = `<type>` - Activate the splitting process. Possible values: `svg` or `jpeg`. No default.
+   * *fileSplitOptions* = `<command line options>`.
 
-       fileDestinationSplit = fileadmin/protected/{{id:R}}.{{filenameBase}}.%02d.svg
+     * [svg] - no default
+     * [jpeg] - default: `-density 150 -quality 90`
 
-   * *tableNameSplit* = `<tablename>` - Reference in table 'Split' to the table, which holds the original PDF file.
+   * *fileDestinationSplit* = `<pathFileName (pattern)>` - Target directory and filename pattern for the created &
+      split'ed files. Default <fileDestination>.split/split.<nr>.<fileSplit>
+      If explicit given, respect that SVG needs a printf style for <nr>, whereas JPEG is numbered automatically. E.g. ::
 
-The splitting happens immediately after the user pressed save.
+       [svg] fileDestinationSplit = fileadmin/protected/{{id:R}}.{{filenameBase:V}}.%02d.svg
+       [jpeg] fileDestinationSplit = fileadmin/protected/{{id:R}}.{{filenameBase:V}}.jpg
 
-To easily access the split files via QFQ, per file per record is created in table 'Split'.
+   * *tableNameSplit* = `<tablename>` - Default: name of table of current form. This name will be saved in table `Split`
+
+
+The splitting happens immediately after the user pressed `save`.
+
+To easily access the split files via QFQ, per file one record is created in table 'Split'.
 
 Table 'Split':
 
@@ -3659,8 +3672,6 @@ Table 'Split':
 | xId          | Primary id of the reference record.                                                        |
 +--------------+--------------------------------------------------------------------------------------------+
 | pathFileName | Path/filename reference to one of the created files                                        |
-+--------------+--------------------------------------------------------------------------------------------+
-| created      | Timestamp                                                                                  |
 +--------------+--------------------------------------------------------------------------------------------+
 
 One usecase why to split an upload: annotate individual pages by using the `FormElement`.type=`annotate`.
@@ -5275,24 +5286,31 @@ Special column names
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Reserved column name   | Purpose                                                                                                                                                                                     |
 +========================+=============================================================================================================================================================================================+
-| _link                  |Easily create links with different features.                                                                                                                                                 |
+| _link                  | `column-link`_ - Build links with different features.                                                                                                                                       |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _mailto                |Quickly create email links. A click on the link will open the default mailer. The address is encrypted via JS against email bots.                                                            |
+| _pageX or _PageX       | `column_pageX`_ - Shortcut version of the link interface for fast creation of internal links. The column name is composed of the string *page*/*Page* and a optional character to specify   |
+|                        | the type of the link.                                                                                                                                                                       |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _pageX or _PageX       |Shortcut version of the link interface for fast creation of internal links. The column name is composed of the string *page*/*Page* and a optional character to specify the type of the link.|
+| _download              | `download`_ - single file (any type) or concatenate multiple files (PDF, ZIP)                                                                                                               |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _pdf, _file, _zip      |Shortcut version of the link interface for fast creation of `download`_ links. Used to offer single file download or to concatenate several PDFs and printout of websites to one PDF file.   |
-| _Pdf, _File, _Zip      |                                                                                                                                                                                             |
+| _pdf, _file, _zip      | `column_pdf`_ - Shortcut version of the link interface for fast creation of `download`_ links. Used to offer single file download or to concatenate several PDFs and printout of websites   |
+| _Pdf, _File, _Zip      | to one PDF file.                                                                                                                                                                            |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _savePdf               | `column-save-pdf`_ - pre render PDF files                                                                                                                                                   |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _excel                 | `excel-export`_ - creates Excel exports based on QFQ Report queries, optional with pre uploaded Excel template files                                                                        |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _yank                  | `copyToClipboard`_. Shortcut version of the link interface                                                                                                                                  |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _sendmail              |Send emails.                                                                                                                                                                                 |
+| _mailto                | `column_mailto`_ - Build email links. A click on the link will open the default mailer. The address is encrypted via JS against email bots.                                                 |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _exec                  |Run batch files or executables on the webserver.                                                                                                                                             |
+| _sendmail              | `column_sendmail`_ - Send emails.                                                                                                                                                           |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _vertical              |Render Text vertically. This is useful for tables with limited column width.                                                                                                                 |
+| _exec                  | `column_exec`_ - Run batch files or executables on the webserver.                                                                                                                           |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _img                   |Display images.                                                                                                                                                                              |
+| _vertical              | `column_vertical`_ - Render Text vertically. This is useful for tables with limited column width.                                                                                           |
++------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| _img                   | `column_img`_ - Display images.                                                                                                                                                             |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _bullet                |Display a blue/gray/green/pink/red/yellow bullet. If none color specified, show nothing.                                                                                                     |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -5308,9 +5326,9 @@ Special column names
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _mimeType              |Show mime type of a given file                                                                                                                                                               |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _thumbnail             |Create thumbnails on the fly. See `column-thumbnail`_.                                                                                                                                       |
+| _thumbnail             | `thumbnail`_ - Create thumbnails on the fly. See `column-thumbnail`_.                                                                                                                       |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _monitor               |Constantly display a file. See `column-monitor`_.                                                                                                                                            |
+| _monitor               | `column-monitor`_ - Constantly display a file. See `column-monitor`_.                                                                                                                       |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _XLS                   |Used for Excel export. Append a `newline` character at the end of the string. Token must be part of string. See `excel-export`_.                                                             |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -6126,14 +6144,17 @@ Examples: ::
 Column: _thumbnail
 ^^^^^^^^^^^^^^^^^^
 
-A thumbnail of the file `T:<pathFilename>` will be rendered and saved with the given pixel size as specified via
-`W:<dimension>`. The file is only rendered once and subsequent access is delivered via a local cache. The will be
-rendered again, if the source file is newer than the thumbnail or if the thumbnail dimension changes.
+For file `T:<pathFilename>` a thumbnail will be rendered, saved (to be reused) and a HTML `<img>` tag is returned,
+With the SIP encoded thumbnail.
 
-The thumbnail pathFilename is a MD5 hash of the pathFilename plus the dimension information.
+The thumbnail:
 
-From multi page files like PDFs, the first page is used as the thumbnail.
-All file formats, which GraphicsMagick 'convert' (http://www.graphicsmagick.org/formats.html) supports, can be
+* Size is specified via `W:<dimension>`. The file is only rendered once and subsequent access is delivered via a local QFQ cache.
+* Will be rendered, if the source file is newer than the thumbnail or if the thumbnail dimension changes.
+* The caching is done by building the MD5 of pathFilename and thumbnail dimension.
+* Of multi page files like PDFs, the first page is used as the thumbnail.
+
+All file formats, which 'convert' ImageMagick (https://www.imagemagick.org/) supports, can be
 used. Office file formats are not supported. Due to speed and quality reasons, SVG files will be converted by inkscape.
 If a file format is not known, QFQ tries to show a corresponding file type image provided by Typo3 - such an image is not
 scaled.
@@ -6165,7 +6186,7 @@ Example: ::
 	10.sql = SELECT 'T:fileadmin/file3.pdf' AS _thumbnail
 
 	# SIP protected, IMG tag, thumbnail width 50px
-	20.sql = SELECT 'T:fileadmin/file3.pdf|W:50x' AS _thumbnail
+	20.sql = SELECT 'T:fileadmin/file3.pdf|W:50' AS _thumbnail
 
 	# No SIP protection, IMG tag, thumbnail width 150px
 	30.sql = SELECT 'T:fileadmin/file3.pdf|s:0' AS _thumbnail
@@ -6177,7 +6198,8 @@ Example: ::
 Dimension
 '''''''''
 
-GraphicsMagick support various settings to force the thumbnail size. See http://www.graphicsmagick.org/GraphicsMagick.html#details-geometry.
+ImageMagick support various settings to force the thumbnail size.
+See https://www.imagemagick.org/script/command-line-processing.php#geometry or http://www.graphicsmagick.org/GraphicsMagick.html#details-geometry.
 
 Cleaning
 ''''''''
