@@ -36,8 +36,8 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-Version 18.x.x
---------------
+Version 18.10.3
+---------------
 
 Date: 29.10.2018
 
