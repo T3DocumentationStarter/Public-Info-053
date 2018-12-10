@@ -36,6 +36,47 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+
+Version 18.12.0
+---------------
+
+Date: 10.12.2018
+
+Notes
+^^^^^
+
+* Config.qfq.php: the variable T3_DB_NAME is not necessary anymore.
+
+Features
+^^^^^^^^
+
+* #3992 / STORE_SYSTEM: dbNameQfq, dbNameData, dbNameT3
+* Config.php: read 'dbNameT3' from TYPO3_CONF_VARS or from T3 config file.
+* Download.php: get dbNameT3 now from STORE_SYSTEM
+* #4906 Php Session Timeout: can be specified globally in configuration and per form. Affects only logged in FE User.
+* #6866 / On logout destroy STORE_USER. Session.php: check if _COOKIE['fe_typo_user'] has changed - yes: clear STORE_USER. Store.php: Rearrange functions.
+* #6999 (Feature) Bootstrap/Form: define columns for desktop 'col-lg-10'
+* #7138 / PDF / single source: deliver without converting
+* #7293/ Implement new logging for file upload.
+* #7406 / dbinit might contain multiple sql statements now.
+* #7407 / MariaDB / Ubuntu 18 complains about missing values if column of type TEXT isn't explicit specified in INSERT. New default for database.init=SET sql_mode = "NO_ENGINE_SUBSTITUTION"
+* #7431 / FE.type=afterSave (FE Action): SQL won't report the causing FE.name/id
+* #7434 / FE.type=beforeLoad / sqlValidate: Validation message not shown to user
+* FormEditor.sql: Switch off 'MySQL strict setting of default values'
+* Logger.php: remove UserAgent - that one is logged in FormSubmitLog Table. Add 'cookie' to filter individual actions.
+* New css classes for icons: .icon-flipped (mirrors icon), .icon-spin (icon spins once on hover), .icon-spin-reverse (mirror of icon spin).
+
+Bug Fixes
+^^^^^^^^^
+
+* #7001 / Error message: if 'modeSql' fails, error message does not contain a reference to the causing FE.
+* ErrorHandler.php: raise an error as an exception has been stopped in mid 2017 - reactivated now.
+* Fix problem in upload elements: a) in exception FE_ID was not reported, b) fillStoreVar was not fired.
+* FormAction.php: throw exception if 'fillStoreVar' selects more than one row.
+
+
+
+
 Version 18.10.3
 ---------------
 

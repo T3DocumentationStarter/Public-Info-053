@@ -258,7 +258,11 @@ Setup a *report* to manage all *forms*:
 
         10 {
             # All forms
-            sql = SELECT CONCAT('p:{{pageId:T}}&form=form&r=', f.id) as _pagee, f.id, f.name, f.title, f.tableName, CONCAT('form=form&r=', f.id) as _Paged FROM Form AS f ORDER BY f.name
+            sql = SELECT CONCAT('p:{{pageId:T}}&form=form&r=', f.id) as _pagee
+                         , f.id, f.name, f.title, f.tableName
+                         , CONCAT('U:form=form&r=', f.id) as _paged
+                      FROM Form AS f
+                      ORDER BY f.name
             rbeg = <tr>
             rend = </tr>
             fbeg = <td>
@@ -285,6 +289,61 @@ Install Check List
 
 Configuration
 -------------
+
+.. _config-qfq-php:
+
+config.qfq.php
+^^^^^^^^^^^^^^
+
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| Keyword                       | Example                                               | Description                                                                |
++===============================+=======================================================+============================================================================+
+| DB_<n>_USER                   | DB_1_USER=qfqUser                                     | Credentials configured in MySQL                                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DB_<n>_PASSWORD               | DB_1_PASSWORD=1234567890                              | Credentials configured in MySQL                                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DB_<n>_SERVER                 | DB_1_SERVER=localhost                                 | Hostname of MySQL Server                                                   |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| DB_<n>_NAME                   | DB_1_NAME=qfq_db                                      | Database name                                                              |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| LDAP_1_RDN                    | LDAP_1_RDN='ou=Admin,ou=example,dc=com'               | Credentials for non-anonymous LDAP access. At the moment only one set of   |
+| LDAP_1_PASSWORD               | LDAP_1_PASSWORD=mySecurePassword                      |                                                                            |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+
+
+Example: *typo3conf/config.qfq.php*: ::
+
+    <?php
+
+    // QFQ configuration
+    //
+    // Save this file as: <site path>/typo3conf/config.qfq.php
+
+    return [
+        'DB_1_USER' => '<DBUSER>',
+        'DB_1_SERVER' => '<DBSERVER>',
+        'DB_1_PASSWORD' => '<DBPW>',
+        'DB_1_NAME' => '<DB>',
+
+        //DB_2_USER = <DBUSER>
+        //DB_2_SERVER = <DBSERVER>
+        //DB_2_PASSWORD = <DBPW>
+        //DB_2_NAME = <DB>
+
+        // DB_n ...
+        // ...
+
+        // LDAP_1_RDN =
+        // LDAP_1_PASSWORD =
+    ];
+
+After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
+
++----------------+------------------------------------------------------------------------------------+
+| _dbNameData    | Can be used to dynamically access the current selected database: {{_dbNameData:Y}} |
++----------------+------------------------------------------------------------------------------------+
+| _dbNameQfq     | Can be used to dynamically access the current selected database: {{_dbNameQfq:Y}}  |
++----------------+------------------------------------------------------------------------------------+
 
 .. _extension-manager-qfq-configuration:
 
@@ -347,7 +406,8 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Database                                                                                                                                                           |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| dbInit                        | dbInit=set names utf8                                 | Global init for using the database.                                        |
+| init                          | init=SET names utf8; SET sql_mode =                   | Global init for using the database. For 'sql_mode="NO_ENGINE_SUBSTITUTION"'|
+|                               | "NO_ENGINE_SUBSTITUTION"                              | see #7407.                                                                 |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | update                        | auto                                                  | | *auto*: apply DB Updates only if there is a newer version.               |
 |                               |                                                       | | *always*: apply DB Updates always, especially play formEditor.sql every  |
@@ -375,6 +435,8 @@ Extension Manager: QFQ Configuration
 | Form-Config                                                                                                                                                        |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | recordLockTimeoutSeconds      | 900                                                   | Timeout for record locking. After this time, a record will be replaced.    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| sessionTimeoutSeconds         | 1800                                                  | Timeout for FE User session. See sessionTimeoutSeconds_                    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | enterAsSubmit                 | enterAsSubmit = 1                                     | 0: off, 1: Pressing *enter* in a form means *save* and *close*.            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -460,65 +522,18 @@ Extension Manager: QFQ Configuration
 | cssClassColumnId              | text-muted                                            | A column in a subrecord with the name id|ID|Id gets this class.            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 
+Automatically filled by QFQ:
 
-.. _config-qfq-php:
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| Keyword                       | Description                                                                                                                        |
++===============================+====================================================================================================================================+
+| dbNameData                    | Use this to get name of the configured 'data'-database. '{{dbNameData:Y}}                                                          |
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| dbNameQfq                     | Use this to get name of the configured 'QFQ'-database. '{{dbNameQfq:Y}}                                                            |
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| dbNameT3                      | Use this to get name of the configured 'T3'-database. '{{dbNameT3:Y}}                                                              |
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 
-config.qfq.php
---------------
-
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| Keyword                       | Example                                               | Description                                                                |
-+===============================+=======================================================+============================================================================+
-| DB_<n>_USER                   | DB_1_USER=qfqUser                                     | Credentials configured in MySQL                                            |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DB_<n>_PASSWORD               | DB_1_PASSWORD=1234567890                              | Credentials configured in MySQL                                            |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DB_<n>_SERVER                 | DB_1_SERVER=localhost                                 | Hostname of MySQL Server                                                   |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| DB_<n>_NAME                   | DB_1_NAME=qfq_db                                      | Database name                                                              |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| LDAP_1_RDN                    | LDAP_1_RDN='ou=Admin,ou=example,dc=com'               | Credentials for non-anonymous LDAP access. At the moment only one set of   |
-| LDAP_1_PASSWORD               | LDAP_1_PASSWORD=mySecurePassword                      |                                                                            |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| T3_DB_NAME                    | T3_DB_NAME=specialt3dbname                            | Only necessary for inline report editing if the t3 database is not         |
-|                               |                                                       | anologous to the Data db name (but ending in _t3) - see `inline-report`_.  |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-
-
-
-Example: *typo3conf/config.qfq.php*: ::
-
-    <?php
-
-    // QFQ configuration
-    //
-    // Save this file as: <site path>/typo3conf/config.qfq.php
-
-    return [
-        'DB_1_USER' => '<DBUSER>',
-        'DB_1_SERVER' => '<DBSERVER>',
-        'DB_1_PASSWORD' => '<DBPW>',
-        'DB_1_NAME' => '<DB>',
-
-        //DB_2_USER = <DBUSER>
-        //DB_2_SERVER = <DBSERVER>
-        //DB_2_PASSWORD = <DBPW>
-        //DB_2_NAME = <DB>
-
-        // DB_n ...
-        // ...
-
-        // LDAP_1_RDN =
-        // LDAP_1_PASSWORD =
-    ];
-
-After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
-
-+----------------+------------------------------------------------------------------------------------+
-| _dbNameData    | Can be used to dynamically access the current selected database: {{_dbNameData:Y}} |
-+----------------+------------------------------------------------------------------------------------+
-| _dbNameQfq     | Can be used to dynamically access the current selected database: {{_dbNameQfq:Y}}  |
-+----------------+------------------------------------------------------------------------------------+
 
 .. _`CustomVariables`:
 
@@ -613,6 +628,23 @@ the end. E.g. `my_long_variable_130`. Such a variable has an allowed length of 1
 usual with the variable name: `{{my_long_variable_130:C:...}}`.
 
 
+.. _`sessionTimeoutSeconds`:
+
+FE-User: Session timeout seconds
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There is no timeout for website users who are not logged in (but typically those users don't have access to protected content).
+
+For logged in users, the default timeout is 1800 seconds. These timeout only affects QFQ related content and can be
+specified a) globally (QFQ configuration) and b) specific per Form.
+
+The maximum timeout depends on the minimal value of php.ini `session.cookie_lifetime` and `session.gc_maxlifetime`.
+Specifying a higher value produces an error in the front end.
+
+Every access to QFQ related content resets the timeout.
+
+After FE login, the next access to QFQ related content starts the timeout counter.
+
 .. _local-documentation:
 
 Local Documentation
@@ -680,19 +712,29 @@ backend for orientation.
 QFQ Keywords (Bodytext)
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+**All of the named parameter are optional.**
+
  +-------------------+---------------------------------------------------------------------------------+
  | Name              | Explanation                                                                     |
  +===================+=================================================================================+
- | form              | | Formname defined in ttcontent record bodytext                                 |
- |                   | | Fix. E.g.: **form = person**                                                  |
- |                   | | - by SIP: **form = {{form:SE}}**                                              |
- |                   | | - by SQL: **form = {{SELECT c.form FROM config AS c WHERE c.id={{a:C}} }}**   |
+ | form              | | Formname.                                                                     |
+ |                   | | Static: **form = person**                                                     |
+ |                   | | By SIP: **form = {{form:SE}}**                                                |
+ |                   | | By SQL: **form = {{SELECT c.form FROM config AS c WHERE c.id={{a:C}} }}**     |
  +-------------------+---------------------------------------------------------------------------------+
- | r                 | | <record id> The form will load the record with the specified id               |
- |                   | | - Variants: **r = 123**, by SQL: **r = {{SELECT ...}}**                       |
- |                   | | - If not specified, the default is '0'                                        |
+ | r                 | | <record id>. The form will load the record with the specified id.             |
+ |                   | | Static: **r = 123**                                                           |
+ |                   | | By SQL: **r = {{SELECT ...}}**                                                |
+ |                   | | If not specified, the SIP parameter 'r' is used.                              |
  +-------------------+---------------------------------------------------------------------------------+
- | <level>.db        | Select a DB. Only necessary if a different than the standard DB should be used. |
+ | dbIndex           | E.g. `dbIndex = {{indexQfq:Y}}` Select a DB index. Only necessary if a          |
+ |                   | different than the standard DB should be used.                                  |
+ +-------------------+---------------------------------------------------------------------------------+
+ | debugShowBodyText | If='1' and configuration_:*showDebugInfo: yes*, shows a tooltip with bodytext   |
+ +-------------------+---------------------------------------------------------------------------------+
+ | sqlLog            | Overwrites configuration_: `SQL_LOG`_ . Only affects `Report`, not `Form`.      |
+ +-------------------+---------------------------------------------------------------------------------+
+ | sqlLogMode        | Overwrites configuration_: `SQL_LOG_MODE`_ . Only affects `Report`, not `Form`. |
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.fbeg      | Start token for every field (=column)                                           |
  +-------------------+---------------------------------------------------------------------------------+
@@ -731,12 +773,6 @@ QFQ Keywords (Bodytext)
  |                   | | *hide*: content of current and sub levels are stored and not shown.           |
  |                   | | *store*: content of current and sub levels are stored and shown.              |
  |                   | | To retrieve the content: `{{<level>.line.content}}`. See `syntax-of-report`_  |
- +-------------------+---------------------------------------------------------------------------------+
- | debugShowBodyText | If='1' and configuration_:*showDebugInfo: yes*, shows a tooltip with bodytext   |
- +-------------------+---------------------------------------------------------------------------------+
- | sqlLog            | Overwrites configuration_: `SQL_LOG`_ . Only affects `Report`, not `Form`.      |
- +-------------------+---------------------------------------------------------------------------------+
- | sqlLogMode        | Overwrites configuration_: `SQL_LOG_MODE`_ . Only affects `Report`, not `Form`. |
  +-------------------+---------------------------------------------------------------------------------+
 
 .. _`qfq-database`:
@@ -1149,7 +1185,7 @@ glue string.
 Result: row
 '''''''''''
 
-A few functionalities needs more than a returned string, instead separate columns are necessary. To indicate an array
+A few functions needs more than a returned string, instead separate columns are necessary. To indicate an array
 result, specify those with an '!': ::
 
    {{!SELECT ...}}
@@ -1486,7 +1522,7 @@ Only variables that are known in a specified store can be substituted.
  +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
  | V   | :ref:`STORE_VARS`: Generic variables.                                                  | See `STORE_VARS`_.                                                             |
  +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
- | Y   | :ref:`STORE_SYSTEM`: a) Database, b) helper vars for logging/debugging:                |  See `STORE_SYSTEM`_.                                                          |
+ | Y   | :ref:`STORE_SYSTEM`: a) Database, b) helper vars for logging/debugging:                | See `STORE_SYSTEM`_.                                                           |
  |     | SYSTEM_SQL_RAW ... SYSTEM_FORM_ELEMENT_COLUMN, c) Any custom fields: CONTACT, HELP, ...|                                                                                |
  +-----+----------------------------------------------------------------------------------------+--------------------------------------------------------------------------------+
  | 0   | *Zero* - always value: 0, might be helpful if a variable is empty or undefined and     | Any key                                                                        |
@@ -1693,7 +1729,7 @@ Store: *VARS* - V
 The directive `fillStoreVar` will fill the store VARS with custom values. Existing Store VARS values will be merged together with them.
 E.g.: ::
 
-    fillStoreVar = {{!SELECT p.name, p.email FROM Person AS p WHERE p.id={{pId:S}} }}
+    fillStoreVar = {{SELECT p.name, p.email FROM Person AS p WHERE p.id={{pId:S}} }}
 
 * After filling the store, the values can be retrieved via `{{name:V}}` and `{{email:V}}`.
 * Be careful by specifying general purpose variables like `id`, `r`, `pageId` and so on. This might conflict with existing variables.
@@ -2350,6 +2386,8 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | formSubmitLogMode           | string | Overwrite default from configuration_                                                                    |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| sessionTimeoutSeconds       | int    | Overwrite default from configuration_ . See sessionTimeoutSeconds_.                                      |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 * Example:
 
@@ -2736,7 +2774,7 @@ See also at specific *FormElement* definitions.
 
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | Name                   | Type   | Note                                                                                                     |
-+------------------------+--------+----------------------------------------------------------------------------------------------------------+
++========================+========+==========================================================================================================+
 | acceptZeroAsRequired   | string | 0|1 - Accept a '0' as a valid input. Default '0' (=0 is not a valid input)                               |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | autofocus              | string | See `input-option-autofocus`_                                                                            |
@@ -2767,7 +2805,7 @@ See also at specific *FormElement* definitions.
 | emptyItemAtEnd         | -      |                                                                                                          |
 | buttonClass            | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| dateFormat             | string | yyyy-mm-dd | dd.mm.yyyy                                                                                  |
+| dateFormat             | string | yyyy-mm-dd / dd.mm.yyyy                                                                                  |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | data-pattern-error     | string | Pattern violation: Text for error message                                                                |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2843,6 +2881,12 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | trim                   | string | By default, whitespace is trimmed. To disable, use 'trim=none'. You can also specify custom trim         |
 |                        |        | characters: 'trim=\\ ' only trims spaces.                                                                |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| sqlValidate            | string | See `sqlValidate`_                                                                                       |
++------------------------+--------+                                                                                                          |
+| expectRecords          | int    |                                                                                                          |
++------------------------+--------+                                                                                                          |
+| messageFail            | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 
@@ -3700,6 +3744,8 @@ Types:
   * afterDelete
   * paste (configure copy/paste forms)
 
+.. _sqlValidate:
+
 Parameter: sqlValidate
 ''''''''''''''''''''''
 
@@ -3711,12 +3757,11 @@ Parameter: sqlValidate
 
   *FormElement.parameter*:
 
-  * *requiredList* = `<fe.name[s]>` - List of `native`-*FormElement* names: only if all of those elements are filled (!=0 and !=''), the *current*
-    `action`-*FormElement* will be processed. This will enable or disable the check, based on the user input! If no
-    `native`-*FormElement* names are given, the specified check will always be performed.
-  * *sqlValidate* = `{{<query>}}` - validation query. E.g.: `sqlValidate={{!SELECT id FROM Person AS p WHERE p.name LIKE {{name:F:all}} AND p.firstname LIKE {{firstname:F:all}} }}`
+  * *requiredList* = `<fe.name[s]>` - List of `native`-*FormElement* names: only if all of those elements are filled
+    (!=0 and !=''), the *current* `action`-*FormElement* will be processed. This will enable or disable the check,
+    based on the user input! If no `native`-*FormElement* names are given, the specified check will always be performed.
 
-    * Pay attention to `{{!...` after the equal sign.
+  * *sqlValidate* = `{{<query>}}` - validation query. E.g.: `sqlValidate={{SELECT id FROM Person AS p WHERE p.name LIKE {{name:F:all}} AND p.firstname LIKE {{firstname:F:all}} }}`
 
   * *expectRecords* = `<value>`- number of expected records.
 
@@ -4101,10 +4146,9 @@ The forms will be rendered with Bootstrap CSS classes, based on the 12 column gr
 Generally a 3 column layout for *label* columns on the left side, an *input* field column in the middle and a *note*
 column on the right side will be rendered.
 
-The used default column (=bootstrap grid) width is *3,6,3* for *label, input, note*.
+The used default column (=bootstrap grid) width is *3,6,3* (col-md , col-lg) for *label, input, note*.
 
-* The system wide default can be changed via `configuration`_ - the new settings are the default
-  settings for all forms.
+* The system wide defaults can be changed via `configuration`_.
 * Per *Form* settings can be done in the *Form* parameter field. They overwrite the system wide default.
 * Per *FormElement* settings can be done in the *FormElement* parameter field. They overwrite the *Form* setting.
 
@@ -4114,7 +4158,8 @@ Custom field width
 ^^^^^^^^^^^^^^^^^^
 
 Per *FormElement* set `BS Label Columns`, `BS Input Columns` or `BS Note Columns` to customize an individual width.
-The sum of these three columns should always be 12.
+If only a number is specified, it's used as `col-md-<number>`. Else the whole text string is used as CSS class, e.g.
+`col-md-3 col-lg-2`.
 
 Multiple Elements per row
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -4196,7 +4241,7 @@ form with the following parameter
    * Type: `beforeSave`
    * Parameter:
 
-     * `sqlValidate={{!SELECT f.id FROM Form AS f WHERE f.name LIKE '{{myName:FE:alnumx}}' LIMIT 1}}`
+     * `sqlValidate={{SELECT f.id FROM Form AS f WHERE f.name LIKE '{{myName:FE:alnumx}}' LIMIT 1}}`
      * `expectRecords = 0`
      * `messageFail = There is already a form with this name`
      * `sqlAfter={{DELETE FROM Clipboard WHERE cookie='{{cookieQfq:C0:alnumx}}' }}`
@@ -4260,8 +4305,8 @@ Deleting a record just by specifying a table name, will only delete the defined 
 
 Example for report::
 
-   SELECT p.name, CONCAT('form=person&r=', p.id) AS _Paged FROM Person AS p
-   SELECT p.name, CONCAT('table=Person&r=', p.id) AS _Paged FROM Person AS p
+   SELECT p.name, CONCAT('U:form=person&r=', p.id) AS _paged FROM Person AS p
+   SELECT p.name, CONCAT('U:table=Person&r=', p.id) AS _paged FROM Person AS p
 
 To automatically delete slave records, use a form and create `beforeDelete` FormElement(s) on the form:
 
@@ -4280,7 +4325,7 @@ Support for record locking is given with mode:
 
 * *exclusive*: user can't force a write.
 
-  * Including a timeout (default 15 mins dirtyRecordTimeoutSeconds in configuration_) for maximum lock time.
+  * Including a timeout (default 15 mins recordLockTimeoutSeconds in configuration_) for maximum lock time.
 
 * *advisory*: user is only warned, but allowed to overwrite.
 * *none*: no bookkeeping about locks.
@@ -4309,7 +4354,7 @@ On `Form.parameter` define a `fillStoreVar` query with a column name equal to a 
 Example: ::
 
   FormElement.name = technicalContact
-  Form.parameter.fillStoreVar = {{!SELECT CONCAT(p.firstName, ' ', p.name) AS technicalContact FROM Person AS p WHERE p.account='{{feUser:T}}' }}
+  Form.parameter.fillStoreVar = {{SELECT CONCAT(p.firstName, ' ', p.name) AS technicalContact FROM Person AS p WHERE p.account='{{feUser:T}}' }}
 
 What we use here is the default STORE prio FSRVD. If the form loads with r=0, 'F', 'S' and 'R' are empty. 'V' is filled.
 If r>0, than 'F' and 'S' are empty and 'R' is filled.
@@ -4997,17 +5042,8 @@ For this reason, QFQ offers an inline report editing feature whenever there is a
 link symbol will appear on the right-hand side of each report record. Please note that the TYPO3 Frontend cache
 is also deleted upon each inline report save.
 
-In order for the inline report editing to work, QFQ needs to be able to access the T3 database. By default this database
-is assumed to be accessible with the same credentials as specified with indexData and is assumed to be named similarly to
-the indexData db name, but ending in _t3 instead of _db (e.g., mydb_db and mydb_t3).
-For a standard installation and db setup, this should be the case.
-
-You can however specify a custom T3 db name in config-qfq-php_:
-
-::
-
-    T3_DB_NAME = customT3DbName
-
+In order for the inline report editing to work, QFQ needs to be able to access the T3 database. This database
+is assumed to be accessible with the same credentials as specified with indexQfq.
 
 Structure
 ---------
