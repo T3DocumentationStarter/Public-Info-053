@@ -46,6 +46,7 @@ Notes
 ^^^^^
 
 * Config.qfq.php: the variable T3_DB_NAME is not necessary anymore.
+* Following SYSTEM_STORE variables renamed. Old: '_dbNameQfq' ,'_dbNameData'. New: 'dbNameQfq' ,'dbNameData'
 
 Features
 ^^^^^^^^

@@ -339,11 +339,11 @@ Example: *typo3conf/config.qfq.php*: ::
 
 After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
 
-+----------------+------------------------------------------------------------------------------------+
-| _dbNameData    | Can be used to dynamically access the current selected database: {{_dbNameData:Y}} |
-+----------------+------------------------------------------------------------------------------------+
-| _dbNameQfq     | Can be used to dynamically access the current selected database: {{_dbNameQfq:Y}}  |
-+----------------+------------------------------------------------------------------------------------+
++---------------+-----------------------------------------------------------------------------------+
+| dbNameData    | Can be used to dynamically access the current selected database: {{dbNameData:Y}} |
++---------------+-----------------------------------------------------------------------------------+
+| dbNameQfq     | Can be used to dynamically access the current selected database: {{dbNameQfq:Y}}  |
++---------------+-----------------------------------------------------------------------------------+
 
 .. _extension-manager-qfq-configuration:
 
@@ -414,9 +414,9 @@ Extension Manager: QFQ Configuration
 |                               |                                                       |   time QFQ is called - *not* recommended!                                  |
 |                               |                                                       | | *never*: never apply DB Updates.                                         |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| indexData                     | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameData:Y}}.  |
+| indexData                     | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{dbNameData:Y}}.   |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| indexQfq                      | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{_dbNameQfq:Y}}.   |
+| indexQfq                      | 1                                                     | Optional. Default: 1. Retrieve the current setting via {{dbNameQfq:Y}}.    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Security                                                                                                                                                           |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
