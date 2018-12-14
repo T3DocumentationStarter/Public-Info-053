@@ -247,9 +247,9 @@ Setup a *report* to manage all *forms*:
     10 {
         # List of Forms: Do not show this list of forms if there is a form given by SIP.
         # Table header.
-        sql = SELECT CONCAT('p:{{pageId:T}}&form=form') as _pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
+        sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form') as _pagen, '#', 'Name', 'Title', 'Table', '' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
         head = {{'b|p:id={{pageAlias:T}}&form=copyFormFromExt|t:Copy form from ExtForm' AS _link}}
-               <table class="table table-hover qfq-table-50">
+               <table class="table table-hover qfq-table-50 tablesorter tablesorter-filter">
         tail = </table>
         rbeg = <thead><tr>
         rend = </tr></thead>
@@ -258,7 +258,7 @@ Setup a *report* to manage all *forms*:
 
         10 {
             # All forms
-            sql = SELECT CONCAT('p:{{pageId:T}}&form=form&r=', f.id) as _pagee
+            sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form&r=', f.id) as _pagee
                          , f.id, f.name, f.title, f.tableName
                          , CONCAT('U:form=form&r=', f.id) as _paged
                       FROM Form AS f
@@ -601,7 +601,7 @@ To get the name and current period: ::
 
 Typically, it's necessary to offer a 'previous' / 'next' link. In this example, the STORE SIP holds the new periodId: ::
 
-  SELECT CONCAT('id={{pageId:T}}&periodId=', {{periodId:SY0}}-1, '|Next') AS _Page, ' ', name, ' ', CONCAT('id={{pageId:T}}&periodId=', {{periodId:SY0}}+1, '|Next') AS _Page FROM Period AS s WHERE s.id={{periodId:SY0}}
+  SELECT CONCAT('p:{{pageAlias:T}}&periodId=', {{periodId:SY0}}-1, '|Next') AS _page, ' ', name, ' ', CONCAT('p:{{pageAlias:T}}&periodId=', {{periodId:SY0}}+1, '|Next') AS _page FROM Period AS s WHERE s.id={{periodId:SY0}}
 
 Take care for minimum and maximum indexes (do not render the links if out of range).
 
@@ -998,7 +998,7 @@ The following QFQ code could be used for that purpose (put it in a QFQ PageConte
                FROM gGroup AS gr
                INNER JOIN MailLog AS ml ON ml.grId = gr.id
                GROUP BY gr.id
-      head = <form onchange='this.submit();' class='form-inline'><input type='hidden' name='id' value='{{pageId:T0}}'>Filter By Group: <select name='grId' class='form-control'><option value=''></option>
+      head = <form onchange='this.submit();' class='form-inline'><input type='hidden' name='id' value='{{pageAlias:T0}}'>Filter By Group: <select name='grId' class='form-control'><option value=''></option>
       rbeg = <option value='
       rend = </option>
       tail = </select>
@@ -1033,7 +1033,7 @@ For debugging purposes you may like to add a Form Submit Log page in the fronten
 The following QFQ code could be used for that purpose (put it in a QFQ PageContent element): ::
 
     # Filters
-    20.shead = <form onchange='this.submit()' class='form-inline'><input type='hidden' name='id' value='{{pageId:T0}}'>
+    20.shead = <form onchange='this.submit()' class='form-inline'><input type='hidden' name='id' value='{{pageAlias:T0}}'>
     20 {
       sql = SELECT id, IF(id = '{{formId:SC0}}', "' selected>", "'>"), name
             FROM Form ORDER BY name
@@ -2484,9 +2484,9 @@ Optional it might be defined via *Form.parameter* ::
 
 The following shows the same *Form* in the `regular`, `readonly` and `requiredOff` mode::
 
-	10.sql = SELECT CONCAT('from&form=person&r=', p.id, '|Regular') as _Pagee,
-	                CONCAT('from&form=person&formModeGlobal=readonly&r=', p.id, '|Readonly') as _Pagee,
-	                CONCAT('from&form=person&formModeGlobal=requiredOff&r=', p.id, '|Required off') as _Pagee
+	10.sql = SELECT CONCAT('p:{{pageAlias:T}}&form=person&r=', p.id, '|Regular') as _pagee,
+	                CONCAT('p:{{pageAlias:T}}&form=person&formModeGlobal=readonly&r=', p.id, '|Readonly') as _pagee,
+	                CONCAT('p:{{pageAlias:T}}&form=person&formModeGlobal=requiredOff&r=', p.id, '|Required off') as _pagee
 	                FROM Person AS p
 
 ..
@@ -3967,7 +3967,7 @@ Parameter
   `pId` in the link who calls the address form. The following creates a 'new' button for an address for all persons, and
   the pId will be automatically saved in the address table: ::
 
-		SELECT CONCAT('{{pageAlias:T}}&form=address&r=0&pId=', p.id) AS _pagen FROM Person AS p
+		SELECT CONCAT('p:{{pageAlias:T}}&form=address&r=0&pId=', p.id) AS _pagen FROM Person AS p
 
   Such parameter, which the form expects to be in the SIP url, should be specified in Form.permitNew and/or Form.permitEdit.
   It's only a check for the webmaster, not to forgot a parameter in a SIP url.
@@ -4402,12 +4402,12 @@ QFQ content record::
   # Creates a small form that redirects back to this page
   10 {
     sql = SELECT '_'
-    head = <form action='#' method='get'><input type='hidden' name='id' value='{{pageId:T}}'>Search: <input type='text' name='search' value='{{search:CE:all}}'><input type='submit' value='Submit'></form>
+    head = <form action='#' method='get'><input type='hidden' name='id' value='{{pageAlias:T}}'>Search: <input type='text' name='search' value='{{search:CE:all}}'><input type='submit' value='Submit'></form>
   }
 
   # SQL statement will find and list all the relevant forms - be careful not to open a cross site scripting door: the parameter 'search' needs to be sanitized.
   20 {
-    sql = SELECT CONCAT('?detail&form=form&r=', f.id) AS _Pagee, f.id, f.name, f.title
+    sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form&r=', f.id) AS _pagee, f.id, f.name, f.title
               FROM Form AS f
               WHERE f.name LIKE  '%{{search:CE:alnumx}}%'
     head = <table class='table'>
@@ -4955,7 +4955,7 @@ tells QFQ to separate the rows of the result by a HTML-line break. The final res
 ::
 
     10.sql = SELECT id AS personId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
-    10.sep = <br>
+    10.rsep = <br>
 
 HTML output:
 ::
@@ -5397,7 +5397,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |x  |   |Mail          |m:<email>                          |m:info@example.com         |Default link class: email                                                                                                               |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|x  |   |Page          |p:<pageId>                         |p:impressum                |Prepend '?' or '?id=', no hostname qualifier (automatically set by browser), default value: {{pageId}}                                  |
+|x  |   |Page          |p:<pageId>                         |p:impressum                |Prepend '?' or '?id=', no hostname qualifier (automatically set by browser)                                                             |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |x  |   |Download      |d:[<exportFilename>]               |d:complete.pdf             |Link points to `api/download.php`. Additional parameter are encoded into a SIP. 'Download' needs an enabled SIP.  See `download`_.      |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -5622,22 +5622,22 @@ The colum name is composed of the string *page* and a trailing character to spec
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
 |  column name  |  Purpose                                      |default value of question parameter  |  Mandatory parameters                        |
 +===============+===============================================+=====================================+==============================================+
-|_page          |Internal link without a grafic                 |empty                                |p:<pageId>[&param]                            |
+|_page          |Internal link without a grafic                 |empty                                |p:<pageId/pageAlias>[&param]                  |
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
-|_pagec         |Internal link without a grafic, with question  |*Please confirm!*                    |p:<pageId>[&param]                            |
+|_pagec         |Internal link without a grafic, with question  |*Please confirm!*                    |p:<pageId/pageAlias>[&param]                  |
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
 |_paged         |Internal link with delete icon (trash)         |*Delete record ?*                    | | U:form=<formname>&r=<record id> *or*       |
 |               |                                               |                                     | | U:table=<tablename>&r=<record id>          |
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
-|_pagee         |Internal link with edit icon (pencil)          |empty                                |p:<pageId>[&param]                            |
+|_pagee         |Internal link with edit icon (pencil)          |empty                                |p:<pageId/pageAlias>[&param]                  |
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
-|_pageh         |Internal link with help icon (question mark)   |empty                                |p:<pageId>[&param]                            |
+|_pageh         |Internal link with help icon (question mark)   |empty                                |p:<pageId/pageAlias>[&param]                  |
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
-|_pagei         |Internal link with information icon (i)        |empty                                |p:<pageId>[&param]                            |
+|_pagei         |Internal link with information icon (i)        |empty                                |p:<pageId/pageAlias>[&param]                  |
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
-|_pagen         |Internal link with new icon (sheet)            |empty                                |p:<pageId>[&param]                            |
+|_pagen         |Internal link with new icon (sheet)            |empty                                |p:<pageId/pageAlias>[&param]                  |
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
-|_pages         |Internal link with show icon (magnifier)       |empty                                |p:<pageId>[&param]                            |
+|_pages         |Internal link with show icon (magnifier)       |empty                                |p:<pageId/pageAlias>[&param]                  |
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
 
 
@@ -7388,7 +7388,7 @@ to edit `AutoCron` jobs: ::
 
     10 {
         # Table header.
-        sql = SELECT CONCAT('p:{{pageId:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment','Last run','In progress', 'Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
+        sql = SELECT CONCAT('p:{{pageAlias:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment','Last run','In progress', 'Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
         head = <table class='table table-hover qfq-table-50'>
         tail = </table>
         rbeg = <thead><tr>
@@ -7406,7 +7406,7 @@ to edit `AutoCron` jobs: ::
                             IF(c.inProgress!=0 AND DATE_ADD(c.inProgress, INTERVAL 10 MINUTE)<NOW(),'title="inProgress > 10mins"',
                             IF(c.lastStatus LIKE 'Error%','title="Status: Error"','')),
                             '>'),
-                        '<td>', CONCAT('p:{{pageId:T}}&form=cron&r=', c.id) AS _pagee, '</td><td>',
+                        '<td>', CONCAT('p:{{pageAlias:T}}&form=cron&r=', c.id) AS _pagee, '</td><td>',
                         c.id, '</td><td>',
                         IF(c.nextrun=0,"", DATE_FORMAT(c.nextrun, "%d.%m.%y %H:%i:%s")), '</td><td>',
                         c.frequency, '</td><td>',
