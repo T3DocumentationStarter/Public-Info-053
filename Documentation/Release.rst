@@ -30,6 +30,14 @@ Date: <date>
 Notes
 ^^^^^
 
+* Existing installations: update QFQ extension config form-layout.formBsColumns/formBsLabelColumns/formBsInputColumns,formBsNoteColumns.
+  old: 12, new: 'col-md-12 col-lg10' resp. smaller values for individual columnns.
+* New config values:
+
+  * Config/flagProduction: yes/now - differentiate between development und production system. Will be used for
+    'throwExceptionGeneralError' too.
+  * Debug/throwExceptionGeneralError - shows/hide exception of general errors.
+
 Features
 ^^^^^^^^
 

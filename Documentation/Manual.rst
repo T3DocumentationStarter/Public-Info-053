@@ -130,7 +130,7 @@ Different browser prints the same page in different variations. To prevent this,
 
 Provide a `print this page`-link (replace 'current pageId' )::
 
-	<a href="typo3conf/ext/qfq/qfq/api/print.php?id={current pageId}">Print this page</a>
+	<a href="typo3conf/ext/qfq/Source/api/print.php?id={current pageId}">Print this page</a>
 
 Any parameter specified after `print.php` will be delivered to `wkhtmltopdf` as part of the URL.
 
@@ -138,7 +138,7 @@ Typoscript code to implement a print link on every page::
 
 	10 = TEXT
 	10 {
-		wrap = <a href="typo3conf/ext/qfq/qfq/api/print.php?id=|&type=99"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
+		wrap = <a href="typo3conf/ext/qfq/Source/api/print.php?id=|&type=99"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
 		data = page:uid
 	}
 
@@ -148,7 +148,7 @@ Send Email
 QFQ sends mail via `sendEmail` http://caspian.dotconf.net/menu/Software/SendEmail/ - a small perl script without a central
 configuration.
 
-By default, `sendEmail` uses the local installed MTA, writes a logfile to `typo3conf/mail.log` and handles attachments
+By default, `sendEmail` uses the local installed MTA, writes a logfile to `fileadmin/protected/log/mail.log` and handles attachments
 via commandline options. A basic HTML email support is implemented.
 
 The latest version is v1.56, which has at least one bug. That one is patched in the QFQ internal version v1.56p1 (see
@@ -171,17 +171,17 @@ Usage: `column-thumbnail`_.
 Setup
 -----
 
-* Install the extension via the Extensionmanager.
+* Install the extension via the Extension Manager.
 
   * If you install the extension by manual download/upload and get an error message
-    "can't activate extension": rename the downloaded zip file to `qfq.zip` or `qfq_<version>.zip` (e.g. version: 0.9.1).
+    "can't activate extension": rename the downloaded zip file to `qfq.zip` or `qfq_<version>.zip` (e.g. version: 18.12.0).
 
-  * If the Extensionmanager stops after importing: check your memory limit in php.ini.
+  * If the Extension Manager stops after importing: check your memory limit in php.ini.
 
-* Copy/rename the file *<site path>/typo3conf/ext/qfq/config.example.qfq.php* to *config.qfq.php*.
+* Copy/rename the file *<site path>/typo3conf/ext/qfq/config.example.qfq.php* to *<site path>/typo3conf/config.qfq.php*.
   Configure the necessary settings `configuration`_
-  The configuration file is outside the of extension directory, to not loose it during updates.
-* When the QFQ Extension is called the first time on the Typo3 Frontend, the file *<ext_dir>/qfq/sql/formEditor.sql* will
+  The configuration file is outside of the extension directory, to not loose it during de-install and install again.
+* When the QFQ Extension is called the first time on the Typo3 frontend, the file *<ext_dir>/qfq/sql/formEditor.sql* will
   played and fills the database with the *Form editor* records. This also happens automatically after each update of QFQ.
 * Configure Typoscript to include Bootstrap, jQuery, QFQ javascript and CSS files.
 
@@ -272,8 +272,8 @@ Setup a *report* to manage all *forms*:
 
 .. _install-checklist:
 
-Install Check List
-------------------
+Installation: Check List
+------------------------
 
 * Protect the directory `<T3 installation>/fileadmin/protected` in Apache against direct file access.
 
@@ -358,6 +358,8 @@ Extension Manager: QFQ Configuration
 | documentation                 | http://docs.typo3.org...                              | Link to the online documentation of QFQ. Every QFQ installation also       |
 |                               |                                                       | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| flagProduction                | yes                                                   | yes|no: might be used to differentiate the installation                    |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | thumbnailDirSecure            | fileadmin/protected/qfqThumbnail                      | Important: secure directory 'protected' (recursive) against direct access. |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | thumbnailDirPublic            | typo3temp/qfqThumbnail                                | Both thumbnail directories will be created if not existing.                |
@@ -383,6 +385,10 @@ Extension Manager: QFQ Configuration
 |                               |                                                       | in case of an SQL error or not exact one record.                           |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Debug                                                                                                                                                              |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| throwExceptionGeneralError    | auto                                                  | | *yes*: 'general errors' in QFQ (PHP) will throw an exception.            |
+|                               |                                                       | | *auto*: becomes 'yes', if 'flagProduction'!='yes', else 'no'.            |
+|                               |                                                       | | *no*: 'general errors' in QFQ (PHP) will be silently ignored.            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | sqlLogMode                    | modify                                                | | *all*: every statement will be logged - this might a lot.                |
 |                               |                                                       | | *modify*: log only statements who change data. *error*: log only         |
@@ -461,13 +467,13 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | cssClassQfqFormBody           | qfq-color-grey-2                                      | Wrap around FormElements: CSS Class, typically a background color.         |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formBsColumns                 | 12                                                    | The whole form will be wrapped in 'col-md-??'. Default is 12 for 100%.     |
+| formBsColumns                 | col-md-12 col-lg-10                                   | The whole form will be wrapped. See `bs-custom-field-width`_               |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formBsLabelColumns            | 3                                                     | Default number of BS columns for the 'label'-column.                       |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formBsInputColumns            | 6                                                     | Default number of BS columns for the 'input'-column.                       |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formBsNoteColumns             | 3                                                     | Default number of BS columns for the 'note'-column.                        |
+| formBsLabelColumns            | col-md-3 col-lg-3                                     | The column get the width. See `bs-custom-field-width`_                     |
++-------------------------------+-------------------------------------------------------+                                                                            |
+| formBsInputColumns            | col-md-6 col-lg-6                                     |                                                                            |
++-------------------------------+-------------------------------------------------------+                                                                            |
+| formBsNoteColumns             | col-md-3 col-lg-3                                     |                                                                            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | extraButtonInfoInline         | <img src="info.png">                                  | Image for `extraButtonInfo`_ (inline).                                     |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -2113,7 +2119,7 @@ Definition
 |BS Label Columns         | The bootstrap grid system is based on 12 columns. The sum of *bsLabelColumns*,                                                                     |
 +-------------------------+ *bsInputColumns* and *bsNoteColumns* should be 12. These values here are the base values                                                           |
 |BS Input Columns         | for all *FormElements*. Exceptions per *FormElement* can be specified per *FormElement*.                                                           |
-+-------------------------+ Default: label=3, input=6, note=3. See `form-layout`_.                                                                                             |
++-------------------------+ Default: label=col-md-3, input=col-md-6, note=col-md-3. See `form-layout`_.                                                                        |
 |BS Note Columns          |                                                                                                                                                    |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |multiMode                | NOT IMPLEMENTED - 'none, horizontal, vertical' (Default 'none')                                                                                    |
@@ -2288,7 +2294,7 @@ Parameter
 +=============================+========+==========================================================================================================+
 | dbIndex                     | int    | Database credential index, given via `config-qfq-php`_ to let the current `Form` operate on the database.|
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| bsColumns                   | int    | Wrap the whole form in '<div class="col-md-??">                                                          |
+| bsColumns                   | string | Wrap the whole form in '<div class="col-md-.. col-lg-..">. See  `bs-custom-field-width`_.                |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | maxVisiblePill              | int    | Show pills upto <maxVisiblePill> as button, all further in a drop-down menu. Eg.: maxVisiblePill=3.      |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2698,12 +2704,12 @@ Fields:
 |Size                 | string                      |Visible length of input element. Might be omitted, depending on the chosen form layout.              |
 |                     |                             |Format: <width>,<height> (in characters)  _`field-size`                                              |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|BS Label Columns     | string                      | Number of bootstrap grid columns for label. By default empty, value inherits from the form.         |
-|                     |                             | _`field-bsLabelColumns`                                                                             |
-+---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|BS Input Columns     | string                      | Number of bootstrap grid columns for input. By default empty, value inherits from the form.         |
-+---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|BS Note Columns      | string                      | Number of bootstrap grid columns for note. By default empty, value inherits from the form.          |
+|BS Label Columns     | string                      | Number of bootstrap grid columns. By default empty, value inherits from the form.                   |
+|                     |                             | _`field-bsLabelColumns`. See `bs-custom-field-width`_                                               |
++---------------------+-----------------------------+                                                                                                     |
+|BS Input Columns     | string                      |                                                                                                     |
++---------------------+-----------------------------+                                                                                                     |
+|BS Note Columns      | string                      |                                                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Label / Input / Note | enum(...)                   | Switch on/off opening|closing of bootstrap form classes _`field-rowLabelInputNote`                  |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
@@ -4154,6 +4160,8 @@ The used default column (=bootstrap grid) width is *3,6,3* (col-md , col-lg) for
 
 A column will be switched off (no wrapping via `<div class='col-md-?>`) by setting a `0` on the respective column.
 
+.. _bs-custom-field-width:
+
 Custom field width
 ^^^^^^^^^^^^^^^^^^
 
@@ -5538,11 +5546,11 @@ Link Examples
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT "p:form_person|C:green" AS _link                               | <a href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>                       |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "U:form=Person&r=123|x|D" as _link                             | <a href="typo3conf/ext/qfq/qfq/api/delete.php?s=badcaffee1234"><span class="glyphicon glyphicon-trash" ></span>"></a>                   |
+| SELECT "U:form=Person&r=123|x|D" as _link                             | <a href="typo3conf/ext/qfq/Source/api/delete.php?s=badcaffee1234"><span class="glyphicon glyphicon-trash" ></span>"></a>                   |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "U:form=Person&r=123|x|t:Delete" as _link                      | <a href="typo3conf/ext/qfq/qfq/api/delete.php?s=badcaffee1234">Delete</a>                                                               |
+| SELECT "U:form=Person&r=123|x|t:Delete" as _link                      | <a href="typo3conf/ext/qfq/Source/api/delete.php?s=badcaffee1234">Delete</a>                                                               |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "s:1|d:full.pdf|M:pdf|p:id=det1&r=12|p:id=det2|F:cv.pdf|       | <a href="typo3conf/ext/qfq/qfq/api/download.php?s=badcaffee1234">Download</a>                                                           |
+| SELECT "s:1|d:full.pdf|M:pdf|p:id=det1&r=12|p:id=det2|F:cv.pdf|       | <a href="typo3conf/ext/qfq/Source/api/download.php?s=badcaffee1234">Download</a>                                                           |
 |         t:Download|a:Create complete PDF - please wait" as _link      |                                                                                                                                         |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT  "y:iatae3Ieem0jeet|t:Password|o:Clipboard|b" AS _link         | <button class="btn btn-info" onClick="new QfqNS.Clipboard({text: 'iatae3Ieem0jeet'});" title='Copy to clipboard'>Password</button>      |
@@ -6732,7 +6740,7 @@ element. Such HTML element:
 
 A `<div>` example HTML output (HTML send to the browser): ::
 
-    <div class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/qfq/api/dragAndDrop.php?s=badcaffee1234">
+    <div class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/Source/api/dragAndDrop.php?s=badcaffee1234">
         <div class="anyClass" id="<uniq1>" data-dnd-id="55">
             Numbero Uno
         </div>
@@ -6762,7 +6770,7 @@ A `<table>` based setup is also possible. Note the attribute  `data-columns="3"`
 which is the same column width as the outer table. ::
 
     <table>
-        <tbody class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/qfq/api/dragAndDrop.php?s=badcaffee1234" data-columns="3">
+        <tbody class="qfq-dnd-sort" data-dnd-api="typo3conf/ext/qfq/Source/api/dragAndDrop.php?s=badcaffee1234" data-columns="3">
             <tr> class="anyClass" id="<uniq1>" data-dnd-id="55">
                 <td>Numbero Uno</td><td>Numbero Uno.2</td><td>Numbero Uno.3</td>
             </tr>
@@ -7347,7 +7355,7 @@ The `AutoCron` service fires periodically jobs like `open a webpage` (typically 
 actions) or `send mail`.
 
 * AutoCron will be triggered via system cron. Minimal time distance therefore is 1 minute. If this is not sufficient,
-  any process who starts `.../typo3conf/ext/qfq/qfq/external/autocron.php` via `/usr/bin/php` frequently might be used.
+  any process who starts `.../typo3conf/ext/qfq/Source/external/autocron.php` via `/usr/bin/php` frequently might be used.
 
 * Custom start time and frequency.
 * Per job:
@@ -7370,7 +7378,7 @@ Setup
 
 Cron task:  ::
 
-  * * * * * /usr/bin/php /var/www/html/typo3conf/ext/qfq/qfq/external/autocron.php
+  * * * * * /usr/bin/php /var/www/html/typo3conf/ext/qfq/Source/external/autocron.php
 
 AutoCron Jobs of type 'website' needs the php.ini setting: ::
 
