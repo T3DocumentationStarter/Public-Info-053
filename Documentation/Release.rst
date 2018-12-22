@@ -30,20 +30,91 @@ Date: <date>
 Notes
 ^^^^^
 
-* Existing installations: update QFQ extension config form-layout.formBsColumns/formBsLabelColumns/formBsInputColumns,formBsNoteColumns.
-  old: 12, new: 'col-md-12 col-lg10' resp. smaller values for individual columnns.
-* New config values:
-
-  * Config/flagProduction: yes/now - differentiate between development und production system. Will be used for
-    'throwExceptionGeneralError' too.
-  * Debug/throwExceptionGeneralError - shows/hide exception of general errors.
-
 Features
 ^^^^^^^^
 
 Bug Fixes
 ^^^^^^^^^
 
+
+Version 18.12.1
+---------------
+
+Date: 22.12.2018
+
+Notes
+^^^^^
+
+* Existing installations: update QFQ extension config form-layout.formBsColumns/formBsLabelColumns/formBsInputColumns,formBsNoteColumns.
+  old: 12, new: 'col-md-12 col-lg10' resp. smaller values for individual columns.
+* New config values:
+
+  * Config/flagProduction: yes/now - differentiate between development und production system. Will be used for
+    'throwExceptionGeneralError' too.
+  * Debug/throwExceptionGeneralError - shows/hide exception of general errors.
+
+* Renamed config values:
+
+  * SITE_PATH >> sitePath
+  * EXT_PATH >> extPath
+  * _dbName >> dbName
+
+* Record locking: revert to old behaviour, that a locked record can't be modified by another form, even if the second
+  form has modeRecordLock=NONE.
+
+Features
+^^^^^^^^
+
+* #7228 / Show error if form element with same name and class already exists.
+* #7494 / Exception 'General Error': disable/enable per config.
+* Adapt class paths in composer.json to the newly refactored folder names.
+* Add col-lg-10 to notes section.
+* Added Alert Manager to have better control over the Alerts.
+* Config.php: make 'reading dbname' Typo3 version dependent.
+* Delete two old composer.json and call new composer in Makefile.
+* Excel.php: change autoload.php path to new composer folder.
+* Manual.rst: several places where the bs-column description are updated with the new way 'col-md-...' instead of '12'.
+  Replace ''{{pageId' with '{{pageAlias'. Replace '... AS _Page' by '... AS _page'. Add 'tablesorter tablesorter-filter'
+  to FormEditor example page.
+* Move bootstrap.php and BindParamTest.php due to refactoring.
+* phpunit.xml: implement const 'PHPUNIT_QFQ'. Store.php: set self::$phpUnit on const 'PHPUNIT_QFQ'
+* Refactor: 'extension/qfq/qfq/...' to 'extension/Source/core/...'
+* Refactor: Manual.rst update config variables (reorder), add 'qfqLog'. Support.php: formSubmitLog hardcoded to
+  fileadmin/protected/log. DOCUMENTATION_QFQ > SYSTEM_DOCUMENTATION_QFQ. Remove config var 'logDir'.
+* Refactor: SITE_PATH >> sitePath, EXT_PATH >> extPath, SYSTEM_PATH_EXT >> SYSTEM_EXT_PATH
+* Remove report/Define.php, report/Error.php.
+
+Bug Fixes
+^^^^^^^^^
+
+* #3464 / Checkboxes now disabled (readonly), even when rendered as Bootstrap. Fixes missing readonly for Template Groups.
+* #6467 / Sanitizing a hidden field makes the form unsubmittable. Updated elementupdate for pattern, added "false" as an
+  alternative to null.  'element-update' now get's 'pattern=<pattern>|false' on element-update.
+* #7089 / FE.type=extra: value already set in SIP store.
+* #7223 / Add "-" as allowed characters in filenames.
+* #7455 / phpunit: Remove outdated report syntax. Catch exception on trying to open a non existing logfile.
+* #7461 / Bug in Doku.
+* #7464 / DragAndDrop - Undefined index: ord. Bug in subrecord fixed.
+* AbstractException.php: fixed problem with empty $match in sql syntax highlighting.
+* Block screen stuck seems fixed.
+* Check not to try to number_format() empty string.
+* config.qfq.example.php: add missing '>'.
+* Fixed broken init in phpunit run. Fixed access to uninitialized var. Throw exception if dndTable or form is missing.
+* Fixed missing $formElement[FE_DECIMAL_FORMAT]. Add 'missing primary record' check. Fixed missing fe['id'].
+* Fixed problem with '?:' - implemented in 2016.
+* Fixed problem with resultset in 'altsql'.
+* formEditor.sql, Manual.rst: renamed '{{_dbName...:Y}}' to '{{dbName...:Y}}'.
+* Manual.rst: Unify 'dbName*' documentation..
+* phpunit: Update fixtures table 'Form', 'FormElement' & 'Dirty' definition. Update LDAP Test - surrounding spaces seems
+  to be escaped now by '\20'. Create tests dir outside of source, create phpunit.xml, move some tests and make them work.
+  Rename tests directory to Tests
+* Record Lock. Revert change in cb2e2a70cfe5c251cffbfce65bdc0899da75a9c5: if a record lock exist, another form, with
+  record lock mode=NONE, can't get write access to it. This is what the manual describes.
+* Sanitize.php: fixes "Uninitialized string offset: 0" error.
+* Save.php: Fixed exception (file size, mime type) for non-existing uploads.
+* Store.php: fixed problem with wrong config varname for DB.
+* Timeout check throws error since php.ini cookie lifetime is zero during unit test. Fix filepath relative to Typo3 dir
+  when running unit test.
 
 Version 18.12.0
 ---------------

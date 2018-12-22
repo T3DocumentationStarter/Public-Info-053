@@ -306,8 +306,8 @@ config.qfq.php
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | DB_<n>_NAME                   | DB_1_NAME=qfq_db                                      | Database name                                                              |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| LDAP_1_RDN                    | LDAP_1_RDN='ou=Admin,ou=example,dc=com'               | Credentials for non-anonymous LDAP access. At the moment only one set of   |
-| LDAP_1_PASSWORD               | LDAP_1_PASSWORD=mySecurePassword                      |                                                                            |
+| LDAP_1_RDN                    | LDAP_1_RDN='ou=Admin,ou=example,dc=com'               | Credentials for non-anonymous LDAP access. Only one set supported.         |
+| LDAP_1_PASSWORD               | LDAP_1_PASSWORD='mySecurePassword'                    |                                                                            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 
 
@@ -325,25 +325,17 @@ Example: *typo3conf/config.qfq.php*: ::
         'DB_1_PASSWORD' => '<DBPW>',
         'DB_1_NAME' => '<DB>',
 
-        //DB_2_USER = <DBUSER>
-        //DB_2_SERVER = <DBSERVER>
-        //DB_2_PASSWORD = <DBPW>
-        //DB_2_NAME = <DB>
+        //DB_2_USER => <DBUSER>
+        //DB_2_SERVER => <DBSERVER>
+        //DB_2_PASSWORD => <DBPW>
+        //DB_2_NAME => <DB>
 
         // DB_n ...
         // ...
 
-        // LDAP_1_RDN =
-        // LDAP_1_PASSWORD =
+        // LDAP_1_RDN => 'ou=Admin,ou=example,dc=com'
+        // LDAP_1_PASSWORD => 'mySecurePassword'
     ];
-
-After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
-
-+---------------+-----------------------------------------------------------------------------------+
-| dbNameData    | Can be used to dynamically access the current selected database: {{dbNameData:Y}} |
-+---------------+-----------------------------------------------------------------------------------+
-| dbNameQfq     | Can be used to dynamically access the current selected database: {{dbNameQfq:Y}}  |
-+---------------+-----------------------------------------------------------------------------------+
 
 .. _extension-manager-qfq-configuration:
 
@@ -390,6 +382,12 @@ Extension Manager: QFQ Configuration
 |                               |                                                       | | *auto*: becomes 'yes', if 'flagProduction'!='yes', else 'no'.            |
 |                               |                                                       | | *no*: 'general errors' in QFQ (PHP) will be silently ignored.            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| formSubmitLogMode             | all                                                   | | *all*: every form submission will be logged.                             |
+|                               |                                                       | | *none*: no logging.                                                      |
+|                               |                                                       | | See `Form Submit Log page`_ for example qfq code to display the log.     |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| redirectAllMailTo             | john@doe.com                                          | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | sqlLogMode                    | modify                                                | | *all*: every statement will be logged - this might a lot.                |
 |                               |                                                       | | *modify*: log only statements who change data. *error*: log only         |
 |                               |                                                       |   DB errors.                                                               |
@@ -398,17 +396,14 @@ Extension Manager: QFQ Configuration
 | sqlLog                        | fileadmin/protected/log/sql.log                       | Filename to log SQL commands: relative to <site path> or absolute. If the  |
 |                               |                                                       | directory does not exist, create it.                                       |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formSubmitLogMode             | all                                                   | | *all*: every form submission will be logged.                             |
-|                               |                                                       | | *none*: no logging.                                                      |
-|                               |                                                       | | See `Form Submit Log page`_ for example qfq code to display the log.     |
+| qfqLog                        | fileadmin/protected/log/qfq.log                       | Filename to log general QFQ events:relative to <site path> or absolute.    |
+|                               |                                                       | If the directory does not exist, create it.                                |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | mailLog                       | fileadmin/protected/log/mail.log                      | Filename to log `sendEmail` commands: relative to <site path> or absolute. |
 |                               |                                                       | If the directory does not exist, create it.                                |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | showDebugInfo                 | auto                                                  | FE - Possible values: yes|no|auto|download. For 'auto': If a BE User is    |
 |                               |                                                       | logged in, a debug information will be shown on the FE.                    |
-+-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| redirectAllMailTo             | john@doe.com                                          | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Database                                                                                                                                                           |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -528,16 +523,20 @@ Extension Manager: QFQ Configuration
 | cssClassColumnId              | text-muted                                            | A column in a subrecord with the name id|ID|Id gets this class.            |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 
-Automatically filled by QFQ:
+After parsing the configuration, the following variables will be set automatically in STORE_SYSTEM:
 
 +-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | Keyword                       | Description                                                                                                                        |
 +===============================+====================================================================================================================================+
-| dbNameData                    | Use this to get name of the configured 'data'-database. '{{dbNameData:Y}}                                                          |
+| dbNameData                    | Name of the 'data'-database. '{{dbNameData:Y}}                                                                                     |
 +-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| dbNameQfq                     | Use this to get name of the configured 'QFQ'-database. '{{dbNameQfq:Y}}                                                            |
+| dbNameQfq                     | Name of the 'QFQ'-database. '{{dbNameQfq:Y}}                                                                                       |
 +-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| dbNameT3                      | Use this to get name of the configured 'T3'-database. '{{dbNameT3:Y}}                                                              |
+| dbNameT3                      | Name of the 'T3'-database. '{{dbNameT3:Y}}                                                                                         |
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| sitePath                      | Absolute path of the current T3 instance. '{{sitePath:Y}}                                                                          |
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| extPath                       | Absolute path of the QFQ extension. '{{extPath:Y}}                                                                                 |
 +-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -5546,11 +5545,11 @@ Link Examples
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT "p:form_person|C:green" AS _link                               | <a href="?form_person"><img alttext="Check" src="typo3conf/ext/qfq/Resources/Public/icons/checked-green.gif"></a>                       |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "U:form=Person&r=123|x|D" as _link                             | <a href="typo3conf/ext/qfq/Source/api/delete.php?s=badcaffee1234"><span class="glyphicon glyphicon-trash" ></span>"></a>                   |
+| SELECT "U:form=Person&r=123|x|D" as _link                             | <a href="typo3conf/ext/qfq/Source/api/delete.php?s=badcaffee1234"><span class="glyphicon glyphicon-trash" ></span>"></a>                |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "U:form=Person&r=123|x|t:Delete" as _link                      | <a href="typo3conf/ext/qfq/Source/api/delete.php?s=badcaffee1234">Delete</a>                                                               |
+| SELECT "U:form=Person&r=123|x|t:Delete" as _link                      | <a href="typo3conf/ext/qfq/Source/api/delete.php?s=badcaffee1234">Delete</a>                                                            |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
-| SELECT "s:1|d:full.pdf|M:pdf|p:id=det1&r=12|p:id=det2|F:cv.pdf|       | <a href="typo3conf/ext/qfq/Source/api/download.php?s=badcaffee1234">Download</a>                                                           |
+| SELECT "s:1|d:full.pdf|M:pdf|p:id=det1&r=12|p:id=det2|F:cv.pdf|       | <a href="typo3conf/ext/qfq/Source/api/download.php?s=badcaffee1234">Download</a>                                                        |
 |         t:Download|a:Create complete PDF - please wait" as _link      |                                                                                                                                         |
 +-----------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 | SELECT  "y:iatae3Ieem0jeet|t:Password|o:Clipboard|b" AS _link         | <button class="btn btn-info" onClick="new QfqNS.Clipboard({text: 'iatae3Ieem0jeet'});" title='Copy to clipboard'>Password</button>      |
