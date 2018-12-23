@@ -71,6 +71,9 @@ Notes
 
 * Record locking: revert to old behaviour, that a locked record can't be modified by another form, even if the second
   form has modeRecordLock=NONE.
+* Autocron: update the system crontab entry to the new path (old 'qfq', new 'Source'):
+
+   .../typo3conf/ext/qfq/Source/external/autocron.php
 
 Features
 ^^^^^^^^
