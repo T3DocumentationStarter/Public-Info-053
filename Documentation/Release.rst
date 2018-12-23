@@ -22,8 +22,8 @@
 Release
 =======
 
-Version 18.x.x
---------------
+Version 18.xx.x
+---------------
 
 Date: <date>
 
@@ -35,6 +35,16 @@ Features
 
 Bug Fixes
 ^^^^^^^^^
+
+Version 18.12.2
+---------------
+
+Date: 23.12.2018
+
+Bug Fixes
+^^^^^^^^^
+
+* Version 18.12.1 was broken due to incorrect and missing autoloader dependencies.
 
 
 Version 18.12.1
