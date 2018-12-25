@@ -4982,7 +4982,7 @@ For **each** row of a query (this means *all* queries), all subqueries will be f
 
 * E.g. if the outer query selects 5 rows, and a nested query select 3 rows, than the total number of rows are 5 x 3 = 15 rows.
 
-There is a set of **variables** that will get replaced before the SQL-Query gets executed:
+There is a set of **variables** that will get replaced before ('count' also after) the SQL-Query gets executed:
 
 ``{{<name>[:<store/s>[:...]]}}``
   Variables from specific stores.
@@ -5004,6 +5004,13 @@ There is a set of **variables** that will get replaced before the SQL-Query gets
 
 ``{{<level>.line.content}}``
   If the content of `<level>` have been stored, e.g. `<level>.content=hide`.
+
+``{{<level>.line.altCount}}`` - Like 'line.count' but for 'alt' query.
+
+``{{<level>.line.altTotal}}`` - Like 'line.total' but for 'alt' query.
+
+``{{<level>.line.altInsertId}}`` - Like 'line.insertId' but for 'alt' query.
+
 
 
 See :ref:`variables` for a full list of all available variables.
@@ -6134,30 +6141,6 @@ Most of the other Link-Class attributes can be used to customize the link. ::
 
 		10.sql = SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test.pdf|p:id=export&r=1|u:www.example.com" AS _pdf
 
-.. _column_ppdf:
-
-Column: _Pdf | _File | _Zip
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Detailed explanation: download_
-
-A limited set of attributes is supported: ::
-
-    10.sql = SELECT "[options]" AS _Pdf, "[options]" AS _File, "[options]" AS _Zip
-
-    with: [options] = [<exportFilename>]|[<text>]|[<1: urlparam|file>]|[<2: urlparam|file>]| ... |[<n: urlparam|file>]
-
-* Parameter are position dependent and therefore without a qualifier!
-* `<urlparam>` or `<file>` might be given.
-* If there is more than one `<urlparam|file>`, only `_Pdf` or `_Zip` is possible.
-* Example: ::
-
-		SELECT "||fileadmin/test.pdf" AS _File, "||fileadmin/test.pdf" AS _Pdf, "||fileadmin/test.pdf" AS _Zip
-		SELECT "output.pdf|Download PDF|fileadmin/test.pdf" AS _File, "output.pdf|Download PDF|fileadmin/test.pdf" AS _Pdf, "output.zip|Download ZIP|fileadmin/test.pdf" AS _Zip
-
-		SELECT "complete.pdf|Download PDF|fileadmin/test1.pdf|fileadmin/test2.pdf|id=export&r=1" AS _Pdf
-
-
 .. _column-save-pdf:
 
 Column: _savePdf
@@ -6348,7 +6331,7 @@ By using the `_link` column name:
 
 * the option `d:...` initiate creating the download link and optional specifies an export filename,
 * the optional `M:...` (Mode) specifies the export type (file, pdf, zip, export),
-* setting `s:1` is mandatory for the download function,
+* setting `s:1` is recommended for the download function (file / path name is hidden to the user),
 * the alttext `a:...` specifies a message in the download popup.
 
 By using `_pdf`,  `_Pdf`, `_file`, `_File`, `_zip`, `_Zip`, `_excel` as column name, the options `d`, `M` and `s`

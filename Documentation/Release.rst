@@ -36,16 +36,36 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-Version 18.12.2
+Version 18.12.3
 ---------------
 
-Date: 23.12.2018
+Date: 25.12.2018
+
+Features
+^^^^^^^^
+
+* Form: Add text 'Record id/Created/Modified' to tooltip of save button.
 
 Bug Fixes
 ^^^^^^^^^
 
-* Version 18.12.1 was broken due to incorrect and missing autoloader dependencies.
+* #7540 / Form: Upload broken. HelperFile.php: correctRelativePathFileName() broken after refactor of qfq paths.
+* #7514 / Report: Broken defaults in _pdf, _file, _link.
+* #7538 / Report: Excel.php - access to undefined index.
+* #7289 / Report: {{<level>.line.insertId}} - missing for altsql.
+* #7539 / Report: Copy to clipboard not reliable. 'Direct' content now correctly encoded. 'Copy file content' fully implemented
+  for text files.
 
+
+Version 18.12.2
+---------------
+
+Date: 24.12.2018
+
+Notes
+^^^^^
+
+* Version skipped. Build problems in CI queue.
 
 Version 18.12.1
 ---------------
@@ -71,6 +91,7 @@ Notes
 
 * Record locking: revert to old behaviour, that a locked record can't be modified by another form, even if the second
   form has modeRecordLock=NONE.
+
 * Autocron: update the system crontab entry to the new path (old 'qfq', new 'Source'):
 
    .../typo3conf/ext/qfq/Source/external/autocron.php
@@ -128,6 +149,7 @@ Bug Fixes
 * Store.php: fixed problem with wrong config varname for DB.
 * Timeout check throws error since php.ini cookie lifetime is zero during unit test. Fix filepath relative to Typo3 dir
   when running unit test.
+
 
 Version 18.12.0
 ---------------
