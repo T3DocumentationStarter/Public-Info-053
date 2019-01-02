@@ -2270,7 +2270,7 @@ The CLIENT `submit_reason` shows the user action:
 Example forwardPage
 ^^^^^^^^^^^^^^^^^^^
 
-* `{{SELECT IF('{{formModeGlobal:S:alnumx}}'='requiredOff', 'no', 'auto') }}`
+* `{{SELECT IF('{{formModeGlobal:S}}'='requiredOff', 'no', 'auto') }}`
 * `{{SELECT IF('{{submit_reason:CE:alnumx}}'='save', 'no', 'url'), '|http://example.com' }}`
 
 Type: combined dynamic mode & URL/page
@@ -2855,7 +2855,7 @@ See also at specific *FormElement* definitions.
 | max                    | s/d/n  | *Always use the international format 'yyyy-mm-dd[ hh:mm[:ss]]*                                           |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | processReadOnly        | [n]    | [0|1] By default FE's with type='readonly' are not processed during 'save'.                              |
-|                        |        | This option forces to process during 'save' them as well.                                                |
+|                        |        | This option forces to process them during 'save' as well.                                                |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | retype                 | string | See `input-text`_                                                                                        |
 | retypeLabel            | string |                                                                                                          |
@@ -6811,13 +6811,13 @@ Fields:
 
 * Parameter:
 
-+-------------------------------------+--------------------------------------------------------------------------------+
-| Attribute                           | Description                                                                    |
-+=====================================+================================================================================+
-| orderInterval = <number>            | Optional. By default '10'. Might be any number > 0.                            |
-+-------------------------------------+--------------------------------------------------------------------------------+
-| orderColumn = <column name>         | Optional. By default 'ord'.                                                    |
-+-------------------------------------+--------------------------------------------------------------------------------+
++-------------------------------------------------------+--------------------------------------------------------------+
+| Attribute                                             | Description                                                  |
++=======================================================+==============================================================+
+| orderInterval = <number>                              | Optional. By default '10'. Might be any number > 0.          |
++-------------------------------------------------------+--------------------------------------------------------------+
+| orderColumn = <column name>                           | Optional. By default 'ord'.                                  |
++-------------------------------------------------------+--------------------------------------------------------------+
 | dragAndDropOrderSql =                                 | Query to selects the *same* records as the report in the     |
 | {{!SELECT n.id AS id, n.ord AS ord FROM Note AS n     | same *order!* Inconsistencies results in order differences.  |
 | ORDER BY n.ord}}                                      | The columns `id` and `ord` are *mandatory.*                  |

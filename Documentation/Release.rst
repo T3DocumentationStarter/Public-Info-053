@@ -22,7 +22,7 @@
 Release
 =======
 
-Version 18.xx.x
+Version 19.xx.x
 ---------------
 
 Date: <date>
@@ -35,6 +35,32 @@ Features
 
 Bug Fixes
 ^^^^^^^^^
+
+
+Version 19.01.0
+---------------
+
+Date: 03.01.2019
+
+Notes
+^^^^^
+
+Features
+^^^^^^^^
+
+* Session expired: report details about session timestamps
+* File not found in FE.type=file: Show more clearly that the pathfilename is only shown when ShowDebugInfo=on.
+
+Bug Fixes
+^^^^^^^^^
+
+* #7553 / If a pill is hidden, FE on that one should not be processed during save/update.
+* #7573 / Upload: Do FillStoreVar before slaveId.
+* #7551 / General error: Access to undefined index.
+* #7544 / General error: Download.php / Line: 175.
+* #7543 / General error: QuickFormQuery.php / Line: 1364. Happened during upload.
+* Download Excel (and all other download types): Content-Disposition header delivered/suppressed in the opposite
+  meaning as it should be. Seems to be fixed now.
 
 Version 18.12.3
 ---------------
