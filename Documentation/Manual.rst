@@ -3055,11 +3055,13 @@ Type: datetime
 Type: extra
 ^^^^^^^^^^^
 
+* The element behaves like, and can be used as, a HTML hidden input element - with the difference & advantage, that the
+  element never leaves the server and therefore can't be manipulated by a user.
+* The following names are reserved and can't be used to name 'extra' FormElements: 'id', 'type', 'L'.
 * The element is not transferred to the the browser.
-* The element behaves like, and can be used as, a HTML hidden input element - with the advantage that the element never
-  leaves the server and therefore can't be manipulated by a user.
-* The element can be used to define / precalculate values for a column, which do not already exist as a native *FormElement*.
+* The element can be used to define / pre calculate values for a column, which do not already exist as a native *FormElement*.
 * The element is build / computed on form load and saved alongside with the SIP parameter of the current form.
+* The element is not recalculated during save - it's stored during 'Form Load' inside the current form SIP handle.
 * Access the value without specifying any store (default store priority is sufficient).
 
 .. _`input-text`:

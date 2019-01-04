@@ -37,6 +37,20 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 19.01.1
+---------------
+
+Date: 04.01.2019
+
+Bug Fixes
+^^^^^^^^^
+
+* #7600 / Path to sendEmail has changed and is updated now.
+* #7603 / Fix problem: formEditor.sql broken - missing semicolon. QFQ updates did not played formEditor.sql.
+  Unit test for DatabaseUpdate(). Especially that formEditor.sql is running fine.
+* #7594 / FE.type=extra: don't name it 'type' or 'id' or 'L' - more detailed error message and an explanation in Manual.rst.
+* Config.php: error message about to high session timeout now reports the PHP settings.
+
 Version 19.01.0
 ---------------
 
