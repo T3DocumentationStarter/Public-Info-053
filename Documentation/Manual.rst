@@ -2893,7 +2893,7 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+                                                                                                          |
 | messageFail            | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| dataSelenium           | string | Optional. See `seleniumTest`_                                                                            |
+| dataSelenium           | string | Optional. See `applicationTest`_                                                                            |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 
@@ -5460,7 +5460,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Class         |c:[n|<text>]                       |c:text-muted               |CSS class for link. n:no class attribute, <text>: explicit named                                                                        |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |   |Attribute     |A:<key>="<value">                  |A:data-selenium="person"   |Custom attributes and a corresponding value. Might be used by Selenium tests.                                                           |
+|   |   |Attribute     |A:<key>="<value">                  |A:data-reference="person"  |Custom attributes and a corresponding value. Might be used by application tests.                                                        |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Target        |g:<text>                           |g:_blank                   |target=_blank,_self,_parent,<custom>. Default: no target                                                                                |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -7514,27 +7514,29 @@ AutoCron / website: HTTPS protocol
 * All certificates are accepted, even self signed without a correct chain or hostnames, not listed in the certificate.
   This is useful if there is a general 'HTTP >> HTTPS' redirection configured and the website is accessed via `https://localhost/...`
 
-.. _seleniumTest:
+.. _applicationTest:
 
-Selenium Test
-=============
+Application Test
+================
 
-With https://www.seleniumhq.org/ it's possible to play and verify automate test cases. To simplify the process of automatically
-identifying HTML elements, a tag might be assigned to elements which have to interact with the test framework.
+With a framework like https://www.seleniumhq.org/ it's possible to play and verify unattended  test cases.
+
+To assist such frameworks and to make the tests reliable, an individual tag might be assigned to elements which have to
+interact with the test framework.
 
 Form
 ----
 
-By default every FormElement contains an attribute 'data-selenium=<value>', whereas the '<value>' is either the name
-of the FormElement or a custom value, defined via 'FormElement.parameter.dataSelenium=<value>'.
+By default every FormElement contains an attribute 'data-reference=<value>', whereas the '<value>' is either the name
+of the FormElement or a custom value, defined via 'FormElement.parameter.dataReference=<value>'.
 
 Report
 ------
 
-Any HTML output can be extended by a tag. For QFQ generated links, an attribute like 'data-selenium' might be injected
-via token 'A' (attribute). ::
+Any HTML output can be extended by a tag - that's done by the webmaster. For QFQ generated links, an attribute like
+'data-reference' might be injected via token 'A' (attribute). ::
 
-   SELECT 'p:personedit&form=person&r=1|b|s|A:data-selenium="person-edit"|t:Edit person' AS _link
+   SELECT 'p:personedit&form=person&r=1|b|s|A:data-reference="person-edit"|t:Edit person' AS _link
 
 
 .. _help:
