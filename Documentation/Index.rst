@@ -6,12 +6,6 @@
 .. include:: Includes.txt
 
 
-
-
-
-
-
-
 .. _start:
 
 =============================================================
@@ -39,7 +33,7 @@ QFQ Extension
 	      		    		Quick Form Query, Form, Report, SQL, Query, Generator, Framework, Secure, Mobile Ready, Responsive.
 
 	          	:Copyright:
-	      	    		2017
+	      	    		2017-2019
 
 	          	:Author:
 		      				Carsten Rose, Benjamin Baer

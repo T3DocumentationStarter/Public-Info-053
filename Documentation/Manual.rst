@@ -350,7 +350,7 @@ Extension Manager: QFQ Configuration
 | documentation                 | http://docs.typo3.org...                              | Link to the online documentation of QFQ. Every QFQ installation also       |
 |                               |                                                       | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| flagProduction                | yes                                                   | yes|no: might be used to differentiate the installation                    |
+| flagProduction                | yes                                                   | yes|no: used to differentiate production and development site.             |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | thumbnailDirSecure            | fileadmin/protected/qfqThumbnail                      | Important: secure directory 'protected' (recursive) against direct access. |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -384,7 +384,7 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | formSubmitLogMode             | all                                                   | | *all*: every form submission will be logged.                             |
 |                               |                                                       | | *none*: no logging.                                                      |
-|                               |                                                       | | See `Form Submit Log page`_ for example qfq code to display the log.     |
+|                               |                                                       | | See `Form Submit Log page`_ for example QFQ code to display the log.     |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | redirectAllMailTo             | john@doe.com                                          | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -788,7 +788,7 @@ QFQ Database
 Recommended setup for Typo3 & QFQ Installation is with *two* databases. One for the Typo3 installation and one for QFQ.
 A good practice is to name both databases equal, appending the suffix '_t3' and '_db'.
 
-When QFQ is called, it checks for QFQ system tables. If they do not exist or have a lower version than the installed qfq
+When QFQ is called, it checks for QFQ system tables. If they do not exist or have a lower version than the installed QFQ
 version, the system tables will be automatically installed or updated.
 
 .. _`system-tables`:
@@ -2893,6 +2893,8 @@ See also at specific *FormElement* definitions.
 +------------------------+--------+                                                                                                          |
 | messageFail            | string |                                                                                                          |
 +------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| dataSelenium           | string | Optional. See `seleniumTest`_                                                                            |
++------------------------+--------+----------------------------------------------------------------------------------------------------------+
 
 
  * `s/d/n`: string or date or number.
@@ -3106,7 +3108,7 @@ the server, the lookup will be performed and the result, upto *typeAheadLimit* e
 * *FormElement.parameter*:
 
   * *typeAheadLimit* = <number>. Max numbers of result records to be shown. Default is 20.
-  * *typeAheadMinLength* = <number>. Minimum length to type before the first lookup starts.
+  * *typeAheadMinLength* = <number>. Minimum length to type before the first lookup starts. Default is 2.
 
 Depending of the `typeahead` setup, the given FormElement will contain the displayed `value` or `id` (if an id/value dict is
 configured).
@@ -3169,9 +3171,17 @@ Type: editor
 
 * To deactivate the surrouding `<p>` tag, configure in *FormElement.parameter*::
 
-     editor-forced_root_block=false
+     editor-forced_root_block = false
 
   This might have impacts on the editor. See https://www.tinymce.com/docs/configure/content-filtering/#forced_root_block
+
+* Set 'extended_valid_elements' to enable HTML tags and their attributes. Example: ::
+
+    editor-extended_valid_elements = span[class|style]
+
+* Set 'editor-content_css' to use a custom CSS to style elements inside the editor. Example: ::
+
+    editor-content_css = fileadmin/custom.css
 
 * *FormElement.size* = <min_height>,<max_height>: in pixels, including top and bottom bars. E.g.: 300,600
 
@@ -3410,10 +3420,14 @@ will be rendered inside the form as a HTML table.
     * *Constant '&'*: Indicate a 'constant' value. E.g. `&12:xId` or `{{...}}` (all possibilities, incl. further SELECT
       statements) might be used.
 
-  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-subrecord-table'. If given, the default will be overwritten.
-    This parameter is helpful if you want to add tablesorting to your subrecord - example: ::
+  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-subrecord-table'. If given, the default will be
+     overwritten. Example: ::
 
-	  subrecordTableClass = table table-hover qfq-subrecord-table tablesorter tablesorter-pager
+	  subrecordTableClass = table table-hover qfq-subrecord-table qfq-table-50
+
+  * Tablesorter in Subrecord:
+
+  	   subrecordTableClass = table table-hover qfq-subrecord-table tablesorter tablesorter-pager tablesorter-filter
 
   * *subrecordColumnTitleEdit*: Optional. Will be rendered as the column title for the new/edit column.
   * *subrecordColumnTitleDelete*: Optional. Will be rendered as the column title for the delete column.
@@ -5457,6 +5471,8 @@ Column: _link
 |   |   |Alttext       |a:<text>                           |a:Name of person           |a) Alttext for images, b) Message text for `download`_ popup window.                                                                    |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Class         |c:[n|<text>]                       |c:text-muted               |CSS class for link. n:no class attribute, <text>: explicit named                                                                        |
++---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
+|   |   |Attribute     |A:<key>="<value">                  |A:data-selenium="person"   |Custom attributes and a corresponding value. Might be used by Selenium tests.                                                           |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Target        |g:<text>                           |g:_blank                   |target=_blank,_self,_parent,<custom>. Default: no target                                                                                |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -7510,20 +7526,43 @@ AutoCron / website: HTTPS protocol
 * All certificates are accepted, even self signed without a correct chain or hostnames, not listed in the certificate.
   This is useful if there is a general 'HTTP >> HTTPS' redirection configured and the website is accessed via `https://localhost/...`
 
+.. _seleniumTest:
+
+Selenium Test
+=============
+
+With https://www.seleniumhq.org/ it's possible to play and verify automate test cases. To simplify the process of automatically
+identifying HTML elements, a tag might be assigned to elements which have to interact with the test framework.
+
+Form
+----
+
+By default every FormElement contains an attribute 'data-selenium=<value>', whereas the '<value>' is either the name
+of the FormElement or a custom value, defined via 'FormElement.parameter.dataSelenium=<value>'.
+
+Report
+------
+
+Any HTML output can be extended by a tag. For QFQ generated links, an attribute like 'data-selenium' might be injected
+via token 'A' (attribute). ::
+
+   SELECT 'p:personedit&form=person&r=1|b|s|A:data-selenium="person-edit"|t:Edit person' AS _link
+
+
 .. _help:
 
 General Tips
 ============
 
-* Does the error happens on every *page* or only on specific one?
-* Does the error happens on every *form* or only on specific one?
+* Does the error happens on every *page* or only on a specific one?
+* Does the error happens on every *form* or only on a specific one?
 
 Tips:
 
 * On general errors:
 
 	* Always check the Javascript console of your browser, see `javascriptProblem`_.
-	* Always check the Webserver logfiles.
+	* Always check the Webserver log files.
 
 QFQ specific
 ------------
@@ -7557,12 +7596,34 @@ Tip on Report: In case the query did not contain any double ticks, just wrap all
  Buggy query:  10.sql = SELECT id, ... FROM myTable WHERE status={{myVar}} ORDER BY status
  Debug query:  10.sql = SELECT "id, ... FROM myTable WHERE status={{myVar}} ORDER BY status"
 
-
-
 Error read file config.qfq.php: syntax error on line xx
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Check the given line number. If it's a SQL statement, enclose it in single or double ticks.
+
+
+Output a text, substitute embedded QFQ variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The content will be copied to '_text'. In `10.tail` than the '{{text:R}}' will be substituted with all known variables.
+Note the '-' in '{{text:RE::-}}', this will prevent that QFQ escapes any character from the content. ::
+
+    10 {
+      sql = SELECT no.text AS _text
+               FROM Note AS no
+               WHERE id=...
+      tail = {{text:RE::-}}
+    }
+
+TypeAhead list with T3 page alias names - use of the T3 DB
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To define a typeahead list of T3 page alias names: ::
+
+    FE.type = text
+    FE.parameter.typeAheadSql = SELECT p.alias FROM {{dbNameT3:Y}}.pages AS p WHERE p.deleted=0 AND p.alias!='' AND p.alias LIKE ? ORDER BY p.alias LIMIT 20
+    FE.parameter.typeAheadMinLength = 1
+
 
 Logging
 -------
@@ -7573,7 +7634,7 @@ General webserver error log
 For apache: `/var/log/apache2/error_log`
 
 Especially if you got a blank page (no rendering at all), this is typically an uncaught PHP error. Check the error message
-and report the bug (http://qfq.io > Contact).
+and report the bug (https://qfq.io > Contact).
 
 Call to undefined function qfq\\mb_internal_encoding()
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -7621,4 +7682,19 @@ Javascript problem
 Open the 'Webdeveloper Tools' (FF: F12, Chrome/Opera: Right mouse click > Inspect Element) in your browser, switch to
 'console' and reload the page. Inspect the messages.
 
+TinyMCE
+-------
 
+Glyph Icons in '<span>'
+^^^^^^^^^^^^^^^^^^^^^^^
+
+TinyMCE forbids by default HTML tag 'span' with 'class' attribute. E.g.: ::
+
+    <span class="glyphicon glyphicon-user"></span>
+
+To allow it, add 'span' to the valid elements in the FormElement.parameter field: ::
+
+    editor-extended_valid_elements = span[class|style]
+
+The HTML span tag has to be added via 'source' view. At least in TinyMCE 4.7.13, the glyph is still not shown in the
+editor but saved.
