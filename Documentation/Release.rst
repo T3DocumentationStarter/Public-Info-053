@@ -22,8 +22,8 @@
 Release
 =======
 
-Version 19.xx.x
----------------
+Version 19.x.x
+--------------
 
 Date: <date>
 
@@ -36,9 +36,38 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 19.1.2
+--------------
 
-Version 19.01.1
----------------
+Date: 17.01.2019
+
+Notes
+^^^^^
+
+* Align FormElement labels left/center/right.
+* Cleanup FormEditor.
+* All SQL commands allowed now.
+
+Features
+^^^^^^^^
+
+* #7620 / Label align left/center/right. Defined by config/form/formelement.
+* #7647 / Preparation for Selenium Tests - Implement new token 'A'  to add any custom attribute to '... AS _link'
+* Cleanup FormEditor: FormElement as second pill. Hide MultiForm as long as it not active. Rename Various to Layout.
+* Manual.rst: Add some tips. Add note how to extend TinyMCE valid_elements.
+* Delete composer in Resources dir, run phpunit tests in gitlab pipeline.
+* Database.php: allow all SQL commands.
+
+Bug Fixes
+^^^^^^^^^
+
+* #7671 / On FormElements, 'fillStoreVar' is now detected and fired at first.
+* Fix for checkbox-inline / radio-inline.
+* Check for non unique FormElements now allows multiple empty FormElements.
+
+
+Version 19.1.1
+--------------
 
 Date: 04.01.2019
 
@@ -51,8 +80,8 @@ Bug Fixes
 * #7594 / FE.type=extra: don't name it 'type' or 'id' or 'L' - more detailed error message and an explanation in Manual.rst.
 * Config.php: error message about to high session timeout now reports the PHP settings.
 
-Version 19.01.0
----------------
+Version 19.1.0
+--------------
 
 Date: 03.01.2019
 

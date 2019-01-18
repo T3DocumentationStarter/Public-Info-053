@@ -453,6 +453,8 @@ Extension Manager: QFQ Configuration
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Form-Layout                                                                                                                                                        |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| labelAlign                    | left                                                  | Label align (left/center/right)/ Default: left. Will be inherited to Form. |
++-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | cssClassQfqContainer          | container                                             | | QFQ with own Bootstrap: 'container'.                                     |
 |                               |                                                       | | QFQ already nested in Bootstrap of mainpage: <empty>.                    |
 +-------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -2113,6 +2115,8 @@ Definition
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Forward (Mode) Page      | a) URL / Typo3 page id/alias or b) Forward Mode (via '{{...}}') or combination of a) & b). See `form-forward`_.                                    |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|labelAlign               | Label align (default/left/center/right)/ Default: 'default' (defined by Config).                                                                   |
++-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Parameter                |  Misc additional parameters. See `form-parameter`_.                                                                                                |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |BS Label Columns         | The bootstrap grid system is based on 12 columns. The sum of *bsLabelColumns*,                                                                     |
@@ -2698,10 +2702,12 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Order                | string                      | Display order of *FormElements* ('order' is a reserved keyword)  _`field-ord`                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|tabindex             | string                      |HTML tabindex attribute  _`field-tabindex`                                                           |
+|tabindex             | string                      | HTML tabindex attribute  _`field-tabindex`                                                          |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Size                 | string                      |Visible length of input element. Might be omitted, depending on the chosen form layout.              |
-|                     |                             |Format: <width>,<height> (in characters)  _`field-size`                                              |
+|labelAlign           | left                        | Label align (default/left/center/right)/ Default: 'default' (defined by Form).                      |
++---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
+|Size                 | string                      | Visible length of input element. Might be omitted, depending on the chosen form layout.             |
+|                     |                             | Format: <width>,<height> (in characters)  _`field-size`                                             |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |BS Label Columns     | string                      | Number of bootstrap grid columns. By default empty, value inherits from the form.                   |
 |                     |                             | _`field-bsLabelColumns`. See `bs-custom-field-width`_                                               |
@@ -2712,20 +2718,20 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Label / Input / Note | enum(...)                   | Switch on/off opening|closing of bootstrap form classes _`field-rowLabelInputNote`                  |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Maxlength            | string                      |Maximum characters for input. _`field-maxLength`                                                     |
+|Maxlength            | string                      | Maximum characters for input. _`field-maxLength`                                                    |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Note                 | string                      |Note of *FormElement*. Depending on layout model, right or below of the *FormElement*.               |
-|                     |                             |Report syntax can also be used, see report-notation_                                                 |
+|Note                 | string                      | Note of *FormElement*. Depending on layout model, right or below of the *FormElement*.              |
+|                     |                             | Report syntax can also be used, see report-notation_                                                |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Tooltip              | text                        |Display this text as tooltip on mouse over.  _`field-tooltip`                                        |
+|Tooltip              | text                        | Display this text as tooltip on mouse over.  _`field-tooltip`                                       |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Placeholder          | string                      |Text, displayed inside the input element in light grey. _`field-placeholder`                         |
+|Placeholder          | string                      | Text, displayed inside the input element in light grey. _`field-placeholder`                        |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|value                | text                        |Default value: See field-value_                                                                      |
+|value                | text                        | Default value: See field-value_                                                                     |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|sql1                 | text                        |SQL query. See individual `FormEelement`. _`sql1`                                                    |
+|sql1                 | text                        | SQL query. See individual `FormEelement`. _`sql1`                                                   |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
-|Parameter            | text                        |Might contain misc parameter. See fe-parameter-attributes_                                           |
+|Parameter            | text                        | Might contain misc parameter. See fe-parameter-attributes_                                          |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |feGroup              | string                      | Comma-separated list of Typo3 FE Group ID. NOT SURE IF THIS WILL BE IMPLEMENTED. Native             |
 |                     |                             | *FormElements*, fieldsets and pills can be assigned to feGroups. Group status: show, hidden,        |
@@ -3108,7 +3114,7 @@ the server, the lookup will be performed and the result, upto *typeAheadLimit* e
 * *FormElement.parameter*:
 
   * *typeAheadLimit* = <number>. Max numbers of result records to be shown. Default is 20.
-  * *typeAheadMinLength* = <number>. Minimum length to type before the first lookup starts.
+  * *typeAheadMinLength* = <number>. Minimum length to type before the first lookup starts. Default is 2.
 
 Depending of the `typeahead` setup, the given FormElement will contain the displayed `value` or `id` (if an id/value dict is
 configured).
@@ -3171,9 +3177,17 @@ Type: editor
 
 * To deactivate the surrouding `<p>` tag, configure in *FormElement.parameter*::
 
-     editor-forced_root_block=false
+     editor-forced_root_block = false
 
   This might have impacts on the editor. See https://www.tinymce.com/docs/configure/content-filtering/#forced_root_block
+
+* Set 'extended_valid_elements' to enable HTML tags and their attributes. Example: ::
+
+    editor-extended_valid_elements = span[class|style]
+
+* Set 'editor-content_css' to use a custom CSS to style elements inside the editor. Example: ::
+
+    editor-content_css = fileadmin/custom.css
 
 * *FormElement.size* = <min_height>,<max_height>: in pixels, including top and bottom bars. E.g.: 300,600
 
@@ -3412,10 +3426,14 @@ will be rendered inside the form as a HTML table.
     * *Constant '&'*: Indicate a 'constant' value. E.g. `&12:xId` or `{{...}}` (all possibilities, incl. further SELECT
       statements) might be used.
 
-  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-subrecord-table'. If given, the default will be overwritten.
-    This parameter is helpful if you want to add tablesorting to your subrecord - example: ::
+  * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-subrecord-table'. If given, the default will be
+     overwritten. Example: ::
 
-	  subrecordTableClass = table table-hover qfq-subrecord-table tablesorter tablesorter-pager
+	  subrecordTableClass = table table-hover qfq-subrecord-table qfq-table-50
+
+  * Tablesorter in Subrecord:
+
+  	   subrecordTableClass = table table-hover qfq-subrecord-table tablesorter tablesorter-pager tablesorter-filter
 
   * *subrecordColumnTitleEdit*: Optional. Will be rendered as the column title for the new/edit column.
   * *subrecordColumnTitleDelete*: Optional. Will be rendered as the column title for the delete column.
@@ -7586,12 +7604,34 @@ Tip on Report: In case the query did not contain any double ticks, just wrap all
  Buggy query:  10.sql = SELECT id, ... FROM myTable WHERE status={{myVar}} ORDER BY status
  Debug query:  10.sql = SELECT "id, ... FROM myTable WHERE status={{myVar}} ORDER BY status"
 
-
-
 Error read file config.qfq.php: syntax error on line xx
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Check the given line number. If it's a SQL statement, enclose it in single or double ticks.
+
+
+Output a text, substitute embedded QFQ variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The content will be copied to '_text'. In `10.tail` than the '{{text:R}}' will be substituted with all known variables.
+Note the '-' in '{{text:RE::-}}', this will prevent that QFQ escapes any character from the content. ::
+
+    10 {
+      sql = SELECT no.text AS _text
+               FROM Note AS no
+               WHERE id=...
+      tail = {{text:RE::-}}
+    }
+
+TypeAhead list with T3 page alias names - use of the T3 DB
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To define a typeahead list of T3 page alias names: ::
+
+    FE.type = text
+    FE.parameter.typeAheadSql = SELECT p.alias FROM {{dbNameT3:Y}}.pages AS p WHERE p.deleted=0 AND p.alias!='' AND p.alias LIKE ? ORDER BY p.alias LIMIT 20
+    FE.parameter.typeAheadMinLength = 1
+
 
 Logging
 -------
