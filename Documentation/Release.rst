@@ -46,7 +46,7 @@ Notes
 
 * Align FormElement labels left/center/right.
 * Cleanup FormEditor.
-* All SQL commands allowed now.
+* All SQL commands now are allowed.
 
 Features
 ^^^^^^^^
@@ -63,7 +63,7 @@ Bug Fixes
 
 * #7671 / On FormElements, 'fillStoreVar' is now detected and fired at first.
 * Fix for checkbox-inline / radio-inline.
-* Check for non unique FormElements now allows multiple empty FormElements.
+* Check for non unique FormElements: multiple empty FE.name (e.g. for FE.type=subrecord) are allowed now.
 
 
 Version 19.1.1
@@ -145,7 +145,7 @@ Notes
 ^^^^^
 
 * Existing installations: update QFQ extension config form-layout.formBsColumns/formBsLabelColumns/formBsInputColumns,formBsNoteColumns.
-  old: 12, new: 'col-md-12 col-lg10' resp. smaller values for individual columns.
+  old: '12', new: 'col-md-12 col-lg10' resp. smaller values for individual columns.
 * New config values:
 
   * Config/flagProduction: yes/now - differentiate between development und production system. Will be used for
@@ -171,7 +171,7 @@ Features
 * #7228 / Show error if form element with same name and class already exists.
 * #7494 / Exception 'General Error': disable/enable per config.
 * Adapt class paths in composer.json to the newly refactored folder names.
-* Add col-lg-10 to notes section.
+* Add 'col-lg-10' to notes section.
 * Added Alert Manager to have better control over the Alerts.
 * Config.php: make 'reading dbname' Typo3 version dependent.
 * Delete two old composer.json and call new composer in Makefile.
