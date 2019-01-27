@@ -1142,28 +1142,144 @@ Types
 Store variables
 ^^^^^^^^^^^^^^^
 
-Syntax:  *{{VarName[:<store / prio>[:<sanitize class>[:<escape>[:<default>]]]]}}*
+Syntax:  *{{VarName[:<store(s)[:<sanitize class>[:<escape>[:<default value>[:type violate message]]]]]}}*
+
+See also:
+
+ * `store`_
+ * `sanitize-class`_
+ * `variable-escape`_
+ * `variable-default`_
+ * `variable-type-message-violate`_
+
 
 * Example::
 
   {{pId}}
   {{pId:FSE}}
   {{pId:FSE:digit}}
+  {{pId::digit}}
   {{name:FSE:alnumx:m}}
+  {{name:::m}}
   {{name:FSE:alnumx:m:John Doe}}
+  {{name::::John Doe}}
+  {{name:FSE:alnumx:m:John Doe:forbidden characters}}
+  {{name:::::forbidden characters}}
 
 * Zero or more stores might be specified to be searched for the given VarName.
-* If no store is specified, the by default searched stores are: **FSRVD** (=FORM > SIP > RECORD > VARS > DEFAULT).
+* If no store is specified, the default for the searched stores are: **FSRVD** (=FORM > SIP > RECORD > VARS > DEFAULT).
 * If the VarName is not found in one store, the next store is searched,  up to the last specified store.
 * If the VarName is not found and a default value is given, the default is returned.
 * If no value is found, nothing is replaced - the string '{{<VarName>}}' remains.
 * If anywhere along the line an empty string is found, this **is** a value: therefore, the search will stop.
 
-See also:
+.. _`sanitize-class`:
 
- * `store`_
- * `variable-escape`_
- * `sanitize-class`_
+Sanitize class
+--------------
+
+Values in STORE_CLIENT *C* (Client=Browser) and STORE_FORM *F* (Form, HTTP 'post') are checked against a
+sanitize class. Values from other stores are *not* checked against any sanitize class, even if a sanitize class is specified.
+
+* Variables get by default the sanitize class defined in the corresponding `FormElement`. If not defined,
+  the default class is 'digit'.
+* A default sanitize class can be overwritten by individual definition: *{{a:C:alnumx}}*
+* If a value violates the specific sanitize class, see `variable-type-message-violate`_ for default or customized message.
+  By default the value becomes `!!<name of sanitize class>!!`. E.g. `!!digit!!`.
+
+For QFQ variables and FormElements:
+
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| Name             | Form | Query | Pattern                                                                                 |
++==================+======+=======+=========================================================================================+
+| **alnumx**       | Form | Query | [A-Za-z][0-9]@-_.,;: /() ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÑÕãñõÄËÏÖÜŸäëïöüÿç            |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **digit**        | Form | Query | [0-9]                                                                                   |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **numerical**    | Form | Query | [0-9.-+]                                                                                |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **allbut**       | Form | Query | All characters allowed, but not [ ]  { } % \ #. The used regexp: '^[^\[\]{}%\\#]+$',    |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+| **all**          | Form | Query | no sanitizing                                                                           |
++------------------+------+-------+-----------------------------------------------------------------------------------------+
+
+
+Only in FormElement:
+
++------------------+------+-------+-------------------------------------------------------------------------------------------+
+| **auto**         | Form |       | Only supported for FormElements. Most suitable checktype is dynamically evaluated based   |
+|                  |      |       | on native column definition, the FormElement type, and other info. See below for details. |
++------------------+------+-------+-------------------------------------------------------------------------------------------+
+| **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}                                           |
++------------------+------+-------+-------------------------------------------------------------------------------------------+
+| **pattern**      | Form |       | Compares the value against a regexp.                                                      |
++------------------+------+-------+-------------------------------------------------------------------------------------------+
+
+
+Rules for CheckType Auto (by priority):
+
+* TypeAheadSQL or TypeAheadLDAP defined: **alnumx**
+* Table definition
+	* integer type: **digit**
+	* floating point number: **numerical**
+* FE Type
+	* 'password', 'note': **all**
+	* 'editor', 'text' and encode = 'specialchar': **all**
+* None of the above: **alnumx**
+
+
+.. _`variable-escape`:
+
+Escape
+------
+
+Variables used in SQL Statements might cause trouble by using: NUL (ASCII 0), \\n, \\r, \\, ', ", and Control-Z.
+
+To protect the web application the following `escape` types are available:
+
+	* 'm' - `real_escape_string() <http://php.net/manual/en/mysqli.real-escape-string.php>`_ (m = mysql)
+	* 'l' - LDAP search filter values will be escaped: `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_FILTER).
+	* 'L' - LDAP DN values will be escaped. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
+	* 's' - single ticks will be escaped. str_replace() of ' against \\'.
+	* 'd' - double ticks will be escaped: str_replace() of " against \\".
+	* 'C' - colon ':' will be escaped: str_replace() of : against \\:.
+	* 'c' - config - the escape type configured in `configuration`_.
+	* ''  - the escape type configured in `configuration`_.
+	* '-' - no escaping.
+
+* The `escape` type is defined by the fourth parameter of the variable. E.g.: `{{name:FE:alnumx:m}}` (m = mysql).
+* It's possible to combine different `escape` types, they will be processed in the order given. E.g. `{{name:FE:alnumx:Ls}}` (L, s).
+* Escaping is typically necessary for SQL or LDAP queries.
+* Be careful when escaping nested variables. Best is to escape **only** the most outer variable.
+* In configuration_ a global `escapeTypeDefault` can be defined. The configured escape type applies to all substituted
+  variables, who *do not* contain a *specific* escape type.
+* Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the *Form editor*). This overwrites the
+  global definition of `configuration`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
+  in `configuration`_.
+* To suppress a default escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
+
+.. _`variable-default`:
+
+Default
+-------
+
+* Any string can be given to define a default value.
+* If a default value is given, it makes no sense to define more than one store: with a default value given, only the
+  first store is considered.
+* If the default value contains a ':', that one needs to be escaped by '\'.
+
+.. _`variable-type-message-violate`:
+
+Type message violate
+--------------------
+
+typeMessageViolate:
+
+ * 'c' - The violated class will shown, surrounded by '!!'. E.g. '!!digit!!'. This is the default.
+ * 'e' - Instead of the value an empty string will be shown.
+ * '0' - Instead of the value the string '0' will be shown.
+ * 'custom text ...' - Instead of the value the custom text will be shown. If the text contains a ':', that one needs to
+    be escaped by '\'.
 
 
 .. _`sql-variables`:
@@ -1268,90 +1384,6 @@ These variables are especially helpful in:
 
 * `report`, to create create links or buttons outside of a SQL statement. E.g. in `head`, `rbeg`, ...
 * `form`, to create links and buttons in labels or notes.
-
-
-.. _`sanitize-class`:
-
-Sanitize class
---------------
-
-Values in STORE_CLIENT *C* (Client=Browser) and STORE_FORM *F* (Form, HTTP 'post') are checked against a
-sanitize class. Values from other stores are not checked against any sanitize class.
-
-* If a value violates the specific sanitize class, the value becomes `!!<name of sanitize class>!!`. E.g. `!!digit!!`.
-* Variables get by default the sanitize class defined in the corresponding `FormElement`. If not defined,
-  the default class is 'digit'.
-* A default sanitize class can be overwritten by individual definition: *{{a:C:alnumx}}*
-
-For QFQ variables and FormElements:
-
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| Name             | Form | Query | Pattern                                                                                 |
-+==================+======+=======+=========================================================================================+
-| **alnumx**       | Form | Query | [A-Za-z][0-9]@-_.,;: /() ÀÈÌÒÙàèìòùÁÉÍÓÚÝáéíóúýÂÊÎÔÛâêîôûÃÑÕãñõÄËÏÖÜŸäëïöüÿç            |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **digit**        | Form | Query | [0-9]                                                                                   |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **numerical**    | Form | Query | [0-9.-+]                                                                                |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **allbut**       | Form | Query | All characters allowed, but not [ ]  { } % \ #. The used regexp: '^[^\[\]{}%\\#]+$',    |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-| **all**          | Form | Query | no sanitizing                                                                           |
-+------------------+------+-------+-----------------------------------------------------------------------------------------+
-
-
-Only in FormElement:
-
-+------------------+------+-------+-------------------------------------------------------------------------------------------+
-| **auto**         | Form |       | Only supported for FormElements. Most suitable checktype is dynamically evaluated based   |
-|                  |      |       | on native column definition, the FormElement type, and other info. See below for details. |
-+------------------+------+-------+-------------------------------------------------------------------------------------------+
-| **email**        | Form | Query | [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}                                           |
-+------------------+------+-------+-------------------------------------------------------------------------------------------+
-| **pattern**      | Form |       | Compares the value against a regexp.                                                      |
-+------------------+------+-------+-------------------------------------------------------------------------------------------+
-
-
-Rules for CheckType Auto (by priority):
-
-* TypeAheadSQL or TypeAheadLDAP defined: **alnumx**
-* Table definition
-	* integer type: **digit**
-	* floating point number: **numerical**
-* FE Type
-	* 'password', 'note': **all**
-	* 'editor', 'text' and encode = 'specialchar': **all**
-* None of the above: **alnumx**
-
-
-.. _`variable-escape`:
-
-Escape
-------
-
-Variables used in SQL Statements might cause trouble by using: NUL (ASCII 0), \\n, \\r, \\, ', ", and Control-Z.
-
-To protect the web application the following `escape` types are available:
-
-	* 'm' - `real_escape_string() <http://php.net/manual/en/mysqli.real-escape-string.php>`_ (m = mysql)
-	* 'l' - LDAP search filter values will be escaped: `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_FILTER).
-	* 'L' - LDAP DN values will be escaped. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
-	* 's' - single ticks will be escaped. str_replace() of ' against \\'.
-	* 'd' - double ticks will be escaped: str_replace() of " against \\".
-	* 'c' - config - the escape type configured in `configuration`_.
-	* ''  - the escape type configured in `configuration`_.
-	* '-' - no escaping.
-
-* The `escape` type is defined by the fourth parameter of the variable. E.g.: `{{name:FE:alnumx:m}}` (m = mysql).
-* It's possible to combine different `escape` types, they will be processed in the order given. E.g. `{{name:FE:alnumx:Ls}}` (L, s).
-* Escaping is typically necessary for SQL or LDAP queries.
-* Be careful when escaping nested variables. Best is to escape **only** the most outer variable.
-* In configuration_ a global `escapeTypeDefault` can be defined. The configured escape type applies to all substituted
-  variables, who *do not* contain a *specific* escape type.
-* Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the *Form editor*). This overwrites the
-  global definition of `configuration`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
-  in `configuration`_.
-* To suppress a default escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
 
 Security
 ========
