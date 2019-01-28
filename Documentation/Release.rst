@@ -36,6 +36,43 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 19.1.3
+--------------
+
+Date: 28.1.2019
+
+Notes
+^^^^^
+
+* If a variable violates a sanitize class, the substituted result can now be configured: a) !!<class>!!, b) '0', c) '', d) '<custom message>'.
+* Alerts (based on _link class), might now show only 'ok' (alone, without 'cancel').
+* Excel Import - three new options: importNamedSheetsOnly, importSetReadDataOnly, importListSheetNames
+
+Features
+^^^^^^^^
+
+* SQL Error / underlining in exception dialog: Add two SQL errors to be underlined in exceptions. Extend to "... in 'order clause'"
+* Extend allowed SQL commands in QFQ vars (have been already subscribed in that way in Manual.rst).
+* #6914 / Customized typeMessageViolation. Incl. unit tests. New escape mode 'C' - escapes ':' by '\'.' - useful for variables in variable definition.
+* #7743 / Move error messages to Constants.php. Unit tests use those constants now. 'data-pattern-error' only delivered
+  if a 'pattern' is given. 'required' attribute only delivered is set. Detection of 'pattern error' on per QFQ default,
+  custom instance wide, per form or per FormElement - per FormElement overwrites other. Move default pattern to constants.
+  Make default error text more specific (only if default error text is not explicit set in config, form or form-element)
+* #7747 / New options to import Excel files: importNamedSheetsOnly, importSetReadDataOnly, importListSheetNames
+* #7684 / Optional hide second button (cancel) in link/question alerts.
+* fillStoreVar: Replace setStore() with appendToStore()
+
+Bug Fixes
+^^^^^^^^^
+
+* #7743 / Form-Element: Explicit given '0' for MIN or MAX has been interpreted as 'not set'.
+* #7702 / Form,Form-Element: Unnecessary evaluation of column 'noteInternal' / 'adminNote'.
+* #7695 / Form/URL Forward: pageAlias not substituted.
+* #7686 / FormAction/sendmail: uninitialised sendMailAttachment.
+* #7685 / Open FormElement from QFQ error message and save modified record: report error about missing {{formId:F}}.
+* FormElement.type=select: fixed problem with dynamic update and mode=readonly - list was still selectable.
+* Hint to skip leading zeros in version number.
+
 Version 19.1.2
 --------------
 

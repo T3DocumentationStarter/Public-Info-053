@@ -1273,14 +1273,12 @@ Default
 Type message violate
 --------------------
 
-typeMessageViolate:
-
- * 'c' - The violated class will shown, surrounded by '!!'. E.g. '!!digit!!'. This is the default.
- * 'e' - Instead of the value an empty string will be shown.
- * '0' - Instead of the value the string '0' will be shown.
- * 'custom text ...' - Instead of the value the custom text will be shown. If the text contains a ':', that one needs to
-    be escaped by '\'.
-
+If a value violates the sanitize class, instead of content on of the following texts will be set.
+ * 'c' - The violated class will be set as content, surrounded by '!!'. E.g. '!!digit!!'. This is the default.
+ * 'e' - Instead of the value an empty string will be set as content.
+ * '0' - Instead of the value the string '0' will be set as content.
+ * 'custom text ...' - Instead of the value the custom text will be set as content. If the text contains a ':', that one needs to
+    be escaped by '\'. Check `variable-escape`_ qualifier 'C' to let QFQ do the colon escaping.
 
 .. _`sql-variables`:
 
