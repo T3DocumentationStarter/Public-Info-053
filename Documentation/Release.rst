@@ -36,6 +36,17 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+
+Version 19.2.0
+--------------
+
+Date: 07.02.2019
+
+Bug Fixes
+^^^^^^^^^
+* #7714 / autocron fails to open logfiles - adjust CWD based on argv(0).
+
+
 Version 19.1.3
 --------------
 
