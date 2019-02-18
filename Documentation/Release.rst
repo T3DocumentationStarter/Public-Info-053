@@ -36,6 +36,35 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 19.2.1
+--------------
+
+
+Date: 16.2.19
+
+Notes
+^^^^^
+
+* New default session timeout: if nothing special is needed, leave the config.sessionTimeout empty. If there is an old value
+  best is to remove it.
+* Variables with escape class='p' now hashes the content to be used as T3 FE passwords. This let's QFQ handle FE User
+  registration or password reset.
+
+Features
+^^^^^^^^
+
+* Manual.rst: update pathFilename to pathFileName an all places.
+* Apply padding-top|botttom to fieldset via qfq-fieldset class.
+* F7165 / fe user registration. New escape type 'p' for T3 passwords.
+
+Bug Fixes
+^^^^^^^^^
+
+* #7634 / Session Timeout too short. Annoying 'session expired' message removed. Default timeout now takes the system defautl.
+* #7864 / 'required'-FE Elements, deactivated via formModeGlobal=requiredOff missed the read marker. Class
+  'required-field' is now always assigned. The final 'required' mode is still temporarily disabled.
+* #7848 / extraColumName 'paged' - easier handling in case 'r=0' or empty 'U:...' - fixes #7848
+
 
 Version 19.2.0
 --------------

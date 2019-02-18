@@ -1234,8 +1234,18 @@ Rules for CheckType Auto (by priority):
 Escape
 ------
 
-a) Variables used in SQL Statements might cause trouble by using: NUL (ASCII 0), \\n, \\r, \\, ', ", or Control-Z.
-b) Converting content like 'password' hashing.
+To 'escape' a character typically means: a character, which have a special meaning/function, should not treated as a special
+character.
+E.g. a string is surrounded by single ticks '. If such a string should contain a single tick inside (like 'Miller's'),
+the inside single tick has to be escaped. This is typically done by a backlash: 'Millers\\'s'.
+
+QFQ offers different ways of escaping. Which of them to use, depends on the situation.
+
+Especially variables used in SQL Statements might cause trouble when using: NUL (ASCII 0), \\n, \\r, \\, ', ", or Control-Z.
+
+Additional there is the escape class 'p' (password hash) which is not 'escape' but hashing. It transforms the value of
+the variable into a hash. The hash function is the one used by Typo3 to encrypt and salt a password. This is useful to
+manipulate FE user passwords via QFQ. See `setFeUserPassword`_
 
 The following `escape` and `hashing` types are available:
 
@@ -1246,7 +1256,7 @@ The following `escape` and `hashing` types are available:
 	* 'd' - double ticks " will be escaped against \\".
 	* 'C' - colon ':' will be escaped against \\:.
 	* 'c' - config - the escape type configured in `configuration`_.
-    * 'p' - password hashing: depends on the hashing type in the current Typo3 installation, including any salting.
+	* 'p' - password hashing: depends on the hashing type in the Typo3 installation, includes salting if configured.
 	* ''  - the escape type configured in `configuration`_.
 	* '-' - no escaping.
 
@@ -6381,8 +6391,7 @@ Example: ::
                     'y:hello world (link)|t:content direct (link)' AS _link,
                     CONCAT('F:', p.pathFileName,'|t:File (yank)|o:', p.pathFileName) AS _yank,
                     CONCAT('y|F:', p.pathFileName,'|t:File (link)|o:', p.pathFileName) AS _link
-                FROM Person AS p
-                  
+                FROM Person AS p  
 
 .. _download:
 
@@ -7695,6 +7704,33 @@ To define a typeahead list of T3 page alias names: ::
     FE.type = text
     FE.parameter.typeAheadSql = SELECT p.alias FROM {{dbNameT3:Y}}.pages AS p WHERE p.deleted=0 AND p.alias!='' AND p.alias LIKE ? ORDER BY p.alias LIMIT 20
     FE.parameter.typeAheadMinLength = 1
+
+.. _setFeUserPassword:
+
+Set FE-User password
+^^^^^^^^^^^^^^^^^^^^
+
+To offer an FE User the possibility to change the own T3 FE password, create a form: ::
+
+    f.name = changeFePassword
+    f.title = Change Password
+    f.table = Person   (QFQ Table, not T3)
+    f.permitNew = never
+    f.permitEdit = sip
+
+    fe[1].name = myPassword
+    fe[1].title = Password
+    fe[1].class = native
+    fe[1].type = password
+    fe[1].mode = required
+    fe[1].parameter = retype
+
+    fe[2].class = action
+    fe[2].type = afterSave
+    fe[2].parameter = sqlAfter={{UPDATE {{dbNameT3:Y}}.fe_users SET password='{{myPassword:FE:all:p}} WHERE username='{{feUser:T}}' AND deleted=0
+
+Call the form via SIP on an existing record. Often QFQ has an own table for persons and also the current user exist in T3
+fe_users table.
 
 
 Logging
