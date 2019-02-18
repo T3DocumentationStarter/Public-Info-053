@@ -642,7 +642,8 @@ FE-User: Session timeout seconds
 
 There is no timeout for website users who are not logged in (but typically those users don't have access to protected content).
 
-For logged in users, the default timeout is 1800 seconds. These timeout only affects QFQ related content and can be
+For logged in users, the default timeout is the php.ini settings for `session.cookie_lifetime` and `session.gc_maxlifetime`
+(minimum of both). These timeout only affects QFQ related content and can be
 specified a) globally (QFQ configuration) and b) specific per Form.
 
 The maximum timeout depends on the minimal value of php.ini `session.cookie_lifetime` and `session.gc_maxlifetime`.
@@ -1233,30 +1234,32 @@ Rules for CheckType Auto (by priority):
 Escape
 ------
 
-Variables used in SQL Statements might cause trouble by using: NUL (ASCII 0), \\n, \\r, \\, ', ", and Control-Z.
+a) Variables used in SQL Statements might cause trouble by using: NUL (ASCII 0), \\n, \\r, \\, ', ", or Control-Z.
+b) Converting content like 'password' hashing.
 
-To protect the web application the following `escape` types are available:
+The following `escape` and `hashing` types are available:
 
 	* 'm' - `real_escape_string() <http://php.net/manual/en/mysqli.real-escape-string.php>`_ (m = mysql)
-	* 'l' - LDAP search filter values will be escaped: `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_FILTER).
-	* 'L' - LDAP DN values will be escaped. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
-	* 's' - single ticks will be escaped. str_replace() of ' against \\'.
-	* 'd' - double ticks will be escaped: str_replace() of " against \\".
-	* 'C' - colon ':' will be escaped: str_replace() of : against \\:.
+	* 'l' - LDAP search filter values: `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_FILTER).
+	* 'L' - LDAP DN values. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
+	* 's' - Single ticks ' will be escaped against \\'.
+	* 'd' - double ticks " will be escaped against \\".
+	* 'C' - colon ':' will be escaped against \\:.
 	* 'c' - config - the escape type configured in `configuration`_.
+    * 'p' - password hashing: depends on the hashing type in the current Typo3 installation, including any salting.
 	* ''  - the escape type configured in `configuration`_.
 	* '-' - no escaping.
 
 * The `escape` type is defined by the fourth parameter of the variable. E.g.: `{{name:FE:alnumx:m}}` (m = mysql).
 * It's possible to combine different `escape` types, they will be processed in the order given. E.g. `{{name:FE:alnumx:Ls}}` (L, s).
-* Escaping is typically necessary for SQL or LDAP queries.
+* Escaping is typically necessary for all user supplied content, especially if they are processed via SQL or LDAP queries.
 * Be careful when escaping nested variables. Best is to escape **only** the most outer variable.
 * In configuration_ a global `escapeTypeDefault` can be defined. The configured escape type applies to all substituted
   variables, who *do not* contain a *specific* escape type.
 * Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the *Form editor*). This overwrites the
   global definition of `configuration`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
   in `configuration`_.
-* To suppress a default escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
+* To suppress an escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
 
 .. _`variable-default`:
 
@@ -2707,7 +2710,7 @@ Fields:
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Mode                 | enum('show', 'readonly',    | | *Show*: regular user input field. This is the default.                                            |
 |                     | 'required',                 | | *Required*: User has to specify a value. Typically, an <empty string> represents 'no value'.      |
-|                     | 'hidden' )                  | | *Readonly*: user can't change any data. Data not saved.                                           |
+|                     | 'hidden' )                  | | *Readonly*: User can't change. Data is not saved, except for FormElement with 'processReadOnly'   |
 |                     |                             | | *Hidden*: *FormElement* is not visible.                                                           |
 +---------------------+-----------------------------+-----------------------------------------------------------------------------------------------------+
 |Mode sql             | `SELECT` statement with     | A value given here overwrites the setting from `mode`. Most useful with :ref:`dynamic-update`.      |
@@ -5510,7 +5513,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Check         |C:[<color>]                        |C:green                    |Show checked with '<color>'. Colors: blue, gray, green, pink, red, yellow. Default Color: green.                                        |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |x  |Thumbnail     |T:<pathFilename>                   |T:fileadmin/file.pdf       |Creates a thumbnail on the fly. Size is specified via 'W'. See `column-thumbnail`_                                                      |
+|   |x  |Thumbnail     |T:<pathFileName>                   |T:fileadmin/file.pdf       |Creates a thumbnail on the fly. Size is specified via 'W'. See `column-thumbnail`_                                                      |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Dimension     |W:[width]x[height]                 |W:50x , W:x60 , W:50x60    |Defines the pixel size of thumbnail.  See `column-thumbnail`_                                                                           |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -6238,14 +6241,14 @@ Examples: ::
 Column: _thumbnail
 ^^^^^^^^^^^^^^^^^^
 
-For file `T:<pathFilename>` a thumbnail will be rendered, saved (to be reused) and a HTML `<img>` tag is returned,
+For file `T:<pathFileName>` a thumbnail will be rendered, saved (to be reused) and a HTML `<img>` tag is returned,
 With the SIP encoded thumbnail.
 
 The thumbnail:
 
 * Size is specified via `W:<dimension>`. The file is only rendered once and subsequent access is delivered via a local QFQ cache.
 * Will be rendered, if the source file is newer than the thumbnail or if the thumbnail dimension changes.
-* The caching is done by building the MD5 of pathFilename and thumbnail dimension.
+* The caching is done by building the MD5 of pathFileName and thumbnail dimension.
 * Of multi page files like PDFs, the first page is used as the thumbnail.
 
 All file formats, which 'convert' ImageMagick (https://www.imagemagick.org/) supports, can be
@@ -6265,7 +6268,7 @@ names for the cached thumbnails.
 |       |                                | parameter are otional. If non is given the default is W:150x               |
 +-------+--------------------------------+----------------------------------------------------------------------------+
 | s     | s:1, s:0                       | Optional. Default: `s:1`. If SIP is enabled, the rendered URL              |
-|       |                                | is a link via `api/download.php?..`. Else a direct pathFilename.           |
+|       |                                | is a link via `api/download.php?..`. Else a direct pathFileName.           |
 +-------+--------------------------------+----------------------------------------------------------------------------+
 | r     | r:7                            | Render Mode. Default 'r:0'. With 'r:7' only the url will be delivered.     |
 +-------+--------------------------------+----------------------------------------------------------------------------+
@@ -6369,7 +6372,7 @@ Copy to clipboard
 +===================+================================+============================================================================+
 | y[:<content>]     | y,  y:some content             | Initiates 'copy to clipboard' mode. Source might given text or page or url |
 +-------------------+--------------------------------+----------------------------------------------------------------------------+
-| F:<pathFilename>  | F:fileadmin/protected/data.R   | pathFilename in DocumentRoot                                               |
+| F:<pathFileName>  | F:fileadmin/protected/data.R   | pathFileName in DocumentRoot                                               |
 +-------------------+--------------------------------+----------------------------------------------------------------------------+
 
 Example: ::

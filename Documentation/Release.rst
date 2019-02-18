@@ -44,6 +44,7 @@ Date: 07.02.2019
 
 Bug Fixes
 ^^^^^^^^^
+
 * #7714 / autocron fails to open logfiles - adjust CWD based on argv(0).
 
 
@@ -64,14 +65,15 @@ Features
 
 * SQL Error / underlining in exception dialog: Add two SQL errors to be underlined in exceptions. Extend to "... in 'order clause'"
 * Extend allowed SQL commands in QFQ vars (have been already subscribed in that way in Manual.rst).
-* #6914 / Customized typeMessageViolation. Incl. unit tests. New escape mode 'C' - escapes ':' by '\'.' - useful for variables in variable definition.
+* New escape mode 'C' - escapes ':' by '\'.' - useful for variables in variable definition.
+* fillStoreVar: Replace setStore() with appendToStore()
+* #6914 / Customized typeMessageViolation. Incl. unit tests.
 * #7743 / Move error messages to Constants.php. Unit tests use those constants now. 'data-pattern-error' only delivered
   if a 'pattern' is given. 'required' attribute only delivered is set. Detection of 'pattern error' on per QFQ default,
   custom instance wide, per form or per FormElement - per FormElement overwrites other. Move default pattern to constants.
   Make default error text more specific (only if default error text is not explicit set in config, form or form-element)
 * #7747 / New options to import Excel files: importNamedSheetsOnly, importSetReadDataOnly, importListSheetNames
 * #7684 / Optional hide second button (cancel) in link/question alerts.
-* fillStoreVar: Replace setStore() with appendToStore()
 
 Bug Fixes
 ^^^^^^^^^
