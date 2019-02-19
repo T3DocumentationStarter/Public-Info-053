@@ -36,11 +36,33 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+
+Version 19.2.2
+--------------
+
+Date: 19.02.2019
+
+Notes
+^^^^^
+
+* QFQ now offers a basic REST API. Check https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html#rest
+
+Features
+^^^^^^^^
+
+* 7910 / Check for double form names
+* 7904 / REST api export. Manual.rst: describe QFQ REST API
+* Latest phpStorm IDE complains about missing ext-json in composer.json. Added.
+* Manual.rst: Example how to use 'password' escape class.
+
+Bug Fixes
+^^^^^^^^^
+
+
 Version 19.2.1
 --------------
 
-
-Date: 16.2.19
+Date: 18.02.2019
 
 Notes
 ^^^^^
