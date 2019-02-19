@@ -7590,6 +7590,96 @@ AutoCron / website: HTTPS protocol
 * All certificates are accepted, even self signed without a correct chain or hostnames, not listed in the certificate.
   This is useful if there is a general 'HTTP >> HTTPS' redirection configured and the website is accessed via `https://localhost/...`
 
+
+
+.. _`rest`:
+
+REST
+----
+
+QFQ offers an API endpoint for GET (and later POST,PUT,DELETE) operations. ::
+
+  <domain>/typo3conf/ext/qfq/Source/api/rest.php/<level1>/<id1>/<level2>/<id2>/.../?<var1>=<value1>&...
+
+Append level names and ids after 'rest.php/...', separated by '/' each.
+
+E.g.:
+
+a) List of all persons: <domain>/typo3conf/ext/qfq/Source/api/rest.php/person
+b) Data of person 123: <domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123
+c) Adresses of person 123: <domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address
+d) Adress details of address 45 from person 123: <domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address/45
+
+
+QFQ 'Forms' are used as a 'container' to configure all necessary export/import details per 'level'.
+Each 'level' is represented by a QFQ Form.
+
+Only the last <level> of an URI will be processed. The former ones are just to fullfil a good looking REST API.
+
+Important:  the level name is the QFQ form name.
+
+Each level name (=form name) is available via STORE_CLIENT and name '_formX'. E.g. in example
+d) '{{_form1:C:alnumx}}'='person' and '{{_form2:C:alnumx}}'='address'.
+
+Each level id  is available via STORE_CLIENT and name '_idX'. E.g. in example
+d) '{{_id1:C}}'='123' and '{{_id2:C}}'='45'.
+
+Also the 'id' after the last 'level' in the URI path (123 in example b), and 45 in example d) ) is copied to
+variable 'r' in STORE_TYPO3, access it via '{{r:T}}'.
+
+
+Export (GET)
+^^^^^^^^^^^^
+
+All data is exported in JSON notation.
+
+A REST (GET) form has two modes: ::
+
+  a) data: specific content to a given id. Defined via 'form.parameter.restSqlData'. This mode is selected
+     if there is an id>0 given.
+
+  b) list: a list of records will be exported. Defined via 'form.parameter.restSqlList'. This mode is selected if there is no id or id=0.
+
+There are  *no* FormElements.
+
+To simplify access to id parameter of the URI, a mapping is possible via 'form.parameter.restParam'.
+E.g. 'restParam=pId,adrId' with example d) makes '{{pId:C}}=123' and '{{adrId:C}}=45'. The order of variable
+names corresponds to the position in the URI. _id1 is always mapped to the first parameter name, _id2 to
+the second one and so on.
+
+GET Variables provided via URL are available via STORE_CLIENT as usual.
+
+Form:
+
++-------------------+------------------------------------------------------------------------------+
+| Attribute         | Description                                                                  |
++===================+==============================================================================+
+| name=<level>      | Level name in URI                                                            |
++-------------------+------------------------------------------------------------------------------+
+| permitNew=rest    | The form can be loaded in REST mode with mising parameter 'id' or 'id=0'     |
++-------------------+------------------------------------------------------------------------------+
+| permitEdit=rest   | The form can be loaded in REST mode with parameter 'id' > 0                  |
++-------------------+------------------------------------------------------------------------------+
+
+
+Form.parameter:
+
++-------------------+------------------------------------------------------------------------------+
+| Attribute         | Description                                                                  |
++===================+==============================================================================+
+| restSqlData       | SQL query selects content shown in data mode.                                |
+|                   | restSqlData={{!SELECT id, name, gender FROM Person WHERE id={{r:T0}} }}      |
++-------------------+------------------------------------------------------------------------------+
+| restSqlList       | SQL query selects content shown in data mode.                                |
+|                   | restSqlData={{!SELECT id, name FROM Person }}                                |
++-------------------+------------------------------------------------------------------------------+
+| restParam         | CSV list of variable names.                                                  |
+|                   | restParam=pId,adrId                                                          |
++-------------------+------------------------------------------------------------------------------+
+
+There are no `special-column-names`_ available in 'restSqlData' or 'restSqlList'. Especially there are no
+SIPs possible, cause REST typically does not offer sessions/cookies which are needed for SIPs.
+
 .. _applicationTest:
 
 Application Test
@@ -7727,7 +7817,7 @@ To offer an FE User the possibility to change the own T3 FE password, create a f
 
     fe[2].class = action
     fe[2].type = afterSave
-    fe[2].parameter = sqlAfter={{UPDATE {{dbNameT3:Y}}.fe_users SET password='{{myPassword:FE:all:p}} WHERE username='{{feUser:T}}' AND deleted=0
+    fe[2].parameter = sqlAfter={{UPDATE {{dbNameT3:Y}}.fe_users SET password='{{myPassword:FE:all:p}}' WHERE username='{{feUser:T}}' AND deleted=0
 
 Call the form via SIP on an existing record. Often QFQ has an own table for persons and also the current user exist in T3
 fe_users table.
