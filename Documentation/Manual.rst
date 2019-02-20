@@ -51,29 +51,15 @@ Preparation
 Report & Form
 ^^^^^^^^^^^^^
 
-In PHP 5.x the QFQ extension needs  the PHP MySQL native driver. The following functions are used and are only available with the
-native driver (see also: http://dev.mysql.com/downloads/connector/php-mysqlnd/):
-
-* mysqli::get_result (important),
-* mysqli::fetch_all (nice to use)
-
-To normalize UTF8 input, the *php5-intl* resp. *php7.0-intl* package is needed by
+To normalize UTF8 input, *php-intl* package is needed by
 
 * normalizer::normalize()
 
 For the `download`_ function, the programs `pdftk` and `file` are necessary to concatenate PDF files.
 
-Preparation for Ubuntu 14.04::
+Preparation for Ubuntu::
 
-  sudo apt-get install php5-mysqlnd php5-intl
-  sudo apt-get install pdftk file                  # for file upload and PDF
-  sudo apt-get install inkscape imagemagick     # to render thumbnails
-  sudo php5enmod mysqlnd
-  sudo service apache2 restart
-
-Preparation for Ubuntu 16.04::
-
-  sudo apt install php7.0-intl
+  sudo apt install php-intl
   sudo apt install pdftk libxrender1 file pdf2svg  # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf), PDF split
   sudo apt install inkscape imagemagick            # to render thumbnails
 
@@ -102,22 +88,28 @@ with the path-filename: ::
 
     cmdWkhtmltopdf=LD_LIBRARY_PATH=/opt/wkhtmltox/lib /opt/wkhtmltox/bin/wkhtmltopdf
 
-**Important**: To access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check! `wkhtml`
-will access the Typo3 page locally (localhost) and that IP address is different from the client (=user) IP.
+.. important::
+
+    o access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check! `wkhtml`
+    will access the Typo3 page locally (localhost) and that IP address is different from the client (=user) IP.
 
 Configure via Typo3 Installtool `All configuration > $TYPO3_CONF_VARS['FE']`: ::
 
    [FE][lockIP] = 0
 
-**Warning**: this disables an important anti-'session hijacking' protection. The security level of the whole installation
-will be *lowered*! Again, this is only needed if `wkhtml` needs access to FE_GROUP protected pages & content. As an
-alternative to lower the security level, create a separated page subtree which is only accessible (configured via
-Typoscript) from specific IPs **or** if a FE-User is logged in.
+.. warning::
+
+    ``[FE][lockIP] = 0`` disables an important anti-'session hijacking' protection. The security level of the whole installation
+    will be *lowered*! Again, this is only needed if `wkhtml` needs access to FE_GROUP protected pages & content. As an
+    alternative to lower the security level, create a separated page subtree which is only accessible (configured via
+    Typoscript) from specific IPs **or** if a FE-User is logged in.
 
 If there are problems with converting/downloading FE_GROUP protected pages, check `SHOW_DEBUG_INFO = download` to debug.
 
-**Important**: Converting HTML to PDF gives no error message but RC=-1? Check carefully all includes of CSS, JS, images
-and so on! Typically some of them fails to load and wkhtml stops running!
+.. note::
+
+    Converting HTML to PDF gives no error message but RC=-1? Check carefully all includes of CSS, JS, images
+    and so on! Typically some of them fails to load and wkhtml stops running!
 
 
 HTML to PDF conversion
@@ -7694,9 +7686,10 @@ Form.parameter:
 | restToken         | Optional. User defined string. For dynamic token see below.                  |
 +-------------------+------------------------------------------------------------------------------+
 
+.. note:
 
-There are no `special-column-names`_ available in `restSqlData` or `restSqlList`. Also there are no
-SIPs possible, cause REST typically does not offer sessions/cookies (which are necessary for SIPs).
+    There are no `special-column-names`_ available in `restSqlData` or `restSqlList`. Also there are no
+    SIPs possible, cause REST typically does not offer sessions/cookies (which are necessary for SIPs).
 
 Authorization
 ^^^^^^^^^^^^^
