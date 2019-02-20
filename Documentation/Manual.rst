@@ -78,10 +78,10 @@ The program is not included in QFQ and has to be manually installed.
   * The current version 0.12.4 might have trouble with https connections. Version 0.12.5-dev (github master branch)
     seems more reliable. Please contact the QFQ authors if you need a compiled Ubuntu version of wkhtmltopdf.
 
-In `configuration`_ specify the: ::
+In `configuration`_ specify the::
 
-    cmdWkhtmltopdf=/opt/wkhtmltox/bin/wkhtmltopdf`.
-    baseUrl=http://www.example.com/`.
+    config.cmdWkhtmltopdf=/opt/wkhtmltox/bin/wkhtmltopdf`.
+    config.baseUrl=http://www.example.com/`.
 
 If wkhtml has been compiled with dedicated libraries (not part of LD_LIBRARY_PATH), specify the LD_LIBRARY_PATH together
 with the path-filename: ::
@@ -90,7 +90,7 @@ with the path-filename: ::
 
 .. important::
 
-    o access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check! `wkhtml`
+    To access FE_GROUP protected pages or content, it's necessary to disable the `[FE][lockIP]` check! `wkhtml`
     will access the Typo3 page locally (localhost) and that IP address is different from the client (=user) IP.
 
 Configure via Typo3 Installtool `All configuration > $TYPO3_CONF_VARS['FE']`: ::
@@ -231,7 +231,9 @@ Setup a *report* to manage all *forms*:
 * Create a Typo3 page.
 * Set the 'URL Alias' to `form` (default) or the individual defined value in parameter `editFormPage` (configuration_).
 * Insert a content record of type *qfq*.
-* In the bodytext insert the following code: ::
+* In the bodytext insert the following code:
+
+.. code-block:: mysql
 
     # If there is a form given by SIP: show
     form={{form:SE}}
@@ -336,6 +338,7 @@ Example: *typo3conf/config.qfq.php*: ::
 
 Extension Manager: QFQ Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Keyword                           | Default / Example                                     | Description                                                                |
@@ -1504,16 +1507,20 @@ If you only have access to `.htaccess`, create a file `<site path>/fileadmin/pro
          Require all denied
     </IfModule>
 
-**Important**: all QFQ uploads should save files in or below such a directory.
+.. important::
+
+    All QFQ uploads should save files only in/below such a protected directory.
 
 To offer download of those files, use the reserved column name '_download' (see `download`_) or variants.
 
-**Important**: To protect the installation against executing of uploaded malicious script code, disable PHP for the final
-upload directory. E.g. `fileadmin` (Apache): ::
+.. important::
 
-    <Directory "/var/www/html/fileadmin">
-      php_admin_flag engine Off
-    </Directory>
+    To protect the installation against executing of uploaded malicious script code, disable PHP for the final
+    upload directory. E.g. `fileadmin` (Apache)::
+
+        <Directory "/var/www/html/fileadmin">
+          php_admin_flag engine Off
+        </Directory>
 
 This is in general a good security improvement for directories with user supplied content.
 
@@ -2001,9 +2008,11 @@ Also, the STORE LDAP remains filled, during the whole form processing time. E.g.
 name and email, it's sufficient to fire one FSL on the first FormElement Action element, and use the same values during further FormElement
 Action Elements.
 
-Important: LDAP access might slow down the *Form* processing on load, update or save! The timeout (default: 3 seconds) have
-to be multiplied by the number of accesses. E.g. a broken LDAP connection and 3 *FormElements* with *FSL*
-results to 9 seconds delay on save. Also be prepared not to receive the expected data.
+.. important::
+
+    LDAP access might slow down the *Form* processing on load, update or save! The timeout (default: 3 seconds) have
+    to be multiplied by the number of accesses. E.g. a broken LDAP connection and 3 *FormElements* with *FSL*
+    results to 9 seconds delay on save. Also be prepared not to receive the expected data.
 
 * *FormElement.parameter.fillStoreLdap* - activate the mode *Fill S* - no value is needed, the existence is sufficient.
 * *Form.parameter* or *FormElement.parameter*:
@@ -6682,7 +6691,7 @@ Setup
 '''''
 
 * Create a special column name `_excel` (or `_link`) in QFQ/Report. As a source, define a T3 PageContent, which has to
-  deliver the dynamic content (also `_excel-export-sample`). ::
+  deliver the dynamic content (also `excel-export-sample`_). ::
 
     SELECT CONCAT('d:final.xlsx|M:excel|s:1|t:Excel (new)|uid:43') AS _link
 
@@ -6758,7 +6767,7 @@ In Report Syntax: ::
     30.sql = SELECT 'position=D30' AS _XLS,
                      '<some content with special characters like newline/carriage return>' AS _XLSb
 
-.. _excel-export-sample:
+.. _`excel-export-sample`:
 
 Excel export samples: ::
 
@@ -7621,7 +7630,9 @@ Each 'level' is represented by a QFQ Form.
 
 Only the last <level> of an URI will be processed. The former ones are just to fulfil a good looking REST API.
 
-Important:  the level name is the QFQ form name.
+.. note::
+
+    The level name is the QFQ form name.
 
 Each level name (=form name) is available via STORE_CLIENT and name `_formX`. E.g. in example
 (1) `{{_form1:C:alnumx}}=person` and `{{_form2:C:alnumx}}=address`.
