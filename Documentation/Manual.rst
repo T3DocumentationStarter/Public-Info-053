@@ -12,6 +12,9 @@
 .. External Links: `Bootstrap <http://getbootstrap.com/>`_:
 .. Add Images: https://wiki.typo3.org/ReST_Syntax#Images ...
 ..
+.. Admonitions (https://docs.typo3.org/typo3cms/drafts/github/xperseguers/RstPrimer/#admonitions)
+..       .. note::    .. important::     .. tip::      .. warning::
+..
 .. -*- coding: utf-8 -*- with BOM.
 
 
@@ -62,17 +65,17 @@ For the `download`_ function, the programs `pdftk` and `file` are necessary to c
 
 Preparation for Ubuntu 14.04::
 
-	sudo apt-get install php5-mysqlnd php5-intl
-	sudo apt-get install pdftk file                  # for file upload and PDF
-	sudo apt-get install inkscape imagemagick     # to render thumbnails
-	sudo php5enmod mysqlnd
-	sudo service apache2 restart
+  sudo apt-get install php5-mysqlnd php5-intl
+  sudo apt-get install pdftk file                  # for file upload and PDF
+  sudo apt-get install inkscape imagemagick     # to render thumbnails
+  sudo php5enmod mysqlnd
+  sudo service apache2 restart
 
 Preparation for Ubuntu 16.04::
 
-	sudo apt install php7.0-intl
-	sudo apt install pdftk libxrender1 file pdf2svg  # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf), PDF split
-	sudo apt install inkscape imagemagick            # to render thumbnails
+  sudo apt install php7.0-intl
+  sudo apt install pdftk libxrender1 file pdf2svg  # for file upload, PDF and 'HTML to PDF' (wkhtmltopdf), PDF split
+  sudo apt install inkscape imagemagick            # to render thumbnails
 
 .. _wkhtml:
 
@@ -130,17 +133,17 @@ Different browser prints the same page in different variations. To prevent this,
 
 Provide a `print this page`-link (replace 'current pageId' )::
 
-	<a href="typo3conf/ext/qfq/Source/api/print.php?id={current pageId}">Print this page</a>
+  <a href="typo3conf/ext/qfq/Source/api/print.php?id={current pageId}">Print this page</a>
 
 Any parameter specified after `print.php` will be delivered to `wkhtmltopdf` as part of the URL.
 
 Typoscript code to implement a print link on every page::
 
-	10 = TEXT
-	10 {
-		wrap = <a href="typo3conf/ext/qfq/Source/api/print.php?id=|&type=99"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
-		data = page:uid
-	}
+  10 = TEXT
+  10 {
+    wrap = <a href="typo3conf/ext/qfq/Source/api/print.php?id=|&type=99"><span class="glyphicon glyphicon-print" aria-hidden="true"></span> Printview</a>
+    data = page:uid
+  }
 
 Send Email
 ^^^^^^^^^^
@@ -259,7 +262,7 @@ Setup a *report* to manage all *forms*:
         10 {
             # All forms
             sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form&r=', f.id) as _pagee
-                         , f.id, f.name, f.title, f.tableName
+                         , f.id, f.name, f.title AS '_striptags', f.tableName
                          , CONCAT('U:form=form&r=', f.id) as _paged
                       FROM Form AS f
                       ORDER BY f.name
@@ -278,7 +281,7 @@ Installation: Check List
 * Protect the directory `<T3 installation>/fileadmin/protected` in Apache against direct file access.
 
   * `<T3 installation>/fileadmin/protected/` should be used for confidential (uploaded / generated) data.
-  * `<T3 installation>/fileadmin/protected/log/...` is the default place for QFQ logfiles.
+  * `<T3 installation>/fileadmin/protected/log/...` is the default place for QFQ log files.
 
 * Protect the directory `<T3 installation>/fileadmin` in Apache to not execute PHP Scripts - malicious uploads won't be executed.
 * Setup a log rotation rule for `sqlLog`.
@@ -384,7 +387,7 @@ Extension Manager: QFQ Configuration
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | formSubmitLogMode                 | all                                                   | | *all*: every form submission will be logged.                             |
 |                                   |                                                       | | *none*: no logging.                                                      |
-|                                   |                                                       | | See `Form Submit Log page`_ for example QFQ code to display the log.     |
+|                                   |                                                       | | See `form-submit-log-page`_ for example QFQ code to display the log.     |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | redirectAllMailTo                 | john@doe.com                                          | If set, redirect all QFQ generated mails (Form, Report) to the specified.  |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -432,6 +435,8 @@ Extension Manager: QFQ Configuration
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | securityGetMaxLength              | 50                                                    | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
 |                                   |                                                       | `ExceptionMaxLength`_.                                                     |
++-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| securityFailedAuthDelay           | 3                                                     | If authorization fails, sleep 'x' seconds before answering the request.    |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Form-Config                                                                                                                                                            |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -599,7 +604,7 @@ Websites, delivering semester data, school year schedules, or any other type or 
 
 In configuration_: ::
 
-	fillStoreSystemBySql1: SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1
+  fillStoreSystemBySql1: SELECT id AS periodId FROM Period WHERE start<=NOW() ORDER BY start DESC LIMIT 1
 
 a variable 'periodId' will automatically computed and filled in STORE SYSTEM. Access it via `{{periodId:Y0}}`.
 To get the name and current period: ::
@@ -608,7 +613,8 @@ To get the name and current period: ::
 
 Typically, it's necessary to offer a 'previous' / 'next' link. In this example, the STORE SIP holds the new periodId: ::
 
-  SELECT CONCAT('p:{{pageAlias:T}}&periodId=', {{periodId:SY0}}-1, '|Next') AS _page, ' ', name, ' ', CONCAT('p:{{pageAlias:T}}&periodId=', {{periodId:SY0}}+1, '|Next') AS _page FROM Period AS s WHERE s.id={{periodId:SY0}}
+  SELECT CONCAT('p:{{pageAlias:T}}&periodId=', {{periodId:SY0}}-1, '|Next') AS _page, ' ', name, ' ',
+    CONCAT('p:{{pageAlias:T}}&periodId=', {{periodId:SY0}}+1, '|Next') AS _page FROM Period AS s WHERE s.id={{periodId:SY0}}
 
 Take care for minimum and maximum indexes (do not render the links if out of range).
 
@@ -821,7 +827,7 @@ System tables
 | Split         | Persistent | Data       |
 +---------------+------------+------------+
 
-See `Mail Log page`_ and `Form Submit Log page`_ for some Frontend views for these tables.
+See `mail-log-page`_ and `form-submit-log-page`_ for some Frontend views for these tables.
 
 * Check Bug #5459 - support of system tables in different DBs not supported.
 
@@ -920,7 +926,7 @@ Debug
 SQL Logging
 -----------
 
-configuration_
+Setup in configuration_
 
 .. _SQL_LOG:
 
@@ -968,14 +974,14 @@ configuration_
   * *download*:
 
     * During a download (especially by using wkhtml), temporary files are not deleted automatically. Also the
-      `wkhtmltopdf` and `pdftk` commandlines will be logged to `SQL_LOG`_. Use this only to debug problems on download.
+      ``wkhtmltopdf`` and ``pdftk`` commandlines will be logged to `SQL_LOG`_. Use this only to debug problems on download.
 
 .. _REDIRECT_ALL_MAIL_TO:
 
 Redirect all mail to (catch all)
 --------------------------------
 
-configuration_
+Setup in configuration_
 
 * *redirectAllMailTo=john@doe.com*
 
@@ -988,7 +994,7 @@ configuration_
     * Clear 'CC' and 'Bcc'
     * Write a note and the original configured receiver at the top of the email body.
 
-_`Mail Log page`
+_`mail-log-page`
 
 Mail Log page
 -------------
@@ -1006,7 +1012,8 @@ The following QFQ code could be used for that purpose (put it in a QFQ PageConte
                FROM gGroup AS gr
                INNER JOIN MailLog AS ml ON ml.grId = gr.id
                GROUP BY gr.id
-      head = <form onchange='this.submit();' class='form-inline'><input type='hidden' name='id' value='{{pageAlias:T0}}'>Filter By Group: <select name='grId' class='form-control'><option value=''></option>
+      head = <form onchange='this.submit();' class='form-inline'><input type='hidden' name='id' value='{{pageAlias:T0}}'>
+               Filter By Group: <select name='grId' class='form-control'><option value=''></option>
       rbeg = <option value='
       rend = </option>
       tail = </select>
@@ -1022,17 +1029,20 @@ The following QFQ code could be used for that purpose (put it in a QFQ PageConte
       sql = SELECT id, '</td><td>', grId, '</td><td>', xId, '</td><td>',
                 REPLACE(receiver, ',', '<br>'), '</td><td>', REPLACE(sender, ',', '<br>'), '</td><td>',
                 DATE_FORMAT(modified, '%d.%m.%Y<br>%H:%i:%s'), '</td><td style="word-break:break-word;">',
-                CONCAT('<b>', subject, '</b><br>', IF(@summary = 'true', CONCAT(SUBSTR(body, 1, LEAST(IF(INSTR(body, '\n') = 0, 50, INSTR(body, '\n')), IF(INSTR(body, '<br>') = 0, 50, INSTR(body, '<br>')))-1), ' ...'), CONCAT('<br>', REPLACE(body, '\n', '<br>'))) )
+                CONCAT('<b>', subject, '</b><br>', IF(@summary = 'true', CONCAT(SUBSTR(body, 1,
+                       LEAST(IF(INSTR(body, '\n') = 0, 50, INSTR(body, '\n')), IF(INSTR(body, '<br>') = 0, 50,
+                       INSTR(body, '<br>')))-1), ' ...'), CONCAT('<br>', REPLACE(body, '\n', '<br>'))) )
               FROM MailLog WHERE (grId = @grId OR @grId = 0)
               ORDER BY modified DESC
               LIMIT 100
-      head = <table class="table table-condensed table-hover"><tr><th>Id</th><th>grId</th><th>xId</th><th>To</th><th>From</th><th>Date</th><th>E-Mail</th></tr>
+      head = <table class="table table-condensed table-hover"><tr>
+                 <th>Id</th><th>grId</th><th>xId</th><th>To</th><th>From</th><th>Date</th><th>E-Mail</th></tr>
       tail = </table>
       rbeg = <tr><td>
       rend = </td></tr>
     }
 
-_`Form Submit Log page`
+_`form-submit-log-page`
 
 Form Submit Log page
 --------------------
@@ -1221,11 +1231,11 @@ Rules for CheckType Auto (by priority):
 
 * TypeAheadSQL or TypeAheadLDAP defined: **alnumx**
 * Table definition
-	* integer type: **digit**
-	* floating point number: **numerical**
+  * integer type: **digit**
+  * floating point number: **numerical**
 * FE Type
-	* 'password', 'note': **all**
-	* 'editor', 'text' and encode = 'specialchar': **all**
+  * 'password', 'note': **all**
+  * 'editor', 'text' and encode = 'specialchar': **all**
 * None of the above: **alnumx**
 
 
@@ -1249,16 +1259,16 @@ manipulate FE user passwords via QFQ. See `setFeUserPassword`_
 
 The following `escape` and `hashing` types are available:
 
-	* 'm' - `real_escape_string() <http://php.net/manual/en/mysqli.real-escape-string.php>`_ (m = mysql)
-	* 'l' - LDAP search filter values: `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_FILTER).
-	* 'L' - LDAP DN values. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
-	* 's' - Single ticks ' will be escaped against \\'.
-	* 'd' - double ticks " will be escaped against \\".
-	* 'C' - colon ':' will be escaped against \\:.
-	* 'c' - config - the escape type configured in `configuration`_.
-	* 'p' - password hashing: depends on the hashing type in the Typo3 installation, includes salting if configured.
-	* ''  - the escape type configured in `configuration`_.
-	* '-' - no escaping.
+  * 'm' - `real_escape_string() <http://php.net/manual/en/mysqli.real-escape-string.php>`_ (m = mysql)
+  * 'l' - LDAP search filter values: `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_FILTER).
+  * 'L' - LDAP DN values. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
+  * 's' - Single ticks ' will be escaped against \\'.
+  * 'd' - double ticks " will be escaped against \\".
+  * 'C' - colon ':' will be escaped against \\:.
+  * 'c' - config - the escape type configured in `configuration`_.
+  * 'p' - password hashing: depends on the hashing type in the Typo3 installation, includes salting if configured.
+  * ''  - the escape type configured in `configuration`_.
+  * '-' - no escaping.
 
 * The `escape` type is defined by the fourth parameter of the variable. E.g.: `{{name:FE:alnumx:m}}` (m = mysql).
 * It's possible to combine different `escape` types, they will be processed in the order given. E.g. `{{name:FE:alnumx:Ls}}` (L, s).
@@ -1333,7 +1343,7 @@ Database index
 To access different databases in a `multi-database`_  setup, the database index can be specified after the opening curly
 braces. ::
 
-	{{[1]SELECT ... }}
+  {{[1]SELECT ... }}
 
 For using the indexData and indexQfq (configuration_), it's a good practice to specify the variable name
 instead of the numeric index. ::
@@ -1385,11 +1395,11 @@ Link column variables
 These variables return a link, completely rendered in HTML. The syntax and all features of `column-link`_ are available.
 The following code will render a 'new person' button::
 
-	{{p:form&form=Person|s|N|t:new person AS link}}
+  {{p:form&form=Person|s|N|t:new person AS link}}
 
 For better reading, the format string might be wrapped in single or double quotes (this is optional): ::
 
-	{{"p:form&form=Person|s|N|t:new person" AS link}}
+  {{"p:form&form=Person|s|N|t:new person" AS link}}
 
 These variables are especially helpful in:
 
@@ -1509,9 +1519,9 @@ To offer download of those files, use the reserved column name '_download' (see 
 **Important**: To protect the installation against executing of uploaded malicious script code, disable PHP for the final
 upload directory. E.g. `fileadmin` (Apache): ::
 
-		<Directory "/var/www/html/fileadmin">
-			php_admin_flag engine Off
-		</Directory>
+    <Directory "/var/www/html/fileadmin">
+      php_admin_flag engine Off
+    </Directory>
 
 This is in general a good security improvement for directories with user supplied content.
 
@@ -1685,7 +1695,9 @@ Store: *CLIENT* - C
  +=========================+==========================================================================================================================================+
  | s                       | =SIP                                                                                                                                     |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
- | r                       | record id. Typically stored in SIP, rarely specified on the URL                                                                          |
+ | r                       | record id. Only if specified as GET parameter - typically stored in SIP (=STORE_SIP)                                                     |
+ +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
+ | form                    | Name of form to load. Only if specified as GET parameter - typically stored in SIP (=STORE_SIP)                                          |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | HTTP_HOST               | current HTTP HOST                                                                                                                        |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1693,7 +1705,7 @@ Store: *CLIENT* - C
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
  | '$_SERVER[*]'           | All other variables accessible by *$_SERVER[]*. Only the often used have a pre-defined sanitize class.                                   |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
- | form                    | Unique name of current form                                                                                                              |
+ | Authorization           | Value of the HTTP Header 'Authorization'. This is typically not set. Mostly used for authentication of REST requests                     |
  +-------------------------+------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. _STORE_TYPO3:
@@ -2536,10 +2548,10 @@ Optional it might be defined via *Form.parameter* ::
 
 The following shows the same *Form* in the `regular`, `readonly` and `requiredOff` mode::
 
-	10.sql = SELECT CONCAT('p:{{pageAlias:T}}&form=person&r=', p.id, '|Regular') as _pagee,
-	                CONCAT('p:{{pageAlias:T}}&form=person&formModeGlobal=readonly&r=', p.id, '|Readonly') as _pagee,
-	                CONCAT('p:{{pageAlias:T}}&form=person&formModeGlobal=requiredOff&r=', p.id, '|Required off') as _pagee
-	                FROM Person AS p
+  10.sql = SELECT CONCAT('p:{{pageAlias:T}}&form=person&r=', p.id, '|Regular') as _pagee,
+                  CONCAT('p:{{pageAlias:T}}&form=person&formModeGlobal=readonly&r=', p.id, '|Readonly') as _pagee,
+                  CONCAT('p:{{pageAlias:T}}&form=person&formModeGlobal=requiredOff&r=', p.id, '|Required off') as _pagee
+                  FROM Person AS p
 
 ..
 
@@ -2687,11 +2699,11 @@ Add an *action* record, type='afterSave', and assign the record to the given *te
 
 In the parameter field define: ::
 
-		slaveId = {{SELECT id FROM Address WHERE personId={{id}} ORDER BY id LIMIT %D,1}}
-		sqlHonorFormElements = city%d, street%d
-		sqlUpdate = {{UPDATE Address SET city='{{city%d:FE:alnumx:s}}', street='{{street%d:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1}}
-		sqlInsert = {{INSERT INTO Address (`personId`, `city`, `street`) VALUES ({{id}}, '{{city%d:FE:alnumx:s}}' , '{{street%d:FE:alnumx:s}}') }}
-		sqlDelete = {{DELETE FROM Address WHERE id={{slaveId}} LIMIT 1}}
+    slaveId = {{SELECT id FROM Address WHERE personId={{id}} ORDER BY id LIMIT %D,1}}
+    sqlHonorFormElements = city%d, street%d
+    sqlUpdate = {{UPDATE Address SET city='{{city%d:FE:alnumx:s}}', street='{{street%d:FE:alnumx:s}}'  WHERE id={{slaveId}} LIMIT 1}}
+    sqlInsert = {{INSERT INTO Address (`personId`, `city`, `street`) VALUES ({{id}}, '{{city%d:FE:alnumx:s}}' , '{{street%d:FE:alnumx:s}}') }}
+    sqlDelete = {{DELETE FROM Address WHERE id={{slaveId}} LIMIT 1}}
 
 The `slaveId` needs attention: the placeholder `%d` starts always at 1. The `LIMIT` directive starts at 0 - therefore
 use `%D` instead of `%d`, cause `%D` is always one below `%d` - but can **only** be used on the action element.
@@ -3480,11 +3492,11 @@ will be rendered inside the form as a HTML table.
   * *subrecordTableClass*: Optional. Default: 'table table-hover qfq-subrecord-table'. If given, the default will be
      overwritten. Example: ::
 
-	  subrecordTableClass = table table-hover qfq-subrecord-table qfq-table-50
+        subrecordTableClass = table table-hover qfq-subrecord-table qfq-table-50
 
   * Tablesorter in Subrecord:
 
-  	   subrecordTableClass = table table-hover qfq-subrecord-table tablesorter tablesorter-pager tablesorter-filter
+       subrecordTableClass = table table-hover qfq-subrecord-table tablesorter tablesorter-pager tablesorter-filter
 
   * *subrecordColumnTitleEdit*: Optional. Will be rendered as the column title for the new/edit column.
   * *subrecordColumnTitleDelete*: Optional. Will be rendered as the column title for the delete column.
@@ -3553,8 +3565,8 @@ and will be processed after saving the primary record and before any action Form
 * *FormElement.value* = `<string>` - By default, the full path of any already uploaded file is shown. To show something
   different, e.g. only the filename, define: ::
 
-	 a) {{filenameBase:V}}
-	 b) {{SELECT SUBSTRING_INDEX( '{{pathFileName:R}}', '/', -1)  }}
+   a) {{filenameBase:V}}
+   b) {{SELECT SUBSTRING_INDEX( '{{pathFileName:R}}', '/', -1)  }}
 
 See also `downloadButton`_ to offer a download of an uploaded file.
 
@@ -4051,7 +4063,7 @@ Parameter
   `pId` in the link who calls the address form. The following creates a 'new' button for an address for all persons, and
   the pId will be automatically saved in the address table: ::
 
-		SELECT CONCAT('p:{{pageAlias:T}}&form=address&r=0&pId=', p.id) AS _pagen FROM Person AS p
+    SELECT CONCAT('p:{{pageAlias:T}}&form=address&r=0&pId=', p.id) AS _pagen FROM Person AS p
 
   Such parameter, which the form expects to be in the SIP url, should be specified in Form.permitNew and/or Form.permitEdit.
   It's only a check for the webmaster, not to forgot a parameter in a SIP url.
@@ -4108,11 +4120,11 @@ Assuming the Typo3 page has the
 
 Configuration in configuration_: ::
 
-		formLanguageAId = 1
-		formLanguageALabel = English
+    formLanguageAId = 1
+    formLanguageALabel = English
 
-		formLanguageBId = 2
-		formLanguageBLabel = Spanish
+    formLanguageBId = 2
+    formLanguageBLabel = Spanish
 
 The default language is not covered in configuration_.
 
@@ -4122,31 +4134,31 @@ missing definition means 'take the default'. E.g.:
 
 * Form: 'person'
 
-	+--------------------+--------------------------+
-	| Column             | Value                    |
-	+====================+==========================+
-	| title              | Eingabe Person           |
-	+--------------------+--------------------------+
-	| languageParameterA | title=Input Person       |
-	+--------------------+--------------------------+
-	| languageParameterB | title=Persona de entrada |
-	+--------------------+--------------------------+
+  +--------------------+--------------------------+
+  | Column             | Value                    |
+  +====================+==========================+
+  | title              | Eingabe Person           |
+  +--------------------+--------------------------+
+  | languageParameterA | title=Input Person       |
+  +--------------------+--------------------------+
+  | languageParameterB | title=Persona de entrada |
+  +--------------------+--------------------------+
 
 * FormElement 'firstname' in Form 'person':
 
-	+--------------------+------------------------------------------------+
-	| Column             | Value                                          |
-	+====================+================================================+
-	| title              | Vorname                                        |
-	+--------------------+------------------------------------------------+
-	| note               | Bitte alle Vornamen erfassen                   |
-	+--------------------+------------------------------------------------+
-	| languageParameterA | | title=Firstname                              |
-	|                    | | note=Please give all firstnames              |
-	+--------------------+------------------------------------------------+
-	| languageParameterB | | title=Persona de entrada                     |
-	|                    | | note=Por favor, introduzca todos los nombres |
-	+--------------------+------------------------------------------------+
+  +--------------------+------------------------------------------------+
+  | Column             | Value                                          |
+  +====================+================================================+
+  | title              | Vorname                                        |
+  +--------------------+------------------------------------------------+
+  | note               | Bitte alle Vornamen erfassen                   |
+  +--------------------+------------------------------------------------+
+  | languageParameterA | | title=Firstname                              |
+  |                    | | note=Please give all firstnames              |
+  +--------------------+------------------------------------------------+
+  | languageParameterB | | title=Persona de entrada                     |
+  |                    | | note=Por favor, introduzca todos los nombres |
+  +--------------------+------------------------------------------------+
 
 
 The following fields are possible:
@@ -4948,8 +4960,8 @@ Table: Person
 
        # Typeahead
        typeAheadLdapSearch = (|(cn=*?*)(mail=*?*))
-       typeAheadLdapValuePrintf	‘%s / %s’, cn, email
-       typeAheadLdapIdPrintf	‘%s’, email
+       typeAheadLdapValuePrintf ‘%s / %s’, cn, email
+       typeAheadLdapIdPrintf  ‘%s’, email
 
        # dynamicUpdate: show note
        fillStoreLdap
@@ -5100,9 +5112,9 @@ Only SELECT and SHOW queries will fire subqueries.
 
 Processing of the resulting rows and columns:
 
-	* In general, all columns of all rows will be printed out sequentially.
-	* On a per column base, printing of columns can be suppressed by starting the column name with an underscore '_'. E.g.
-	  `SELECT id AS _id`.
+  * In general, all columns of all rows will be printed out sequentially.
+  * On a per column base, printing of columns can be suppressed by starting the column name with an underscore '_'. E.g.
+    `SELECT id AS _id`.
 
      This might be useful to store values, which will be used later on in another query via the `{{id:R}}` or
      `{{<level>.columnName}}` variable. To suppress printing of a column, use a underscore as column name prefix. E.g.
@@ -5250,9 +5262,9 @@ Leading / trailing spaces
 By default, leading or trailing whitespaces are removed from strings behind '='. E.g. 'rend =  test ' becomes 'test' for
 rend. To prevent any leading or trailing spaces, surround them by using single or double ticks. Example: ::
 
-	10.sql = SELECT name FROM Person
-	10.rsep = ' '
-	10.head = "Names: "
+  10.sql = SELECT name FROM Person
+  10.rsep = ' '
+  10.head = "Names: "
 
 
 Braces character for nesting
@@ -6081,23 +6093,23 @@ Optional any number of sources can be concatenated to a single PDF file: 'C|F:<f
 
 Examples in Report::
 
-	# One file attached.
-	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf" AS _sendmail
+  # One file attached.
+  10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf" AS _sendmail
 
-	# Two files attached.
-	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf" AS _sendmail
+  # Two files attached.
+  10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf" AS _sendmail
 
-	# Two files and a webpage (converted to PDF) are attached.
-	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf|p:?id=export&r=123|d:person.pdf" AS _sendmail
+  # Two files and a webpage (converted to PDF) are attached.
+  10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf|F:fileadmin/detail.pdf|p:?id=export&r=123|d:person.pdf" AS _sendmail
 
-	# Two webpages (converted to PDF) are attached.
-	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123|d:person123.pdf|p:?id=export&r=234|d:person234.pdf" AS _sendmail
+  # Two webpages (converted to PDF) are attached.
+  10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123|d:person123.pdf|p:?id=export&r=234|d:person234.pdf" AS _sendmail
 
-	# One file and two webpages (converted to PDF) are *concatenated* to one PDF and attached.
-	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|C|F:fileadmin/summary.pdf|p:?id=export&r=123|p:?id=export&r=234|d:complete.pdf" AS _sendmail
+  # One file and two webpages (converted to PDF) are *concatenated* to one PDF and attached.
+  10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|C|F:fileadmin/summary.pdf|p:?id=export&r=123|p:?id=export&r=234|d:complete.pdf" AS _sendmail
 
-	# One T3 webpage, protected by a SIP, are attached.
-	10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123&_sip=1|d:person123.pdf" AS _sendmail
+  # One T3 webpage, protected by a SIP, are attached.
+  10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|p:?id=export&r=123&_sip=1|d:person123.pdf" AS _sendmail
 
 .. _column_img:
 
@@ -6212,15 +6224,15 @@ Most of the other Link-Class attributes can be used to customize the link. ::
 * For column `_pdf` and `_zip`, the element sources `p:...`, `U:...`, `u:...`, `F:...` might repeated multiple times.
 * Example: ::
 
-		10.sql = SELECT "F:fileadmin/test.pdf" as _pdf,  "F:fileadmin/test.pdf" as _file,  "F:fileadmin/test.pdf" as _zip
-		10.sql = SELECT "p:id=export&r=1" as _pdf,  "p:id=export&r=1" as _file,  "p:id=export&r=1" as _zip
+    10.sql = SELECT "F:fileadmin/test.pdf" as _pdf,  "F:fileadmin/test.pdf" as _file,  "F:fileadmin/test.pdf" as _zip
+    10.sql = SELECT "p:id=export&r=1" as _pdf,  "p:id=export&r=1" as _file,  "p:id=export&r=1" as _zip
 
-		10.sql = SELECT "t:Download PDF|F:fileadmin/test.pdf" as _pdf,  "t:Download PDF|F:fileadmin/test.pdf" as _file,  "t:Download ZIP|F:fileadmin/test.pdf" as _zip
-		10.sql = SELECT "t:Download PDF|p:id=export&r=1" as _pdf,  "t:Download PDF|p:id=export&r=1" as _file,  "t:Download ZIP|p:id=export&r=1" as _zip
+    10.sql = SELECT "t:Download PDF|F:fileadmin/test.pdf" as _pdf,  "t:Download PDF|F:fileadmin/test.pdf" as _file,  "t:Download ZIP|F:fileadmin/test.pdf" as _zip
+    10.sql = SELECT "t:Download PDF|p:id=export&r=1" as _pdf,  "t:Download PDF|p:id=export&r=1" as _file,  "t:Download ZIP|p:id=export&r=1" as _zip
 
-		10.sql = SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _pdf, "d:complete.zip|t:Download ZIP|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _zip
+    10.sql = SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _pdf, "d:complete.zip|t:Download ZIP|F:fileadmin/test1.pdf|F:fileadmin/test2.pdf" as _zip
 
-		10.sql = SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test.pdf|p:id=export&r=1|u:www.example.com" AS _pdf
+    10.sql = SELECT "d:complete.pdf|t:Download PDF|F:fileadmin/test.pdf|p:id=export&r=1|u:www.example.com" AS _pdf
 
 .. _column-save-pdf:
 
@@ -6242,8 +6254,8 @@ Tips:
 
 Examples: ::
 
-	SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf" AS _savePdf
-	SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf|U:id=test&--orientation=landscape" AS _savePdf
+  SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf" AS _savePdf
+  SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf|U:id=test&--orientation=landscape" AS _savePdf
 
 
 .. _column-thumbnail:
@@ -6289,17 +6301,17 @@ tag. Something like `<body style="background-image:url(bgimage.jpg)">` could be 
 
 Example: ::
 
-	# SIP protected, IMG tag, thumbnail width 150px
-	10.sql = SELECT 'T:fileadmin/file3.pdf' AS _thumbnail
+  # SIP protected, IMG tag, thumbnail width 150px
+  10.sql = SELECT 'T:fileadmin/file3.pdf' AS _thumbnail
 
-	# SIP protected, IMG tag, thumbnail width 50px
-	20.sql = SELECT 'T:fileadmin/file3.pdf|W:50' AS _thumbnail
+  # SIP protected, IMG tag, thumbnail width 50px
+  20.sql = SELECT 'T:fileadmin/file3.pdf|W:50' AS _thumbnail
 
-	# No SIP protection, IMG tag, thumbnail width 150px
-	30.sql = SELECT 'T:fileadmin/file3.pdf|s:0' AS _thumbnail
+  # No SIP protection, IMG tag, thumbnail width 150px
+  30.sql = SELECT 'T:fileadmin/file3.pdf|s:0' AS _thumbnail
 
-	# SIP protected, only the URL to the image, thumbnail width 150px
-	40.sql = SELECT 'T:fileadmin/file3.pdf|s:1|r:7' AS _thumbnail
+  # SIP protected, only the URL to the image, thumbnail width 150px
+  40.sql = SELECT 'T:fileadmin/file3.pdf|s:1|r:7' AS _thumbnail
 
 
 Dimension
@@ -6314,7 +6326,7 @@ Cleaning
 By default, the thumbnail directories are never cleaned. It's a good idea to install a cronjob which purges all files
 older than 1 year: ::
 
-	find /path/to/files -type f -mtime +365 -delete
+  find /path/to/files -type f -mtime +365 -delete
 
 Render
 ''''''
@@ -6337,7 +6349,7 @@ The secure path needs to be protected against direct file access by the webmaste
 
 QFQ returns a HTML 'img'-tag: ::
 
-	<img src="api/download.php?s=badcaffee1234">
+  <img src="api/download.php?s=badcaffee1234">
 
 Thumbnail: public
 '''''''''''''''''
@@ -6490,49 +6502,49 @@ Parameter and (element) sources
       the key/value tuple in `p:...`, `u:...` or `U:...` has to be separated by '='. Please see last example below.
     * If an option contains an '&' it must be escaped with double '\\'. See example.
 
-	Most of the other Link-Class attributes can be used to customize the link as well.
+  Most of the other Link-Class attributes can be used to customize the link as well.
 
 Example `_link`: ::
 
-	# single `file`. Specifying a popup message window text is not necessary, cause a file directly accessed is fast.
-	SELECT "d:file.pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
+  # single `file`. Specifying a popup message window text is not necessary, cause a file directly accessed is fast.
+  SELECT "d:file.pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
 
-	# single `file`, with mode
-	SELECT "d:file.pdf|M:pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
+  # single `file`, with mode
+  SELECT "d:file.pdf|M:pdf|s|t:Download|F:fileadmin/pdf/test.pdf" AS _link
 
-	# three sources: two pages and one file
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
+  # three sources: two pages and one file
+  SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
 
-	# three sources: two pages and one file
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
+  # three sources: two pages and one file
+  SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1|F:fileadmin/pdf/test.pdf" AS _link
 
-	# three sources: two pages and one file, parameter to wkhtml will be SIP encoded
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1&_sip=1|p:id=detail2&r=1&_sip=1|F:fileadmin/pdf/test.pdf" AS _link
+  # three sources: two pages and one file, parameter to wkhtml will be SIP encoded
+  SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1&_sip=1|p:id=detail2&r=1&_sip=1|F:fileadmin/pdf/test.pdf" AS _link
 
-	# three sources: two pages and one file, the second page will be in landscape and pagesize A3
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1&--orientation=Landscape&--page-size=A3|F:fileadmin/pdf/test.pdf" AS _link
+  # three sources: two pages and one file, the second page will be in landscape and pagesize A3
+  SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail&r=1|p:id=detail2&r=1&--orientation=Landscape&--page-size=A3|F:fileadmin/pdf/test.pdf" AS _link
 
-	# One source and a header file. Note: the parameter to the header URL is escaped with double backslash.
-	SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail2&r=1&--orientation=Landscape&--header={{URL:R}}?indexp.php?id=head\\&L=1|F:fileadmin/pdf/test.pdf" AS _link
+  # One source and a header file. Note: the parameter to the header URL is escaped with double backslash.
+  SELECT "d:complete.pdf|s|t:Complete PDF|p:id=detail2&r=1&--orientation=Landscape&--header={{URL:R}}?indexp.php?id=head\\&L=1|F:fileadmin/pdf/test.pdf" AS _link
 
 ..
 
 Example `_pdf`, `_zip`: ::
 
-	# File 1: p:id=1&--orientation=Landscape&--page-size=A3
-	# File 2: p:id=form
-	# File 3: F:fileadmin/file.pdf
-	SELECT 't:PDF|a:Creating a new PDF|p:id=1&--orientation=Landscape&--page-size=A3|p:id=form|F:fileadmin/file.pdf' AS _pdf
+  # File 1: p:id=1&--orientation=Landscape&--page-size=A3
+  # File 2: p:id=form
+  # File 3: F:fileadmin/file.pdf
+  SELECT 't:PDF|a:Creating a new PDF|p:id=1&--orientation=Landscape&--page-size=A3|p:id=form|F:fileadmin/file.pdf' AS _pdf
 
-	# File 1: p:id=1
-	# File 2: u:http://www.example.com
-	# File 3: F:fileadmin/file.pdf
-	SELECT 't:PDF - 3 Files|a:Please be patient|p:id=1|u:http://www.example.com|F:fileadmin/file.pdf' AS _pdf
+  # File 1: p:id=1
+  # File 2: u:http://www.example.com
+  # File 3: F:fileadmin/file.pdf
+  SELECT 't:PDF - 3 Files|a:Please be patient|p:id=1|u:http://www.example.com|F:fileadmin/file.pdf' AS _pdf
 
-	# File 1: p:id=1
-	# File 2: p:id=form
-	# File 3: F:fileadmin/file.pdf
-	SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|p:id=1|p:id=form|F:', p.pathFileName) AS _zip
+  # File 1: p:id=1
+  # File 2: p:id=form
+  # File 3: F:fileadmin/file.pdf
+  SELECT CONCAT('t:ZIP - 3 Pages|a:Please be patient|p:id=1|p:id=form|F:', p.pathFileName) AS _zip
 
 ..
 
@@ -6551,65 +6563,65 @@ Best practice:
 
 #. Create a clean (=no menu, no website layout) letter layout in a separated T3 branch: ::
 
-	page = PAGE
-	page.typeNum = 0
-	page.includeCSS {
-	  10 = typo3conf/ext/qfq/Resources/Public/Css/qfq-letter.css
-	}
+      page = PAGE
+      page.typeNum = 0
+      page.includeCSS {
+        10 = typo3conf/ext/qfq/Resources/Public/Css/qfq-letter.css
+      }
 
-	// Grant access to any logged in user or specific development IPs
-	[usergroup = *] || [IP = 127.0.0.1,192.168.1.* ]
-	  page.10 < styles.content.get
-	[else]
-	  page.10 = TEXT
-	  page.10.value = access forbidden
-	[global]
+      // Grant access to any logged in user or specific development IPs
+      [usergroup = *] || [IP = 127.0.0.1,192.168.1.* ]
+        page.10 < styles.content.get
+      [else]
+        page.10 = TEXT
+        page.10.value = access forbidden
+      [global]
 
 #. Create a T3 `body` page (e.g. page alias: 'letterbody') with some content. Example static HTML content: ::
 
-	<div class="letter-receiver">
-	  <p>Address</p>
-	</div>
-	<div class="letter-sender">
-	 <p><b>firstName name</b><br>
-	  Phone +00 00 000 00 00<br>
-	  Fax +00 00 000 00 00<br>
-	 </p>
-	</div>
+      <div class="letter-receiver">
+        <p>Address</p>
+      </div>
+      <div class="letter-sender">
+       <p><b>firstName name</b><br>
+        Phone +00 00 000 00 00<br>
+        Fax +00 00 000 00 00<br>
+       </p>
+      </div>
 
-	<div class="letter-date">
-	  Zurich, 01.12.2017
-	</div>
+      <div class="letter-date">
+        Zurich, 01.12.2017
+      </div>
 
-	<div class="letter-body">
-	 <h1>Subject</h1>
+      <div class="letter-body">
+       <h1>Subject</h1>
 
-	 <p>Dear Mrs...</p>
-	 <p>Lucas ipsum dolor sit amet organa solo skywalker darth c-3p0 anakin jabba mara greedo skywalker.</p>
+       <p>Dear Mrs...</p>
+       <p>Lucas ipsum dolor sit amet organa solo skywalker darth c-3p0 anakin jabba mara greedo skywalker.</p>
 
-	 <div class="letter-no-break">
-	 <p>Regards</p>
-	 <p>Company</p>
-	 <img class="letter-signature" src="">
-	 <p>Firstname Name<br>Function</p>
-	 </div>
-	</div>
+       <div class="letter-no-break">
+       <p>Regards</p>
+       <p>Company</p>
+       <img class="letter-signature" src="">
+       <p>Firstname Name<br>Function</p>
+       </div>
+      </div>
 
 #. Create a T3 letter-`header` page (e.g. page alias: 'letterheader') , with only the header information: ::
 
-		<header>
-		<img src="fileadmin/logo.png" class="letter-logo">
+        <header>
+        <img src="fileadmin/logo.png" class="letter-logo">
 
-		<div class="letter-unit">
-		  <p class="letter-title">Department</p>
-		  <p>
-			 Company name<br>
-			 Company department<br>
-			 Street<br>
-			 City
-		  </p>
-		</div>
-		</header>
+        <div class="letter-unit">
+          <p class="letter-title">Department</p>
+          <p>
+           Company name<br>
+           Company department<br>
+           Street<br>
+           City
+          </p>
+        </div>
+        </header>
 
 #. Create a) a link (Report) to the PDF letter or b) attach the PDF (on the fly rendered) to a mail. Both will call the
    `wkhtml` via the `download` mode and forwards the necessary parameter.
@@ -6626,7 +6638,7 @@ Use in `report`: ::
 
 Sendmail. Parameter: ::
 
-	sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}} }}
+  sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}} }}
 
 Replace the static content elements from 2. and 3. by QFQ Content elements as needed: ::
 
@@ -7312,16 +7324,16 @@ Recent List
 A nice feature is to show a list with last changed records. The following will show the 10 last modified (Form or
 FormElement) forms: ::
 
-	10 {
-	  sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form&r=', f.id, '|t:', f.name,'|o:', GREATEST(MAX(fe.modified), f.modified)) AS _page
-				  FROM Form AS f
-				  LEFT JOIN FormElement AS fe ON fe.formId = f.id
-				  GROUP BY f.id
-				  ORDER BY GREATEST(MAX(fe.modified), f.modified) DESC
-				  LIMIT 10
-	  head = <h3>Recent Forms</h3>
-	  rsep = ,&ensp;
-	}
+  10 {
+    sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form&r=', f.id, '|t:', f.name,'|o:', GREATEST(MAX(fe.modified), f.modified)) AS _page
+          FROM Form AS f
+          LEFT JOIN FormElement AS fe ON fe.formId = f.id
+          GROUP BY f.id
+          ORDER BY GREATEST(MAX(fe.modified), f.modified) DESC
+          LIMIT 10
+    head = <h3>Recent Forms</h3>
+    rsep = ,&ensp;
+  }
 
 .. _`store_user_examples`:
 
@@ -7460,7 +7472,8 @@ to edit `AutoCron` jobs: ::
 
     10 {
         # Table header.
-        sql = SELECT CONCAT('p:{{pageAlias:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment','Last run','In progress', 'Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
+        sql = SELECT CONCAT('p:{{pageAlias:T}}&form=cron') AS _pagen, 'id', 'Next run','Frequency','Comment',
+                     'Last run','In progress', 'Status' FROM (SELECT 1) AS fake WHERE '{{form:SE}}'=''
         head = <table class='table table-hover qfq-table-50'>
         tail = </table>
         rbeg = <thead><tr>
@@ -7570,16 +7583,16 @@ Access restriction
 To protect AutoCron pages not to be triggered accidental or by unprivileged access, access to those page tree might be
 limited to localhost. Some example Typoscript: ::
 
-	# Access allowed for any logged in user or via 'localhost'
-	[usergroup = *] || [IP = 127.0.0.1]
-	  page.10 < styles.content.get
-	[else]
-	  # Error Message
-	  page.10 = TEXT
-	  page.10.value = <h2>Access denied</h2>Please log in or access this page from an authorized host. Your current IP address:&nbsp;
-	  page.20 = TEXT
-	  page.20.data = getenv : REMOTE_ADDR
-	[global]
+  # Access allowed for any logged in user or via 'localhost'
+  [usergroup = *] || [IP = 127.0.0.1]
+    page.10 < styles.content.get
+  [else]
+    # Error Message
+    page.10 = TEXT
+    page.10.value = <h2>Access denied</h2>Please log in or access this page from an authorized host. Your current IP address:&nbsp;
+    page.20 = TEXT
+    page.20.data = getenv : REMOTE_ADDR
+  [global]
 
 
 
@@ -7601,31 +7614,31 @@ QFQ offers an API endpoint for GET (and later POST,PUT,DELETE) operations. ::
 
   <domain>/typo3conf/ext/qfq/Source/api/rest.php/<level1>/<id1>/<level2>/<id2>/.../?<var1>=<value1>&...
 
-Append level names and ids after 'rest.php/...', separated by '/' each.
+Append level names and ids after `rest.php/...`, separated by '/' each.
 
 E.g.:
 
-a) List of all persons: <domain>/typo3conf/ext/qfq/Source/api/rest.php/person
-b) Data of person 123: <domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123
-c) Adresses of person 123: <domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address
-d) Adress details of address 45 from person 123: <domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address/45
+1. List of all persons: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person`
+2. Data of person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123`
+3. Adresses of person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address`
+4. Adress details of address 45 from person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address/45`
 
 
 QFQ 'Forms' are used as a 'container' to configure all necessary export/import details per 'level'.
 Each 'level' is represented by a QFQ Form.
 
-Only the last <level> of an URI will be processed. The former ones are just to fullfil a good looking REST API.
+Only the last <level> of an URI will be processed. The former ones are just to fulfil a good looking REST API.
 
 Important:  the level name is the QFQ form name.
 
-Each level name (=form name) is available via STORE_CLIENT and name '_formX'. E.g. in example
-d) '{{_form1:C:alnumx}}'='person' and '{{_form2:C:alnumx}}'='address'.
+Each level name (=form name) is available via STORE_CLIENT and name `_formX`. E.g. in example
+(1) `{{_form1:C:alnumx}}=person` and `{{_form2:C:alnumx}}=address`.
 
-Each level id  is available via STORE_CLIENT and name '_idX'. E.g. in example
-d) '{{_id1:C}}'='123' and '{{_id2:C}}'='45'.
+Each level id is available via STORE_CLIENT and name `_idX`. E.g. in example
+(2) `{{_id1:C}}=123` and `{{_id2:C}}=45`.
 
-Also the 'id' after the last 'level' in the URI path (123 in example b), and 45 in example d) ) is copied to
-variable 'r' in STORE_TYPO3, access it via '{{r:T}}'.
+Also the `id` after the last `level` in the URI path, 123 in example (2) and 45 in example (4), is copied to
+variable `r` in STORE_TYPO3, access it via `{{r:T}}`.
 
 
 Export (GET)
@@ -7635,16 +7648,19 @@ All data is exported in JSON notation.
 
 A REST (GET) form has two modes: ::
 
-  a) data: specific content to a given id. Defined via 'form.parameter.restSqlData'. This mode is selected
-     if there is an id>0 given.
+data
+    Specific content to a given id. Defined via 'form.parameter.restSqlData'. This mode is selected if there is an
+    id>0 given.
 
-  b) list: a list of records will be exported. Defined via 'form.parameter.restSqlList'. This mode is selected if there is no id or id=0.
+list
+    A list of records will be exported.  Defined via 'form.parameter.restSqlList'. This mode is selected if there is no
+    id or id=0.
 
 There are  *no* FormElements.
 
 To simplify access to id parameter of the URI, a mapping is possible via 'form.parameter.restParam'.
-E.g. 'restParam=pId,adrId' with example d) makes '{{pId:C}}=123' and '{{adrId:C}}=45'. The order of variable
-names corresponds to the position in the URI. _id1 is always mapped to the first parameter name, _id2 to
+E.g. `restParam=pId,adrId` with example d) makes `{{pId:C}}=123` and `{{adrId:C}}=45`. The order of variable
+names corresponds to the position in the URI. `_id1` is always mapped to the first parameter name, `_id2` to
 the second one and so on.
 
 GET Variables provided via URL are available via STORE_CLIENT as usual.
@@ -7668,17 +7684,62 @@ Form.parameter:
 | Attribute         | Description                                                                  |
 +===================+==============================================================================+
 | restSqlData       | SQL query selects content shown in data mode.                                |
-|                   | restSqlData={{!SELECT id, name, gender FROM Person WHERE id={{r:T0}} }}      |
+|                   | `restSqlData={{!SELECT id, name, gender FROM Person WHERE id='{{r:T0}}'' }}` |
 +-------------------+------------------------------------------------------------------------------+
 | restSqlList       | SQL query selects content shown in data mode.                                |
-|                   | restSqlData={{!SELECT id, name FROM Person }}                                |
+|                   | `restSqlData={{!SELECT id, name FROM Person }}`                              |
 +-------------------+------------------------------------------------------------------------------+
-| restParam         | CSV list of variable names.                                                  |
-|                   | restParam=pId,adrId                                                          |
+| restParam         | Optional. CSV list of variable names. E.g.: `restParam=pId,adrId`            |
++-------------------+------------------------------------------------------------------------------+
+| restToken         | Optional. User defined string. For dynamic token see below.                  |
 +-------------------+------------------------------------------------------------------------------+
 
-There are no `special-column-names`_ available in 'restSqlData' or 'restSqlList'. Especially there are no
-SIPs possible, cause REST typically does not offer sessions/cookies which are needed for SIPs.
+
+There are no `special-column-names`_ available in `restSqlData` or `restSqlList`. Also there are no
+SIPs possible, cause REST typically does not offer sessions/cookies (which are necessary for SIPs).
+
+Authorization
+^^^^^^^^^^^^^
+
+By default, the REST API is public accessible.
+
+If this is not wished, HTTP AUTH might be used (configured via webserver) or the
+QFQ internal 'HTTP header token based authorization'.
+
+Token based authorization
+'''''''''''''''''''''''''
+
+A form will require a 'token based authorization', as soon as there is a `form.parameter.restToken` defined.
+Therefore the HTTP Header 'Authorization' has to be set with `token=<secret token>`. The 'secret token' will
+be checked against the server. Using HTTPS, such token can't be sniffed and will typically not be logged in
+any server logs.
+
+Example: ::
+
+  form.parameter.restToken=myCrypticString0123456789
+
+  Test via commandline: curl -X GET -H 'Authorization: Token token=myCrypticString0123456789' "http://localhost/qfq/typo3conf/ext/qfq/Source/api/rest.php/person/123/address/"
+
+The static setup with `form.parameter.restToken=myCrypticString0123456789 is fine, as long as only one token
+exist. In case of multiple tokens, replace the static string against a SQL query.
+
+General: The HTML Header Authorization token is available in STORE_CLIENT via '`{{Authorization:C:alnumx}}`.
+
+For example all created tokens are saved in a table 'Auth' with a column 'token'. Define: ::
+
+  form.parameter.restToken={{SELECT a.token FROM Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' }}
+
+To restrict access to a subset of data, just save the limitations inside the Auth record and update the query
+to check it:
+
+.. code-block:: pmysql
+
+  form.parameter.restToken={{SELECT a.token FROM Auth AS a WHERE a.token='{{Authorization:C:alnumx}}'}}
+  form.parameter.restSqlList={{!SELECT p.id, p.name, p.email FROM Person AS p, Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' AND a.attribute=p.attribute}}
+  form.parameter.restSqlData={{!SELECT p.* FROM Person AS p, Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' AND a.attribute=p.attribute AND p.id='{{r:T0}}' }}
+
+If authorization is denied, the request will be answered with a delay of 3 seconds (configured via securityFailedAuthDelay).
+
 
 .. _applicationTest:
 
@@ -7687,7 +7748,7 @@ Application Test
 
 With a framework like https://www.seleniumhq.org/ it's possible to play and verify unattended  test cases.
 
-To assist such frameworks and to make the tests reliable, an individual tag might be assigned to elements which have to
+To assist such frameworks and to make the tests reliable, an individual tag might be assigned to HTML elements which have to
 interact with the test framework.
 
 Form
@@ -7700,7 +7761,9 @@ Report
 ------
 
 Any HTML output can be extended by a tag - that's done by the webmaster. For QFQ generated links, an attribute like
-'data-reference' might be injected via token 'A' (attribute). ::
+'data-reference' might be injected via token 'A' (attribute).
+
+.. code-block:: mysql
 
    SELECT 'p:personedit&form=person&r=1|b|s|A:data-reference="person-edit"|t:Edit person' AS _link
 
@@ -7720,8 +7783,8 @@ Tips:
 
 * On general errors:
 
-	* Always check the Javascript console of your browser, see `javascriptProblem`_.
-	* Always check the Webserver log files.
+  * Always check the Javascript console of your browser, see `javascriptProblem`_.
+  * Always check the Webserver log files.
 
 Caching
 -------
