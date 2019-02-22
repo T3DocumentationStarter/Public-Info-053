@@ -9,12 +9,19 @@
 ..
 .. --------------------------------------------------
 .. Best Practice T3 reST  https://docs.typo3.org/typo3cms/drafts/github/xperseguers/RstPrimer/
-.. External Links: `Bootstrap <http://getbootstrap.com/>`_:
+.. Italic *italic*
+.. Bold **bold**
+.. Code ``text``
+.. External Links: `Bootstrap <http://getbootstrap.com/>`_
 .. Add Images: https://wiki.typo3.org/ReST_Syntax#Images ...
 ..
 .. Admonitions (https://docs.typo3.org/typo3cms/drafts/github/xperseguers/RstPrimer/#admonitions)
 ..       .. note::    .. important::     .. tip::      .. warning::
 ..
+.. Definition:
+.. some text becomes strong (only one line)
+..      description has to indented
+
 .. -*- coding: utf-8 -*- with BOM.
 
 
@@ -995,7 +1002,9 @@ Mail Log page
 -------------
 
 For debugging purposes you may like to add a Mail Log page in the frontend.
-The following QFQ code could be used for that purpose (put it in a QFQ PageContent element): ::
+The following QFQ code could be used for that purpose (put it in a QFQ PageContent element):
+
+.. code-block:: mysql
 
     # Page parameters
     1.sql = SELECT @grId := '{{grId:C0:digit}}' AS _grId
@@ -1043,7 +1052,9 @@ Form Submit Log page
 --------------------
 
 For debugging purposes you may like to add a Form Submit Log page in the frontend.
-The following QFQ code could be used for that purpose (put it in a QFQ PageContent element): ::
+The following QFQ code could be used for that purpose (put it in a QFQ PageContent element):
+
+.. code-block:: mysql
 
     # Filters
     20.shead = <form onchange='this.submit()' class='form-inline'><input type='hidden' name='id' value='{{pageAlias:T0}}'>
@@ -1295,8 +1306,8 @@ If a value violates the sanitize class, instead of content on of the following t
  * 'c' - The violated class will be set as content, surrounded by '!!'. E.g. '!!digit!!'. This is the default.
  * 'e' - Instead of the value an empty string will be set as content.
  * '0' - Instead of the value the string '0' will be set as content.
- * 'custom text ...' - Instead of the value the custom text will be set as content. If the text contains a ':', that one needs to
-    be escaped by '\'. Check `variable-escape`_ qualifier 'C' to let QFQ do the colon escaping.
+ * 'custom text ...' - Instead of the value the custom text will be set as content. If the text contains a ':', that one
+   needs to be escaped by '\'. Check `variable-escape`_ qualifier 'C' to let QFQ do the colon escaping.
 
 .. _`sql-variables`:
 
@@ -2547,7 +2558,9 @@ Optional it might be defined via *Form.parameter* ::
   Than, e.g. an action-FormElement 'afterSave' can be used to detect the final submit situation and do some extra stuff,
   necessary for the final submit.
 
-The following shows the same *Form* in the `regular`, `readonly` and `requiredOff` mode::
+The following shows the same *Form* in the `regular`, `readonly` and `requiredOff` mode:
+
+.. code-block:: mysql
 
   10.sql = SELECT CONCAT('p:{{pageAlias:T}}&form=person&r=', p.id, '|Regular') as _pagee,
                   CONCAT('p:{{pageAlias:T}}&form=person&formModeGlobal=readonly&r=', p.id, '|Readonly') as _pagee,
@@ -2821,7 +2834,9 @@ FE: 'Report' notation
 ^^^^^^^^^^^^^^^^^^^^^
 
 The FE fields 'value' and 'note' understand the `Report`_ syntax. Nested SQL queries as well as links with SIP encoding
-are possible. To distinguish between 'Form' and 'Report' syntax, the first line has to be `#!report` ::
+are possible. To distinguish between 'Form' and 'Report' syntax, the first line has to be `#!report`:
+
+.. code-block:: mysql
 
     #!report
 
@@ -3636,7 +3651,7 @@ See also `downloadButton`_ to offer a download of an uploaded file.
 
   * *chmodFile* = <unix file permission mode> - e.g. `660` for owner and group read and writeable. Only the numeric mode is allowed.
   * *chmodDir* = <unix file permission mode> - e.g. `770` for owner and group read, writeable and executable. Only the
-     numeric mode is allowed. Will be applied to all new created directories.
+    numeric mode is allowed. Will be applied to all new created directories.
 
   * autoOrient: images might contain EXIF data (e.g. captured via mobile phones) incl. an orientation tag like TopLeft,
     BottomRight and so on. Web-Browser and other grafic programs often understand and respect those information and rotate
@@ -4496,7 +4511,9 @@ If *showDebugInfo* is enabled, a full stacktrace and variable contents are displ
 Form search
 ^^^^^^^^^^^
 
-QFQ content record::
+QFQ content record:
+
+.. code-block:: mysql
 
   # Creates a small form that redirects back to this page
   10 {
@@ -4676,7 +4693,7 @@ Chart
   * Don't nest the HTML & JavaScript code - bad workaround, this is not human readable.
   * Select different nesting token, e.g. '<' (check the first line on the following example).
 
-::
+.. code-block:: mysql
 
      # <
 
@@ -4918,9 +4935,7 @@ Table: Person
 
     * Type: text
     * Label: Name
-    * Parameter::
-
-       typeAheadSql = SELECT name FROM Person WHERE name LIKE ? OR firstName LIKE ? LIMIT 100
+    * Parameter: ``typeAheadSql = SELECT name FROM Person WHERE name LIKE ? OR firstName LIKE ? LIMIT 100``
 
 Typeahead: LDAP with additional values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -5031,7 +5046,8 @@ A simple example
 ^^^^^^^^^^^^^^^^
 
 Assume that the database has a table person with columns firstName and lastName. To create a simple list of all persons, we can do the following:
-::
+
+.. code-block:: mysql
 
     10.sql = SELECT id AS pId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
 
@@ -5039,29 +5055,25 @@ The '10' indicates a *root level* of the report (see section `Structure`_). The 
 for the specific level. When the query is executed, it will return a result having one single column name containing first and last name
 separated by a space character.
 
-The HTML output, displayed on the page, resulting from only this definition, could look as follows:
-::
+The HTML output, displayed on the page, resulting from only this definition, could look as follows::
 
     John DoeJane MillerFrank Star
 
-..
 
 I.e., QFQ will simply output the content of the SQL result row after row for each single level.
 
 However, we can modify (wrap) the output by setting the values of various keys for each level: 10.rsep=<br/> for example
 tells QFQ to separate the rows of the result by a HTML-line break. The final result in this case is:
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT id AS personId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
     10.rsep = <br>
 
-HTML output:
-::
+HTML output::
 
     John Doe<br>Jane Miller<br>Frank Star
 
-..
 
 .. _`syntax-of-report`:
 
@@ -5160,7 +5172,7 @@ of person records from your person table, you can use the SQL query on the secon
 
 See the example below:
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT id AS _pId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
     10.rsep = <br>
@@ -5169,17 +5181,13 @@ See the example below:
     10.10.rbeg = (
     10.10.rend = )
 
-..
 
-This would result in
-
-::
+This would result in::
 
     John Doe (3004 Bern)
     Jane Miller (8008 Zürich)
     Frank Star (3012 Bern)
 
-..
 
 Text across several lines
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -5192,7 +5200,9 @@ be appended to the last keyword line. 'Keyword' lines are detected on:
  * {
  * <level>[.<sub level] {
 
-Example::
+Example:
+
+.. code-block:: mysql
 
     10.sql = SELECT 'hello world'
                FROM mastertable
@@ -5211,10 +5221,12 @@ Join mode: SQL
 
 This is the default. All lines are joined with a *space* in between. E.g.: ::
 
+.. code-block:: mysql
+
     10.sql = SELECT 'hello world'
                FROM mastertable
 
-Results to: `10.sql = SELECT 'hello world' FROM mastertable`
+Results to: ``10.sql = SELECT 'hello world' FROM mastertable``
 
 Notice the space between "...world'" and "FROM ...".
 
@@ -5222,17 +5234,21 @@ Join mode: strip whitespace
 '''''''''''''''''''''''''''
 
 Ending a line with a '\\' strips all leading and trailing whitespaces of that line joins the line directly (no extra
-space in between). E.g.: ::
+space in between). E.g.:
+
+.. code-block:: mysql
 
     10.sql = SELECT 'hello world', 'd:final.pdf \
                                     |p:id=export  \
                                     |t:Download' AS _pdf \
 
-Results to: `10.sql = SELECT 'hello world', 'd:final.pdf|p:id=export|t:Download' AS _pdf`
+Results to: ``10.sql = SELECT 'hello world', 'd:final.pdf|p:id=export|t:Download' AS _pdf``
 
 Note: the '\\' does not force the joining, it only removes the whitespaces.
 
-To get the same result, the following is also possible: ::
+To get the same result, the following is also possible:
+
+.. code-block:: mysql
 
     10.sql = SELECT 'hello world', CONCAT('d:final.pdf'
                                     '|p:id=export',
@@ -5241,7 +5257,9 @@ To get the same result, the following is also possible: ::
 Nesting of levels
 ^^^^^^^^^^^^^^^^^
 
-Levels can be nested. E.g.: ::
+Levels can be nested. E.g.:
+
+.. code-block:: mysql
 
   10 {
     sql = SELECT ...
@@ -5251,7 +5269,9 @@ Levels can be nested. E.g.: ::
     }
   }
 
-This is equal to: ::
+This is equal to:
+
+.. code-block:: mysql
 
   10.sql = SELECT ...
   10.5.sql = SELECT ...
@@ -5261,7 +5281,9 @@ Leading / trailing spaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 By default, leading or trailing whitespaces are removed from strings behind '='. E.g. 'rend =  test ' becomes 'test' for
-rend. To prevent any leading or trailing spaces, surround them by using single or double ticks. Example: ::
+rend. To prevent any leading or trailing spaces, surround them by using single or double ticks. Example:
+
+.. code-block:: mysql
 
   10.sql = SELECT name FROM Person
   10.rsep = ' '
@@ -5273,7 +5295,9 @@ Braces character for nesting
 
 By default, curly braces '{}' are used for nesting. Alternatively angle braces '<>', round braces '()' or square
 braces '[]' are also possible. To define the braces to use, the **first line** of the bodytext has to be a comment line and the
-last character of that line must be one of '{[(<'. The corresponding braces are used for that QFQ record. E.g.: ::
+last character of that line must be one of '{[(<'. The corresponding braces are used for that QFQ record. E.g.:
+
+.. code-block:: mysql
 
     # Specific code. >
     10 <
@@ -5293,7 +5317,9 @@ Per QFQ tt-content record, only one type of nesting braces can be used.
 Be careful to:
 
 * write nothing else than whitespaces/newline behind an **open brace**
-* the **closing brace** has to be alone on a line. ::
+* the **closing brace** has to be alone on a line:
+
+.. code-block:: mysql
 
    10.sql = SELECT 'Yearly Report'
 
@@ -5336,7 +5362,9 @@ The STORE_RECORD will always be merged with previous content. The Level Keys are
 
 Multiple columns, with the same column name, can't be accessed individually. Only the last column is available.
 
-Retrieving the *final* value of `special-column-names`_ is possible via '{{&<column>:R}}. Example: ::
+Retrieving the *final* value of `special-column-names`_ is possible via '{{&<column>:R}}. Example:
+
+.. code-block:: mysql
 
   10.sql = SELECT 'p:home&form=Person|s|b:success|t:Edit' AS _link
   10.20.sql = SELECT '{{link:R}}', '{{&link:R}}'
@@ -5344,7 +5372,9 @@ Retrieving the *final* value of `special-column-names`_ is possible via '{{&<col
 The first column of row `10.20` returns 'p:home&form=Person|s|b:success|t:Edit',the second column returns
 '<span class="btn btn-success"><a href="?home&s=badcaffee1234">Edit</a></span>'.
 
-Example STORE_RECORD: ::
+Example STORE_RECORD:
+
+.. code-block:: mysql
 
   10.sql= SELECT p.id AS _pId, p.name FROM Person AS p
   10.5.sql = SELECT adr.city, 'dummy' AS _pId FROM Address AS adr WHERE adr.pId={{pId:R}}
@@ -5355,7 +5385,9 @@ The line '10.10' will output 'dummy' in cases where there is at least one corres
 If there are no addresses (all persons) it reports the person id.
 If there is at least one address, it reports 'dummy', cause that's the last stored content.
 
-Example 'level': ::
+Example 'level':
+
+.. code-block:: mysql
 
   10.sql= SELECT p.id AS _pId, p.name FROM Person AS p
   10.5.sql = SELECT adr.city, 'dummy' AS _pId FROM Address AS adr WHERE adr.pId={{10.pId}}
@@ -5381,7 +5413,9 @@ Notes to the level:
 |             | *30.5.1*  will be executed as many times as *30.5* has row numbers.                                                    |
 +-------------+------------------------------------------------------------------------------------------------------------------------+
 
-Report Example 1: ::
+Report Example 1:
+
+.. code-block:: mysql
 
     # Displays current date
     10.sql = SELECT CURDATE()
@@ -5600,7 +5634,7 @@ render mode might dynamically control the rendered link.
 |7           | pure url            |pure url            |                  |no link, pure url                                                          |
 +------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT CONCAT('u:', p.homepage, IF(p.showHomepage='yes', '|r:0', '|r:5') ) AS _link FROM Person AS p
 
@@ -5717,7 +5751,7 @@ The colum name is composed of the string *page* and a trailing character to spec
 
 **Syntax**
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT "[options]" AS _page[<link type>]
 
@@ -5725,7 +5759,7 @@ The colum name is composed of the string *page* and a trailing character to spec
 
     <link type> = c,d,e,h,i,n,s
 
-..
+
 
 +---------------+-----------------------------------------------+-------------------------------------+----------------------------------------------+
 |  column name  |  Purpose                                      |default value of question parameter  |  Mandatory parameters                        |
@@ -5785,7 +5819,7 @@ These column offers a link, with a confirmation question, to delete one record (
 
 **Syntax**
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT "U:table=<tablename>&r=<record id>|q:<question>|..." AS _paged
     10.sql = SELECT "U:form=<formname>&r=<record id>|q:<question>|..." AS _paged
@@ -5817,7 +5851,7 @@ Additional action *FormElement* of type *beforeDelete* or *afterDelete* will be 
 Examples:
 '''''''''
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT 'U:table=Person&r=123|q:Do you want delete John Doe?' AS _paged
     10.sql = SELECT 'U:form=person-main&r=123|q:Do you want delete John Doe?' AS _paged
@@ -5857,7 +5891,7 @@ Render text vertically. This is useful for tables with limited column width. The
 
 **Syntax**
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT "<text>|[<angle>]" AS _vertical
 
@@ -5876,7 +5910,7 @@ This works best for angles close to 270 or 90.
 
 **Minimal Example**
 
-::
+.. code-block:: mysql
 
 
     10.sql = SELECT "Hallo" AS _vertical
@@ -5894,7 +5928,7 @@ Easily create Email links.
 
 **Syntax**
 
-::
+.. code-block:: mysql
 
 
     10.sql = SELECT "<email address>|[<link text>]" AS _mailto
@@ -5917,30 +5951,25 @@ Easily create Email links.
 
 **Minimal Example**
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT "john.doe@example.com" AS _mailto
-
-..
 
 
 
 **Advanced Example**
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT "john.doe@example.com|John Doe" AS _mailto
 
-..
 
 .. _column_sendmail:
 
 Column: _sendmail
 ^^^^^^^^^^^^^^^^^
 
-Format: ::
+Format::
 
     t:<TO:email[,email]>|f:<FROM:email>|s:<subject>|b:<body>
         [|c:<CC:email[,email]]>[|B:<BCC:email[,email]]>[|r:<REPLY-TO:email>]
@@ -5948,7 +5977,7 @@ Format: ::
         [|e:<subject encode: encode/decode/none>][E:<body encode: encode/decode/none>][|mode:html]
         [|C][d:<filename of the attachment>][|F:<file to attach>][|u:<url>][|p:<T3 uri>]
 
-The following parameters can also be written as complete words for ease of use: ::
+The following parameters can also be written as complete words for ease of use::
 
     to:<email[,email]>|from:<email>|subject:<subject>|body:<body>
         [|cc:<email[,email]]>[|bcc:<email[,email]]>[|reply-to:<email>]
@@ -5959,7 +5988,7 @@ Send emails. Every mail will be logged in the table `mailLog`. Attachments are s
 
 **Syntax**
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
     10.sql = SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
@@ -6034,22 +6063,18 @@ Send emails. Every mail will be logged in the table `mailLog`. Attachments are s
 
 **Minimal Example**
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available." AS _sendmail
-
-..
 
 This will send an email with subject *Latest News* from company@example.com to john.doe@example.com.
 
 **Advanced Examples**
 
-::
+.. code-block:: mysql
 
     10.sql = SELECT "t:customer1@example.com,Firstname Lastname <customer2@example.com>, Firstname Lastname <customer3@example.com>| \\
                      f:company@example.com|s:Latest News|b:The new version is now available.|r:sales@example.com|A:on|g:101|x:222|c:ceo@example.com|B:backup@example.com" AS _sendmail
-
-..
 
 This will send an email with subject *Latest News* from company@example.com to customer1, customer2 and customer3 by
 using a realname for customer2 and customer3 and suppress generating of OoO answer if any receiver is on vacation.
@@ -6092,7 +6117,9 @@ Any combination (incl. repeating them) are possible. Any source will be added as
 
 Optional any number of sources can be concatenated to a single PDF file: 'C|F:<file1>|F:<file2>|p:export&a=123'.
 
-Examples in Report::
+Examples in Report:
+
+.. code-block:: mysql
 
   # One file attached.
   10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf" AS _sendmail
@@ -6124,13 +6151,9 @@ Renders images. Allows to define an alternative text and a title attribute for t
 
 **Syntax**
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT "<path to image>|[<alt text>]|[<title text>]" AS _img
-
-..
-
 
 
 +-------------+-------------------------------------------------------------------------------------------+---------------------------+
@@ -6146,19 +6169,14 @@ Renders images. Allows to define an alternative text and a title attribute for t
 
 **Minimal Example**
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT "fileadmin/img/img.jpg" AS _img
-
-..
-
 
 
 **Advanced Examples**
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT "fileadmin/img/img.jpg|Aternative Text" AS _img            # alt="Alternative Text, no title
     20.sql = SELECT "fileadmin/img/img.jpg|Aternative Text|" AS _img           # alt="Alternative Text, no title
@@ -6169,7 +6187,6 @@ Renders images. Allows to define an alternative text and a title attribute for t
     70.sql = SELECT "fileadmin/img/img.jpg||Title Text" AS _img                # empty alt, title="Title Text"
     80.sql = SELECT "fileadmin/img/img.jpg||" AS _img                          # empty alt, no title
 
-..
 
 .. _column_exec:
 
@@ -6198,13 +6215,11 @@ Runs batch files or executables on the webserver. In case of an error, returncod
 
 **Minimal Examples**
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT "ls -s" AS _exec
     20.sql = SELECT "./batchfile.sh" AS _exec
 
-..
 
 .. _column_pdf:
 
@@ -6213,7 +6228,9 @@ Column: _pdf | _file | _zip
 
 Detailed explanation: download_
 
-Most of the other Link-Class attributes can be used to customize the link. ::
+Most of the other Link-Class attributes can be used to customize the link.
+
+.. code-block:: mysql
 
     10.sql = SELECT "[options]" AS _pdf, "[options]" AS _file, "[options]" AS _zip
 
@@ -6223,7 +6240,9 @@ Most of the other Link-Class attributes can be used to customize the link. ::
 * Parameter are position independent.
 * *<params>*: see `download-parameter-files`_
 * For column `_pdf` and `_zip`, the element sources `p:...`, `U:...`, `u:...`, `F:...` might repeated multiple times.
-* Example: ::
+* Example:
+
+.. code-block:: mysql
 
     10.sql = SELECT "F:fileadmin/test.pdf" as _pdf,  "F:fileadmin/test.pdf" as _file,  "F:fileadmin/test.pdf" as _zip
     10.sql = SELECT "p:id=export&r=1" as _pdf,  "p:id=export&r=1" as _file,  "p:id=export&r=1" as _zip
@@ -6253,7 +6272,9 @@ Tips:
 * If the target file already exists it will be overwriten. To save individual files, choose a new filename,
   for example by adding a timestamp.
 
-Examples: ::
+Examples:
+
+.. code-block:: mysql
 
   SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf" AS _savePdf
   SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf|U:id=test&--orientation=landscape" AS _savePdf
@@ -6300,7 +6321,10 @@ The render mode '7' is useful, if the URL of the thumbnail have to be used in an
 tag. Something like `<body style="background-image:url(bgimage.jpg)">` could be solved with
 `SELECT "<body style="background-image:url(", 'T:fileadmin/file3.pdf' AS _thumbnail, ')">'`
 
-Example: ::
+Example:
+
+
+.. code-block:: mysql
 
   # SIP protected, IMG tag, thumbnail width 150px
   10.sql = SELECT 'T:fileadmin/file3.pdf' AS _thumbnail
@@ -6369,7 +6393,9 @@ Column: _monitor
 
 Detailed explanation: monitor_
 
-**Syntax** ::
+**Syntax**
+
+.. code-block:: mysql
 
     10.sql = SELECT 'file:<filename>|tail:<number of last lines>|append:<0 or 1>|interval:<time in ms>|htmlId:<id>' AS _monitor
 
@@ -6398,7 +6424,9 @@ Copy to clipboard
 | F:<pathFileName>  | F:fileadmin/protected/data.R   | pathFileName in DocumentRoot                                               |
 +-------------------+--------------------------------+----------------------------------------------------------------------------+
 
-Example: ::
+Example:
+
+.. code-block:: mysql
 
     10.sql = SELECT 'y:hello world (yank)|t:content direct (yank)' AS _yank,
                     'y:hello world (link)|t:content direct (link)' AS _link,
@@ -6627,7 +6655,9 @@ Best practice:
 #. Create a) a link (Report) to the PDF letter or b) attach the PDF (on the fly rendered) to a mail. Both will call the
    `wkhtml` via the `download` mode and forwards the necessary parameter.
 
-Use in `report`: ::
+Use in `report`:
+
+.. code-block:: mysql
 
   sql = SELECT CONCAT('d:Letter.pdf|t:',p.firstName, ' ', p.name,
                        '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&',
@@ -6641,7 +6671,9 @@ Sendmail. Parameter: ::
 
   sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}} }}
 
-Replace the static content elements from 2. and 3. by QFQ Content elements as needed: ::
+Replace the static content elements from 2. and 3. by QFQ Content elements as needed:
+
+.. code-block:: mysql
 
   10.sql = SELECT '<div class="letter-receiver"><p>', p.name AS '_+br', p.street AS '_+br', p.city AS '_+br', '</p>'
             FROM Person AS p WHERE p.id={{pId:S}}
@@ -6743,7 +6775,9 @@ Create a output like this: ::
 
 This fills D11, E11, F11, D12
 
-In Report Syntax: ::
+In Report Syntax:
+
+.. code-block:: mysql
 
     # With ... AS _XLS (token explicit given)
     10.sql = SELECT 'position=D10' AS _XLS,
@@ -6769,7 +6803,9 @@ In Report Syntax: ::
 
 .. _`excel-export-sample`:
 
-Excel export samples: ::
+Excel export samples:
+
+.. code-block:: mysql
 
     # From scratch (both are the same, one with '_excel' the other with '_link')
     SELECT CONCAT('d:new.xlsx|t:Excel (new)|uid:54') AS _excel
@@ -6828,7 +6864,9 @@ A `<div>` example HTML output (HTML send to the browser): ::
     </div>
 
 
-A typical QFQ report which generates those `<div>` HTML: ::
+A typical QFQ report which generates those `<div>` HTML:
+
+.. code-block:: mysql
 
     10 {
       sql = SELECT '<div id="anytag-', n.id,'" data-dnd-id="', n.id,'">' , n.note, '</div>'
@@ -6858,7 +6896,9 @@ which is the same column width as the outer table. ::
         </tbody>
     </table>
 
-A typical QFQ report which generates this HTML: ::
+A typical QFQ report which generates this HTML:
+
+.. code-block:: mysql
 
     10 {
       sql = SELECT '<tr id="anytag-', n.id,'" data-dnd-id="', n.id,'" data-columns="3">' , n.id AS '_+td', n.note AS '_+td', n.ord AS '_+td', '</tr>'
@@ -6879,7 +6919,9 @@ predefined html id has to be assigned them. After an update, all changed order n
 be updated via AJAX.
 
 The html id per element is defined by `qfq-dnd-ord-id-<id>` where `<id>` is the record id. Same example as above, but
-with an updated `n.ord` column: ::
+with an updated `n.ord` column:
+
+.. code-block:: mysql
 
     10 {
       sql = SELECT '<tr id="anytag-', n.id,'" data-dnd-id="', n.id,'" data-columns="3">' , n.id AS '_+td', n.note AS '_+td',
@@ -6952,12 +6994,16 @@ Bootstrap
 * Table > hover: `table-hover`
 * Table > condensed: `table-condensed`
 
-E.g.::
+Example:
+
+.. code-block:: mysql
 
   10.sql = SELECT id, name, firstName, ...
   10.head = <table class='table table-condensed qfq-table-50'>
 
-* `qfq-100`, `qfq-left` - makes e.g. a button full width and aligns the text left. ::
+* `qfq-100`, `qfq-left` - makes e.g. a button full width and aligns the text left.
+
+.. code-block:: mysql
 
     10.sql = SELECT "p:home&r=0|t:Home|c:qfq-100 qfq-left" AS _pagev
 
@@ -6997,7 +7043,9 @@ Customization:
   as well as your own `$(document).ready()` function with the desired config. In this case, it is recommended not to
   use the above *tablesorter* classes since the QFQ javascript code could interfere with your javascript code.
 
-Example: ::
+Example:
+
+.. code-block:: mysql
 
     10 {
       sql = SELECT id, CONCAT('form&form=person&r=', id) AS _Pagee, lastName, title FROM person
@@ -7020,16 +7068,22 @@ Monitor
 Display a (log)file from the server, inside the browser, which updates automatically by a user defined interval. Access
 to the file is SIP protected. Any file on the server is possible.
 
-* On a Typo3 page, define a HTML element with a unique html-id. E.g.: ::
+* On a Typo3 page, define a HTML element with a unique html-id. E.g.:
+
+.. code-block:: mysql
 
     10.head = <pre id="monitor-1">Please wait</pre>
 
-* On the same Typo3 page, define a SQL column '_monitor' with the necessary parameter: ::
+* On the same Typo3 page, define a SQL column '_monitor' with the necessary parameter:
+
+.. code-block:: mysql
 
     10.sql = SELECT 'file:fileadmin/protected/log/sql.log|tail:50|append:1|refresh:1000|htmlId:monitor-1' AS _monitor
 
 
-* Short version with all defaults used to display system configured sql.log: ::
+* Short version with all defaults used to display system configured sql.log:
+
+.. code-block:: mysql
 
     10.sql = SELECT 'file:{{sqlLog:Y}}' AS _monitor, '<pre id="monitor-1" style="white-space: pre-wrap;">Please wait</pre>'
 
@@ -7041,44 +7095,27 @@ The following section gives some examples of typical reports.
 Basic Queries
 ^^^^^^^^^^^^^
 
-*   One simple query
+One simple query
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT "Hello World"
 
-..
 
-
-
-Result:
-
-::
-
+Result::
 
     Hello World
 
-..
 
+Two simple queries
 
-
-    Two simple queries
-
-::
+.. code-block:: mysql
 
 
     10.sql = SELECT "Hello World"
     20.sql = SELECT "Say hello"
 
-..
-
-
-
-    Result:
-
-::
-
+Result::
 
     Hello WorldSay hello
 
@@ -7086,75 +7123,45 @@ Result:
 
 
 
-    Two simple queries, with break
+Two simple queries, with break
 
-::
+.. code-block:: mysql
 
 
     10.sql = SELECT "Hello World<br>"
     20.sql = SELECT "Say hello"
 
-..
 
-
-
-    Result:
-
-::
-
+Result::
 
     Hello World
     Say hello
-
-..
-
 
 
 Accessing the database
 ^^^^^^^^^^^^^^^^^^^^^^
 
-    Real data, one single column
+Real data, one single column
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT p.firstName FROM exp_person AS p
 
-..
 
-
-
-    Result:
-
-::
-
+Result::
 
     BillieElvisLouisDiana
 
-..
 
+Real data, two columns
 
-
-    Real data, two columns
-
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT p.firstName, p.lastName FROM exp_person AS p
 
-..
-
-
-
-    Result:
-
-::
-
+Result::
 
     BillieHolidayElvisPresleyLouisArmstrongDianaRoss
-
-..
-
 
 
 The result of the SQL query is an output, row by row and column by column, without adding any formatting information.
@@ -7173,56 +7180,38 @@ actual levels result.
 
 Two columns
 
-::
-
+.. code-block:: mysql
 
     # Add the formatting information as a column
     10.sql = SELECT p.firstName, " " , p.lastName, "<br>" FROM exp_person AS p
 
-..
 
-
-
-Result:
-
-::
-
+Result::
 
     Billie Holiday
     Elvis Presley
     Louis Armstrong
     Diana Ross
-
-..
-
 
 
 One column 'rend'
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT p.firstName, " " , p.lastName FROM exp_person AS p
     10.rend = <br>
 
-..
-
-Result:
-
-::
-
+Result::
 
     Billie Holiday
     Elvis Presley
     Louis Armstrong
     Diana Ross
 
-..
 
 More HTML
 
-::
-
+.. code-block:: mysql
 
     10.sql = SELECT p.name FROM exp_person AS p
     10.head = <ul>
@@ -7230,16 +7219,16 @@ More HTML
     10.rbeg = <li>
     10.rend = </li>
 
-..
-
-Result: ::
+Result::
 
     o Billie Holiday
     o Elvis Presley
     o Louis Armstrong
     o Diana Ross
 
-The same as above, but with braces::
+The same as above, but with braces:
+
+.. code-block:: mysql
 
   10 {
     sql = SELECT p.name FROM exp_person AS p
@@ -7249,14 +7238,18 @@ The same as above, but with braces::
     rend = </li>
   }
 
-Two queries: ::
+Two queries:
+
+.. code-block:: mysql
 
     10.sql = SELECT p.name FROM exp_person AS p
     10.rend = <br>
     20.sql = SELECT a.street FROM exp_address AS a
     20.rend = <br>
 
-Two queries: nested ::
+Two queries: nested
+
+.. code-block:: mysql
 
     # outer query
     10.sql = SELECT p.name FROM exp_person AS p
@@ -7268,7 +7261,9 @@ Two queries: nested ::
 
 * For every record of '10', all records of 10.10 will be printed.
 
-Two queries: nested with variables ::
+Two queries: nested with variables
+
+.. code-block:: mysql
 
     # outer query
     10.sql = SELECT p.id, p.name FROM exp_person AS p
@@ -7280,7 +7275,9 @@ Two queries: nested with variables ::
 
 * For every record of '10', all assigned records of 10.10 will be printed.
 
-Two queries: nested with hidden variables in a table ::
+Two queries: nested with hidden variables in a table
+
+.. code-block:: mysql
 
     10.sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
     10.rend = <br>
@@ -7289,7 +7286,9 @@ Two queries: nested with hidden variables in a table ::
     10.10.sql = SELECT a.street FROM exp_address AS a WHERE a.pId='{{10.pId}}'
     10.10.rend = <br>
 
-Same as above, but written in the nested notation ::
+Same as above, but written in the nested notation
+
+.. code-block:: mysql
 
   10 {
     sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
@@ -7302,7 +7301,9 @@ Same as above, but written in the nested notation ::
     }
   }
 
-Best practice *recommendation* for using parameter - see `access-column-values`_ ::
+Best practice *recommendation* for using parameter - see `access-column-values`_
+
+.. code-block:: mysql
 
   10 {
     sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
@@ -7323,7 +7324,9 @@ Recent List
 ^^^^^^^^^^^
 
 A nice feature is to show a list with last changed records. The following will show the 10 last modified (Form or
-FormElement) forms: ::
+FormElement) forms:
+
+.. code-block:: mysql
 
   10 {
     sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form&r=', f.id, '|t:', f.name,'|o:', GREATEST(MAX(fe.modified), f.modified)) AS _page
@@ -7349,11 +7352,15 @@ Two pages (pass variable)
 Sometimes it's useful to have variables per user (=browser session). Set a variable on page 'A' and retrieve the value
 on page 'B'.
 
-Page 'A' - set the variable: ::
+Page 'A' - set the variable:
+
+.. code-block:: mysql
 
     10.sql = SELECT 'hello' AS '_=greeting'
 
-Page 'B' - get the value: ::
+Page 'B' - get the value:
+
+.. code-block:: mysql
 
     10.sql = SELECT '{{greeting:UE}}'
 
@@ -7363,7 +7370,9 @@ If page 'A' is called, page 'B' will print 'hello'.
 One page (collect variables)
 ''''''''''''''''''''''''''''
 
-A page will be called with several SIP variables, but not at all at the same time. To still get all variables at any time: ::
+A page will be called with several SIP variables, but not at all at the same time. To still get all variables at any time:
+
+.. code-block:: mysql
 
     # Normalize
     10.sql = SELECT '{{order:USE:::sum}}' AS '_=order', '{{step:USE:::5}}' AS _step, '{{direction:USE:::ASC}}' AS _direction
@@ -7383,7 +7392,9 @@ Simulate/switch user: feUser
 
 Just set the STORE_USER variable 'feUser'.
 
-All places with `{{feUser:Y}}` has to be replaced by `{{feUser:UY}}`: ::
+All places with `{{feUser:Y}}` has to be replaced by `{{feUser:UY}}`:
+
+.. code-block:: mysql
 
     # Normalize
     10.sql = SELECT '{{feUser:UT}}' AS '_=feUser'
@@ -7399,7 +7410,9 @@ Semester switch (remember last choice)
 A current semester is defined via configuration in STORE_SYSTEM '{{semId:Y}}'. The first column in 10.sql
 `'{{semId:SUY}}' AS '_=semId'` saves
 the semester to STORE_USER via '_=semId'. The priority 'SUY' takes either the latest choose (STORE_SIP) or reuse the
-last used (STORE_USER) or (first time call during browser session) takes the default from config (STORE_SYSTEM): ::
+last used (STORE_USER) or (first time call during browser session) takes the default from config (STORE_SYSTEM):
+
+.. code-block:: mysql
 
     # Semester switch
     10 {
@@ -7415,6 +7428,298 @@ last used (STORE_USER) or (first time call during browser session) takes the def
       head = <div class="btn-group" style="position: absolute; top: 15px; right: 25px;">
       tail = </div><p></p>
     }
+
+
+.. _`restApi`:
+
+REST
+====
+
+Via `REST <https://en.wikipedia.org/wiki/Representational_state_transfer>`_ it's possible to access the QFQ based
+application. Each REST API endpoint has to be defined as a QFQ Form. The QFQ REST api implements the
+four most used REST HTTP methods:
+
+GET - Read
+    Shows a list of database records or a single record. The QFQ form holds the definition which and what to show.
+
+    List: ``curl -X GET "http://localhost/qfq/typo3conf/ext/qfq/Source/api/rest.php/person/``
+
+    Data (id=123): ``curl -X GET "http://localhost/qfq/typo3conf/ext/qfq/Source/api/rest.php/person/123``
+
+POST - Create new record
+    The QFQ form defines wich columns will be written in which table. Most of QFQ Form functionality can be used. Example:
+
+    ``curl -X POST "http://localhost/qfq/typo3conf/ext/qfq/Source/api/rest.php/person/" -d '{"name":"Miller","firstname":"Joe"}'``
+
+PUT - Update a record
+    Similar to POST, but a given record will be updated.
+
+    ``curl -X PUT "http://localhost/qfq/typo3conf/ext/qfq/Source/api/rest.php/person/123" -d '{"name":"Miller","firstname":"Joe"}'``
+
+DELETE - Delete a record
+    Similar to a QFQ Delete form.
+
+    ``curl -X DELETE "http://localhost/qfq/typo3conf/ext/qfq/Source/api/rest.php/person/123"``
+
+All data will imported / exported in JSON notation.
+
+Any QFQ form becomes a REST form via:  ``Form > Access > Permit REST: get / insert / update / delete``
+
+Endpoint
+--------
+
+.. tip::
+
+    The basic REST API endpoint: ``<domain>/typo3conf/ext/qfq/Source/api/rest.ph``
+
+    ``<domain>/typo3conf/ext/qfq/Source/api/rest.php/<level1>/<id1>/<level2>/<id2>/.../?<var1>=<value1>&...``
+
+
+Append level names and ids after `.../rest.php/`, each separated by '/' .
+
+E.g.:
+
+1. List of all persons: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person`
+2. Data of person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123`
+3. Adresses of person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address`
+4. Adress details of address 45 from person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address/45`
+
+QFQ 'Forms' are used as a 'container' (to define all details).
+
+.. tip::
+
+    The QFQ ``form name`` represents  the level name.
+
+Only the last <level> of an URI will be processed. The former ones are just to fulfil a good looking REST API.
+
+.. note::
+
+    Each level name (=form name) is available via STORE_CLIENT and name `_formX`. E.g. in example
+    (1) `{{_form1:C:alnumx}}=person` and `{{_form2:C:alnumx}}=address`.
+
+    Each level id is available via STORE_CLIENT and name `_idX`. E.g. in example
+    (2) `{{_id1:C}}=123` and `{{_id2:C}}=45`.
+
+    Also the `id` after the last `level` in the URI path, 123 in example (2) and 45 in example (4), is copied to
+    variable `r` in STORE_TYPO3, access it via `{{r:T}}`.
+
+
+GET - Read
+----------
+
+A REST (GET) form has two modes:
+
+data
+    Specific content to a given id. Defined via 'form.parameter.restSqlData'. This mode is selected if there is an
+    id>0 given.
+
+list
+    A list of records will be exported.  Defined via 'form.parameter.restSqlList'. This mode is selected if there is no
+    id or id=0.
+
+.. note::
+
+    There are  *no* native-FormElements necessary or loaded. Action FormElements will be processed.
+
+To simplify access to id parameter of the URI, a mapping is possible via 'form.parameter.restParam'.
+E.g. `restParam=pId,adrId` with example d) makes `{{pId:C}}=123` and `{{adrId:C}}=45`. The order of variable
+names corresponds to the position in the URI. `_id1` is always mapped to the first parameter name, `_id2` to
+the second one and so on.
+
+GET Variables provided via URL are available via STORE_CLIENT as usual.
+
+Form:
+
++-------------------+------------------------------------------------------------------------------+
+| Attribute         | Description                                                                  |
++===================+==============================================================================+
+| name              | *<level>* Mandatory. Level name (Endpoint) in URI.                           |
++-------------------+------------------------------------------------------------------------------+
+| table             | Mandatory. Name of the primary table                                         |
++-------------------+------------------------------------------------------------------------------+
+| Permit REST       | *get* Mandatory. The form can be loaded in REST mode.                        |
++-------------------+------------------------------------------------------------------------------+
+
+
+Form.parameter:
+
++-------------------+----------------------------------------------------------------------------------+
+| Attribute         | Description                                                                      |
++===================+==================================================================================+
+| restSqlData       | Mandatory. SQL query selects content shown in data mode.                         |
+|                   | | ``restSqlData={{!SELECT id, name, gender FROM Person WHERE id='{{r:T0}}'' }}`` |
++-------------------+----------------------------------------------------------------------------------+
+| restSqlList       | Mandatory. SQL query selects content shown in data mode.                         |
+|                   | | ``restSqlData={{!SELECT id, name FROM Person }}``                              |
++-------------------+----------------------------------------------------------------------------------+
+| restParam         | Optional. CSV list of variable names. E.g.: ``restParam=pId,adrId``              |
++-------------------+----------------------------------------------------------------------------------+
+| restToken         | Optional. User defined string or dynamic token (see `restAuthorization`_).       |
++-------------------+----------------------------------------------------------------------------------+
+
+.. note::
+
+    There are no `special-column-names`_ available in `restSqlData` or `restSqlList`. Also there are no
+    SIPs possible, cause REST typically does not offer sessions/cookies (which are necessary for SIPs).
+
+
+.. important::
+
+    If there is an ``ìd`` given, a record in the named primary with the specified table has to exist.
+    If not, an error is thrown.
+
+POST - Insert
+-------------
+
+Form:
+
++-------------------+------------------------------------------------------------------------------+
+| Attribute         | Description                                                                  |
++===================+==============================================================================+
+| name              | *<level>* Mandatory. Level name (Endpoint) in URI.                           |
++-------------------+------------------------------------------------------------------------------+
+| table             | Mandatory. Name of the primary table                                         |
++-------------------+------------------------------------------------------------------------------+
+| Permit REST       | *insert* Mandatory. The form can be loaded in REST mode.                     |
++-------------------+------------------------------------------------------------------------------+
+| id                | Missing or '0'.                                                              |
++-------------------+------------------------------------------------------------------------------+
+
+Form.parameter:
+
++-------------------+----------------------------------------------------------------------------------+
+| Attribute         | Description                                                                      |
++===================+==================================================================================+
+| restParam         | Optional. CSV list of variable names. E.g.: ``restParam=pId,adrId``              |
++-------------------+----------------------------------------------------------------------------------+
+| restToken         | Optional. User defined string or dynamic token (see `restAuthorization`_).       |
++-------------------+----------------------------------------------------------------------------------+
+
+FormElement:
+
+* For each column to save one FormElement with ``FE.name=<column>`` is necessary.
+* A regular QFQ form can be used as REST Post endpoint
+
+
+PUT - Update
+------------
+
+Form:
+
++-------------------+------------------------------------------------------------------------------+
+| Attribute         | Description                                                                  |
++===================+==============================================================================+
+| name              | *<level>* Mandatory. Level name (Endpoint) in URI.                           |
++-------------------+------------------------------------------------------------------------------+
+| table             | Mandatory. Name of the primary table                                         |
++-------------------+------------------------------------------------------------------------------+
+| Permit REST       | *update* Mandatory. The form can be loaded in REST mode.                     |
++-------------------+------------------------------------------------------------------------------+
+| id                | >0                                                                           |
++-------------------+------------------------------------------------------------------------------+
+
+Form.parameter:
+
++-------------------+----------------------------------------------------------------------------------+
+| Attribute         | Description                                                                      |
++===================+==================================================================================+
+| restParam         | Optional. CSV list of variable names. E.g.: ``restParam=pId,adrId``              |
++-------------------+----------------------------------------------------------------------------------+
+| restToken         | Optional. User defined string or dynamic token (see `restAuthorization`_).       |
++-------------------+----------------------------------------------------------------------------------+
+
+FormElement:
+
+* For each column to save one FormElement with ``FE.name=<column>`` is necessary.
+* A regular QFQ form can be used as REST Post endpoint
+
+DELETE - Delete
+---------------
+
+Form:
+
++-------------------+------------------------------------------------------------------------------+
+| Attribute         | Description                                                                  |
++===================+==============================================================================+
+| name              | *<level>* Mandatory. Level name (Endpoint) in URI.                           |
++-------------------+------------------------------------------------------------------------------+
+| table             | Mandatory. Name of the primary table                                         |
++-------------------+------------------------------------------------------------------------------+
+| Permit REST       | *delete* Mandatory. The form can be loaded in REST mode.                     |
++-------------------+------------------------------------------------------------------------------+
+| id                | >0                                                                           |
++-------------------+------------------------------------------------------------------------------+
+
+Form.parameter:
+
++-------------------+----------------------------------------------------------------------------------+
+| Attribute         | Description                                                                      |
++===================+==================================================================================+
+| restParam         | Optional. CSV list of variable names. E.g.: ``restParam=pId,adrId``              |
++-------------------+----------------------------------------------------------------------------------+
+| restToken         | Optional. User defined string or dynamic token (see `restAuthorization`_).       |
++-------------------+----------------------------------------------------------------------------------+
+
+.. note::
+
+    There are  *no* native-FormElements necessary - but might exist for dependent records to delete. Action FormElements
+    will be processed.
+
+
+.. _`restAuthorization`:
+
+Authorization
+-------------
+
+A QFQ form is only acessible via REST API, if ``Form.permitRest`` enables on of the HTTP Method: **get, post, put, delete**
+
+``Permit New`` or ``Permit Edit`` don't apply to QFQ forms called via REST.
+
+.. important::
+
+    By default, the REST API is public accessible.
+
+If this is not wished:
+
+* HTTP AUTH might be used (configured via webserver)
+* Any other webserver based access restriction method
+* or the QFQ internal 'HTTP header token based authorization'.
+
+Token based authorization
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A form will require a 'token based authorization', as soon as there is a ``form.parameter.restToken`` defined.
+Therefore the HTTP Header 'Authorization' has to be set with ``token=<secret token>``. The 'secret token' will
+be checked against the server.
+
+Example: ::
+
+  form.parameter.restToken=myCrypticString0123456789
+
+  Test via commandline: curl -X GET -H 'Authorization: Token token=myCrypticString0123456789' "http://localhost/qfq/typo3conf/ext/qfq/Source/api/rest.php/person/123/address/"
+
+The static setup with ``form.parameter.restToken=myCrypticString0123456789`` is fine, as long as only one token
+exist. In case of multiple tokens, replace the static string against a SQL query.
+
+.. tip::
+
+    The HTML Header Authorization token is available in STORE_CLIENT via '`{{Authorization:C:alnumx}}`.
+
+Best Practice: For example all created tokens are saved in a table 'Auth' with a column 'token'. Define::
+
+  form.parameter.restToken={{SELECT a.token FROM Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' }}
+
+To restrict access to a subset of data, just save the limitations inside the Auth record and update the query
+to check it:
+
+.. code-block:: mysql
+
+  form.parameter.restToken={{SELECT a.token FROM Auth AS a WHERE a.token='{{Authorization:C:alnumx}}'}}
+  form.parameter.restSqlList={{!SELECT p.id, p.name, p.email FROM Person AS p, Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' AND a.attribute=p.attribute}}
+  form.parameter.restSqlData={{!SELECT p.* FROM Person AS p, Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' AND a.attribute=p.attribute AND p.id='{{r:T0}}' }}
+
+If authorization is denied, the request will be answered with a delay of 3 seconds (configured via securityFailedAuthDelay).
+
 
 .. _`system`:
 
@@ -7466,7 +7771,9 @@ Create / edit `AutoCron` jobs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create a T3 page with a QFQ record (similar to the formeditor). Such page should be access restricted and is only needed
-to edit `AutoCron` jobs: ::
+to edit `AutoCron` jobs:
+
+.. code-block:: mysql
 
     dbIndex={{indexQfq:Y}}
     form={{form:S}}
@@ -7605,146 +7912,6 @@ AutoCron / website: HTTPS protocol
   This is useful if there is a general 'HTTP >> HTTPS' redirection configured and the website is accessed via `https://localhost/...`
 
 
-
-.. _`rest`:
-
-REST
-----
-
-QFQ offers an API endpoint for GET (and later POST,PUT,DELETE) operations. ::
-
-  <domain>/typo3conf/ext/qfq/Source/api/rest.php/<level1>/<id1>/<level2>/<id2>/.../?<var1>=<value1>&...
-
-Append level names and ids after `rest.php/...`, separated by '/' each.
-
-E.g.:
-
-1. List of all persons: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person`
-2. Data of person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123`
-3. Adresses of person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address`
-4. Adress details of address 45 from person 123: `<domain>/typo3conf/ext/qfq/Source/api/rest.php/person/123/address/45`
-
-
-QFQ 'Forms' are used as a 'container' to configure all necessary export/import details per 'level'.
-Each 'level' is represented by a QFQ Form.
-
-Only the last <level> of an URI will be processed. The former ones are just to fulfil a good looking REST API.
-
-.. note::
-
-    The level name is the QFQ form name.
-
-Each level name (=form name) is available via STORE_CLIENT and name `_formX`. E.g. in example
-(1) `{{_form1:C:alnumx}}=person` and `{{_form2:C:alnumx}}=address`.
-
-Each level id is available via STORE_CLIENT and name `_idX`. E.g. in example
-(2) `{{_id1:C}}=123` and `{{_id2:C}}=45`.
-
-Also the `id` after the last `level` in the URI path, 123 in example (2) and 45 in example (4), is copied to
-variable `r` in STORE_TYPO3, access it via `{{r:T}}`.
-
-
-Export (GET)
-^^^^^^^^^^^^
-
-All data is exported in JSON notation.
-
-A REST (GET) form has two modes: ::
-
-data
-    Specific content to a given id. Defined via 'form.parameter.restSqlData'. This mode is selected if there is an
-    id>0 given.
-
-list
-    A list of records will be exported.  Defined via 'form.parameter.restSqlList'. This mode is selected if there is no
-    id or id=0.
-
-There are  *no* FormElements.
-
-To simplify access to id parameter of the URI, a mapping is possible via 'form.parameter.restParam'.
-E.g. `restParam=pId,adrId` with example d) makes `{{pId:C}}=123` and `{{adrId:C}}=45`. The order of variable
-names corresponds to the position in the URI. `_id1` is always mapped to the first parameter name, `_id2` to
-the second one and so on.
-
-GET Variables provided via URL are available via STORE_CLIENT as usual.
-
-Form:
-
-+-------------------+------------------------------------------------------------------------------+
-| Attribute         | Description                                                                  |
-+===================+==============================================================================+
-| name=<level>      | Level name in URI                                                            |
-+-------------------+------------------------------------------------------------------------------+
-| permitNew=rest    | The form can be loaded in REST mode with mising parameter 'id' or 'id=0'     |
-+-------------------+------------------------------------------------------------------------------+
-| permitEdit=rest   | The form can be loaded in REST mode with parameter 'id' > 0                  |
-+-------------------+------------------------------------------------------------------------------+
-
-
-Form.parameter:
-
-+-------------------+------------------------------------------------------------------------------+
-| Attribute         | Description                                                                  |
-+===================+==============================================================================+
-| restSqlData       | SQL query selects content shown in data mode.                                |
-|                   | `restSqlData={{!SELECT id, name, gender FROM Person WHERE id='{{r:T0}}'' }}` |
-+-------------------+------------------------------------------------------------------------------+
-| restSqlList       | SQL query selects content shown in data mode.                                |
-|                   | `restSqlData={{!SELECT id, name FROM Person }}`                              |
-+-------------------+------------------------------------------------------------------------------+
-| restParam         | Optional. CSV list of variable names. E.g.: `restParam=pId,adrId`            |
-+-------------------+------------------------------------------------------------------------------+
-| restToken         | Optional. User defined string. For dynamic token see below.                  |
-+-------------------+------------------------------------------------------------------------------+
-
-.. note:
-
-    There are no `special-column-names`_ available in `restSqlData` or `restSqlList`. Also there are no
-    SIPs possible, cause REST typically does not offer sessions/cookies (which are necessary for SIPs).
-
-Authorization
-^^^^^^^^^^^^^
-
-By default, the REST API is public accessible.
-
-If this is not wished, HTTP AUTH might be used (configured via webserver) or the
-QFQ internal 'HTTP header token based authorization'.
-
-Token based authorization
-'''''''''''''''''''''''''
-
-A form will require a 'token based authorization', as soon as there is a `form.parameter.restToken` defined.
-Therefore the HTTP Header 'Authorization' has to be set with `token=<secret token>`. The 'secret token' will
-be checked against the server. Using HTTPS, such token can't be sniffed and will typically not be logged in
-any server logs.
-
-Example: ::
-
-  form.parameter.restToken=myCrypticString0123456789
-
-  Test via commandline: curl -X GET -H 'Authorization: Token token=myCrypticString0123456789' "http://localhost/qfq/typo3conf/ext/qfq/Source/api/rest.php/person/123/address/"
-
-The static setup with `form.parameter.restToken=myCrypticString0123456789 is fine, as long as only one token
-exist. In case of multiple tokens, replace the static string against a SQL query.
-
-General: The HTML Header Authorization token is available in STORE_CLIENT via '`{{Authorization:C:alnumx}}`.
-
-For example all created tokens are saved in a table 'Auth' with a column 'token'. Define: ::
-
-  form.parameter.restToken={{SELECT a.token FROM Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' }}
-
-To restrict access to a subset of data, just save the limitations inside the Auth record and update the query
-to check it:
-
-.. code-block:: pmysql
-
-  form.parameter.restToken={{SELECT a.token FROM Auth AS a WHERE a.token='{{Authorization:C:alnumx}}'}}
-  form.parameter.restSqlList={{!SELECT p.id, p.name, p.email FROM Person AS p, Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' AND a.attribute=p.attribute}}
-  form.parameter.restSqlData={{!SELECT p.* FROM Person AS p, Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' AND a.attribute=p.attribute AND p.id='{{r:T0}}' }}
-
-If authorization is denied, the request will be answered with a delay of 3 seconds (configured via securityFailedAuthDelay).
-
-
 .. _applicationTest:
 
 Application Test
@@ -7829,7 +7996,9 @@ the content. For SQL statements, remove the outer token (e.g. only one curly bra
 
   FE.title: Person { SELECT ... WHERE id={{buggyVar:alnumx}} }
 
-Tip on Report: In case the query did not contain any double ticks, just wrap all but 'SELECT' in double ticks: ::
+Tip on Report: In case the query did not contain any double ticks, just wrap all but 'SELECT' in double ticks:
+
+.. code-block:: mysql
 
  Buggy query:  10.sql = SELECT id, ... FROM myTable WHERE status={{myVar}} ORDER BY status
  Debug query:  10.sql = SELECT "id, ... FROM myTable WHERE status={{myVar}} ORDER BY status"
@@ -7844,7 +8013,9 @@ Output a text, substitute embedded QFQ variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The content will be copied to '_text'. In `10.tail` than the '{{text:R}}' will be substituted with all known variables.
-Note the '-' in '{{text:RE::-}}', this will prevent that QFQ escapes any character from the content. ::
+Note the '-' in '{{text:RE::-}}', this will prevent that QFQ escapes any character from the content.
+
+.. code-block:: mysql
 
     10 {
       sql = SELECT no.text AS _text
@@ -7856,7 +8027,9 @@ Note the '-' in '{{text:RE::-}}', this will prevent that QFQ escapes any charact
 TypeAhead list with T3 page alias names - use of the T3 DB
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To define a typeahead list of T3 page alias names: ::
+To define a typeahead list of T3 page alias names:
+
+.. code-block:: mysql
 
     FE.type = text
     FE.parameter.typeAheadSql = SELECT p.alias FROM {{dbNameT3:Y}}.pages AS p WHERE p.deleted=0 AND p.alias!='' AND p.alias LIKE ? ORDER BY p.alias LIMIT 20
