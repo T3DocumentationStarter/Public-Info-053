@@ -9,7 +9,7 @@
 ..
 .. --------------------------------------------------
 .. Best Practice T3 reST  https://docs.typo3.org/typo3cms/drafts/github/xperseguers/RstPrimer/
-.. External Links: `Bootstrap <http://getbootstrap.com/>`_:
+.. External Links: `Bootstrap <http://getbootstrap.com/>`_
 .. Add Images: https://wiki.typo3.org/ReST_Syntax#Images
 ..
 .. -*- coding: utf-8 -*- with BOM.
@@ -36,6 +36,36 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+
+Version 19.2.3
+--------------
+
+Date: 22.02.2019
+
+Notes
+^^^^^
+
+New: `QFQ REST <https://docs.typo3.org/typo3cms/drafts/github/T3DocumentationStarter/Public-Info-053/Manual.html#rest>`_
+interface implemented.
+
+Features
+^^^^^^^^
+
+* Rest Implementation with GET,PUT,POST,DELETE and authorization token
+* REST.md: add
+* Manual.rst: reformat all sql code to use tyoposcript - it seems mysql does not work
+* Manual.rst: Add some admonitions
+
+Bug Fixes
+^^^^^^^^^
+
+* #7925 / fixed:
+
+  1. change CWD during split reduced to splitting only.
+  1. fixed problem in mkDirParent() with absolute paths.
+  1. make logger independent of CWD.
+  1. fixed problem with `mktemp --tmpdir`(difference Ubuntu 16 / 18) by using PHP function again.
+  1. fixed some 'undefined index' problems.
 
 Version 19.2.2
 --------------
