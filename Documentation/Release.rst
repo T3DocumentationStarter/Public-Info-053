@@ -59,13 +59,11 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-* #7925 / fixed:
-
-  1. change CWD during split reduced to splitting only.
-  1. fixed problem in mkDirParent() with absolute paths.
-  1. make logger independent of CWD.
-  1. fixed problem with `mktemp --tmpdir`(difference Ubuntu 16 / 18) by using PHP function again.
-  1. fixed some 'undefined index' problems.
+* #7925 / Change CWD during split reduced to splitting only.
+* #7925 / Fixed problem in mkDirParent() with absolute paths.
+* #7925 / Make logger independent of CWD.
+* #7925 / Fixed problem with `mktemp --tmpdir`(difference Ubuntu 16 / 18) by using PHP function again.
+* #7925 / Fixed some 'undefined index' problems.
 
 Version 19.2.2
 --------------

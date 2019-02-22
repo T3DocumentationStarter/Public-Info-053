@@ -238,9 +238,7 @@ Setup a *report* to manage all *forms*:
 * Create a Typo3 page.
 * Set the 'URL Alias' to `form` (default) or the individual defined value in parameter `editFormPage` (configuration_).
 * Insert a content record of type *qfq*.
-* In the bodytext insert the following code:
-
-.. code-block:: typoscript
+* In the bodytext insert the following code::
 
     # If there is a form given by SIP: show
     form={{form:SE}}
@@ -1002,9 +1000,7 @@ Mail Log page
 -------------
 
 For debugging purposes you may like to add a Mail Log page in the frontend.
-The following QFQ code could be used for that purpose (put it in a QFQ PageContent element):
-
-.. code-block:: typoscript
+The following QFQ code could be used for that purpose (put it in a QFQ PageContent element)::
 
     # Page parameters
     1.sql = SELECT @grId := '{{grId:C0:digit}}' AS _grId
@@ -1052,9 +1048,7 @@ Form Submit Log page
 --------------------
 
 For debugging purposes you may like to add a Form Submit Log page in the frontend.
-The following QFQ code could be used for that purpose (put it in a QFQ PageContent element):
-
-.. code-block:: typoscript
+The following QFQ code could be used for that purpose (put it in a QFQ PageContent element)::
 
     # Filters
     20.shead = <form onchange='this.submit()' class='form-inline'><input type='hidden' name='id' value='{{pageAlias:T0}}'>
@@ -2558,9 +2552,7 @@ Optional it might be defined via *Form.parameter* ::
   Than, e.g. an action-FormElement 'afterSave' can be used to detect the final submit situation and do some extra stuff,
   necessary for the final submit.
 
-The following shows the same *Form* in the `regular`, `readonly` and `requiredOff` mode:
-
-.. code-block:: typoscript
+The following shows the same *Form* in the `regular`, `readonly` and `requiredOff` mode::
 
   10.sql = SELECT CONCAT('p:{{pageAlias:T}}&form=person&r=', p.id, '|Regular') as _pagee,
                   CONCAT('p:{{pageAlias:T}}&form=person&formModeGlobal=readonly&r=', p.id, '|Readonly') as _pagee,
@@ -2834,9 +2826,7 @@ FE: 'Report' notation
 ^^^^^^^^^^^^^^^^^^^^^
 
 The FE fields 'value' and 'note' understand the `Report`_ syntax. Nested SQL queries as well as links with SIP encoding
-are possible. To distinguish between 'Form' and 'Report' syntax, the first line has to be `#!report`:
-
-.. code-block:: typoscript
+are possible. To distinguish between 'Form' and 'Report' syntax, the first line has to be `#!report`::
 
     #!report
 
@@ -4511,9 +4501,7 @@ If *showDebugInfo* is enabled, a full stacktrace and variable contents are displ
 Form search
 ^^^^^^^^^^^
 
-QFQ content record:
-
-.. code-block:: typoscript
+QFQ content record::
 
   # Creates a small form that redirects back to this page
   10 {
@@ -4692,8 +4680,7 @@ Chart
 
   * Don't nest the HTML & JavaScript code - bad workaround, this is not human readable.
   * Select different nesting token, e.g. '<' (check the first line on the following example).
-
-.. code-block:: typoscript
+::
 
      # <
 
@@ -5045,9 +5032,7 @@ To display a report on any given TYPO3 page, create a content element of type 'Q
 A simple example
 ^^^^^^^^^^^^^^^^
 
-Assume that the database has a table person with columns firstName and lastName. To create a simple list of all persons, we can do the following:
-
-.. code-block:: typoscript
+Assume that the database has a table person with columns firstName and lastName. To create a simple list of all persons, we can do the following::
 
     10.sql = SELECT id AS pId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
 
@@ -5063,9 +5048,7 @@ The HTML output, displayed on the page, resulting from only this definition, cou
 I.e., QFQ will simply output the content of the SQL result row after row for each single level.
 
 However, we can modify (wrap) the output by setting the values of various keys for each level: 10.rsep=<br/> for example
-tells QFQ to separate the rows of the result by a HTML-line break. The final result in this case is:
-
-.. code-block:: typoscript
+tells QFQ to separate the rows of the result by a HTML-line break. The final result in this case is::
 
     10.sql = SELECT id AS personId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
     10.rsep = <br>
@@ -5170,9 +5153,7 @@ A report can be divided into several levels. This can make report definitions mo
 splitting of otherwise excessively long SQL queries. For example, if your SQL query on the root level selects a number
 of person records from your person table, you can use the SQL query on the second level to look up the city where each person lives.
 
-See the example below:
-
-.. code-block:: typoscript
+See the example below::
 
     10.sql = SELECT id AS _pId, CONCAT(firstName, " ", lastName, " ") AS name FROM person
     10.rsep = <br>
@@ -5200,9 +5181,7 @@ be appended to the last keyword line. 'Keyword' lines are detected on:
  * {
  * <level>[.<sub level] {
 
-Example:
-
-.. code-block:: typoscript
+Example::
 
     10.sql = SELECT 'hello world'
                FROM mastertable
@@ -5219,9 +5198,7 @@ Example:
 Join mode: SQL
 ''''''''''''''
 
-This is the default. All lines are joined with a *space* in between. E.g.: ::
-
-.. code-block:: typoscript
+This is the default. All lines are joined with a *space* in between. E.g.::
 
     10.sql = SELECT 'hello world'
                FROM mastertable
@@ -5234,9 +5211,7 @@ Join mode: strip whitespace
 '''''''''''''''''''''''''''
 
 Ending a line with a '\\' strips all leading and trailing whitespaces of that line joins the line directly (no extra
-space in between). E.g.:
-
-.. code-block:: typoscript
+space in between). E.g.::
 
     10.sql = SELECT 'hello world', 'd:final.pdf \
                                     |p:id=export  \
@@ -5246,9 +5221,7 @@ Results to: ``10.sql = SELECT 'hello world', 'd:final.pdf|p:id=export|t:Download
 
 Note: the '\\' does not force the joining, it only removes the whitespaces.
 
-To get the same result, the following is also possible:
-
-.. code-block:: typoscript
+To get the same result, the following is also possible::
 
     10.sql = SELECT 'hello world', CONCAT('d:final.pdf'
                                     '|p:id=export',
@@ -5257,9 +5230,7 @@ To get the same result, the following is also possible:
 Nesting of levels
 ^^^^^^^^^^^^^^^^^
 
-Levels can be nested. E.g.:
-
-.. code-block:: typoscript
+Levels can be nested. E.g.::
 
   10 {
     sql = SELECT ...
@@ -5269,9 +5240,7 @@ Levels can be nested. E.g.:
     }
   }
 
-This is equal to:
-
-.. code-block:: typoscript
+This is equal to::
 
   10.sql = SELECT ...
   10.5.sql = SELECT ...
@@ -5281,9 +5250,7 @@ Leading / trailing spaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 By default, leading or trailing whitespaces are removed from strings behind '='. E.g. 'rend =  test ' becomes 'test' for
-rend. To prevent any leading or trailing spaces, surround them by using single or double ticks. Example:
-
-.. code-block:: typoscript
+rend. To prevent any leading or trailing spaces, surround them by using single or double ticks. Example::
 
   10.sql = SELECT name FROM Person
   10.rsep = ' '
@@ -5295,9 +5262,7 @@ Braces character for nesting
 
 By default, curly braces '{}' are used for nesting. Alternatively angle braces '<>', round braces '()' or square
 braces '[]' are also possible. To define the braces to use, the **first line** of the bodytext has to be a comment line and the
-last character of that line must be one of '{[(<'. The corresponding braces are used for that QFQ record. E.g.:
-
-.. code-block:: typoscript
+last character of that line must be one of '{[(<'. The corresponding braces are used for that QFQ record. E.g.::
 
     # Specific code. >
     10 <
@@ -5317,9 +5282,7 @@ Per QFQ tt-content record, only one type of nesting braces can be used.
 Be careful to:
 
 * write nothing else than whitespaces/newline behind an **open brace**
-* the **closing brace** has to be alone on a line:
-
-.. code-block:: typoscript
+* the **closing brace** has to be alone on a line::
 
    10.sql = SELECT 'Yearly Report'
 
@@ -5362,9 +5325,7 @@ The STORE_RECORD will always be merged with previous content. The Level Keys are
 
 Multiple columns, with the same column name, can't be accessed individually. Only the last column is available.
 
-Retrieving the *final* value of `special-column-names`_ is possible via '{{&<column>:R}}. Example:
-
-.. code-block:: typoscript
+Retrieving the *final* value of `special-column-names`_ is possible via '{{&<column>:R}}. Example::
 
   10.sql = SELECT 'p:home&form=Person|s|b:success|t:Edit' AS _link
   10.20.sql = SELECT '{{link:R}}', '{{&link:R}}'
@@ -5372,9 +5333,7 @@ Retrieving the *final* value of `special-column-names`_ is possible via '{{&<col
 The first column of row `10.20` returns 'p:home&form=Person|s|b:success|t:Edit',the second column returns
 '<span class="btn btn-success"><a href="?home&s=badcaffee1234">Edit</a></span>'.
 
-Example STORE_RECORD:
-
-.. code-block:: typoscript
+Example STORE_RECORD::
 
   10.sql= SELECT p.id AS _pId, p.name FROM Person AS p
   10.5.sql = SELECT adr.city, 'dummy' AS _pId FROM Address AS adr WHERE adr.pId={{pId:R}}
@@ -5385,9 +5344,7 @@ The line '10.10' will output 'dummy' in cases where there is at least one corres
 If there are no addresses (all persons) it reports the person id.
 If there is at least one address, it reports 'dummy', cause that's the last stored content.
 
-Example 'level':
-
-.. code-block:: typoscript
+Example 'level'::
 
   10.sql= SELECT p.id AS _pId, p.name FROM Person AS p
   10.5.sql = SELECT adr.city, 'dummy' AS _pId FROM Address AS adr WHERE adr.pId={{10.pId}}
@@ -5413,9 +5370,7 @@ Notes to the level:
 |             | *30.5.1*  will be executed as many times as *30.5* has row numbers.                                                    |
 +-------------+------------------------------------------------------------------------------------------------------------------------+
 
-Report Example 1:
-
-.. code-block:: typoscript
+Report Example 1::
 
     # Displays current date
     10.sql = SELECT CURDATE()
@@ -5634,7 +5589,7 @@ render mode might dynamically control the rendered link.
 |7           | pure url            |pure url            |                  |no link, pure url                                                          |
 +------------+---------------------+--------------------+------------------+---------------------------------------------------------------------------+
 
-.. code-block:: typoscript
+Example::
 
     10.sql = SELECT CONCAT('u:', p.homepage, IF(p.showHomepage='yes', '|r:0', '|r:5') ) AS _link FROM Person AS p
 
@@ -5749,9 +5704,7 @@ Columns: _page[X]
 The colum name is composed of the string *page* and a trailing character to specify the type of the link.
 
 
-**Syntax**
-
-.. code-block:: typoscript
+**Syntax**::
 
     10.sql = SELECT "[options]" AS _page[<link type>]
 
@@ -5817,9 +5770,7 @@ Column: _paged
 These column offers a link, with a confirmation question, to delete one record (mode 'table') or a bunch of records
 (mode 'form'). After deleting the record(s), the current page will be reloaded in the browser.
 
-**Syntax**
-
-.. code-block:: typoscript
+**Syntax** ::
 
     10.sql = SELECT "U:table=<tablename>&r=<record id>|q:<question>|..." AS _paged
     10.sql = SELECT "U:form=<formname>&r=<record id>|q:<question>|..." AS _paged
@@ -5848,10 +5799,9 @@ Mode: form
 Deletes the record with id '<record id>' from the table specified in form '<form name>' as primary table.
 Additional action *FormElement* of type *beforeDelete* or *afterDelete* will be fired too.
 
-Examples:
-'''''''''
-
-.. code-block:: typoscript
+Examples
+''''''''
+::
 
     10.sql = SELECT 'U:table=Person&r=123|q:Do you want delete John Doe?' AS _paged
     10.sql = SELECT 'U:form=person-main&r=123|q:Do you want delete John Doe?' AS _paged
@@ -5889,9 +5839,7 @@ Column: _vertical
 Render text vertically. This is useful for tables with limited column width. The vertical rendering is achieved via CSS tranformations
 (rotation) defined in the style attribute of the wrapping tag. You can optionally specify the rotation angle.
 
-**Syntax**
-
-.. code-block:: typoscript
+**Syntax** ::
 
     10.sql = SELECT "<text>|[<angle>]" AS _vertical
 
@@ -5908,10 +5856,7 @@ Render text vertically. This is useful for tables with limited column width. The
 The text is surrounded by some HTML tags in an effort to make other elements position appropriately around it.
 This works best for angles close to 270 or 90.
 
-**Minimal Example**
-
-.. code-block:: typoscript
-
+**Minimal Example** ::
 
     10.sql = SELECT "Hallo" AS _vertical
     20.sql = SELECT "Hallo|90" AS _vertical
@@ -5926,10 +5871,7 @@ Column: _mailto
 
 Easily create Email links.
 
-**Syntax**
-
-.. code-block:: typoscript
-
+**Syntax** ::
 
     10.sql = SELECT "<email address>|[<link text>]" AS _mailto
 
@@ -5949,17 +5891,13 @@ Easily create Email links.
 +--------------+----------------------------------------------------------------------------------------+-------------+
 
 
-**Minimal Example**
-
-.. code-block:: typoscript
+**Minimal Example** ::
 
     10.sql = SELECT "john.doe@example.com" AS _mailto
 
 
 
-**Advanced Example**
-
-.. code-block:: typoscript
+**Advanced Example** ::
 
     10.sql = SELECT "john.doe@example.com|John Doe" AS _mailto
 
@@ -5986,9 +5924,7 @@ The following parameters can also be written as complete words for ease of use::
 
 Send emails. Every mail will be logged in the table `mailLog`. Attachments are supported.
 
-**Syntax**
-
-.. code-block:: typoscript
+**Syntax** ::
 
     10.sql = SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow" AS _sendmail
     10.sql = SELECT "t:john@doe.com|f:jane@doe.com|s:Reminder tomorrow|b:Please dont miss the meeting tomorrow|A:off|g:1|x:2|y:3|z:4" AS _sendmail
@@ -6061,17 +5997,13 @@ Send emails. Every mail will be logged in the table `mailLog`. Attachments are s
   If this is not wished, it can be turned off by `e=none` and/or `E=none`.
 
 
-**Minimal Example**
-
-.. code-block:: typoscript
+**Minimal Example** ::
 
     10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available." AS _sendmail
 
 This will send an email with subject *Latest News* from company@example.com to john.doe@example.com.
 
-**Advanced Examples**
-
-.. code-block:: typoscript
+**Advanced Examples** ::
 
     10.sql = SELECT "t:customer1@example.com,Firstname Lastname <customer2@example.com>, Firstname Lastname <customer3@example.com>| \\
                      f:company@example.com|s:Latest News|b:The new version is now available.|r:sales@example.com|A:on|g:101|x:222|c:ceo@example.com|B:backup@example.com" AS _sendmail
@@ -6117,9 +6049,7 @@ Any combination (incl. repeating them) are possible. Any source will be added as
 
 Optional any number of sources can be concatenated to a single PDF file: 'C|F:<file1>|F:<file2>|p:export&a=123'.
 
-Examples in Report:
-
-.. code-block:: typoscript
+Examples in Report::
 
   # One file attached.
   10.sql = SELECT "t:john.doe@example.com|f:company@example.com|s:Latest News|b:The new version is now available.|F:fileadmin/summary.pdf" AS _sendmail
@@ -6149,9 +6079,7 @@ Renders images. Allows to define an alternative text and a title attribute for t
 *   If no alternative text is defined, an empty alt attribute is rendered in the img tag (since this attribute is mandatory in HTML).
 *   If no title text is defined, the title attribute will not be rendered at all.
 
-**Syntax**
-
-.. code-block:: typoscript
+**Syntax** ::
 
     10.sql = SELECT "<path to image>|[<alt text>]|[<title text>]" AS _img
 
@@ -6167,16 +6095,12 @@ Renders images. Allows to define an alternative text and a title attribute for t
 +-------------+-------------------------------------------------------------------------------------------+---------------------------+
 
 
-**Minimal Example**
-
-.. code-block:: typoscript
+**Minimal Example** ::
 
     10.sql = SELECT "fileadmin/img/img.jpg" AS _img
 
 
-**Advanced Examples**
-
-.. code-block:: typoscript
+**Advanced Examples** ::
 
     10.sql = SELECT "fileadmin/img/img.jpg|Aternative Text" AS _img            # alt="Alternative Text, no title
     20.sql = SELECT "fileadmin/img/img.jpg|Aternative Text|" AS _img           # alt="Alternative Text, no title
@@ -6213,9 +6137,7 @@ Runs batch files or executables on the webserver. In case of an error, returncod
 +-------------+--------------------------------------------------+-----------------+
 
 
-**Minimal Examples**
-
-.. code-block:: typoscript
+**Minimal Examples** ::
 
     10.sql = SELECT "ls -s" AS _exec
     20.sql = SELECT "./batchfile.sh" AS _exec
@@ -6228,9 +6150,7 @@ Column: _pdf | _file | _zip
 
 Detailed explanation: download_
 
-Most of the other Link-Class attributes can be used to customize the link.
-
-.. code-block:: typoscript
+Most of the other Link-Class attributes can be used to customize the link. ::
 
     10.sql = SELECT "[options]" AS _pdf, "[options]" AS _file, "[options]" AS _zip
 
@@ -6240,9 +6160,7 @@ Most of the other Link-Class attributes can be used to customize the link.
 * Parameter are position independent.
 * *<params>*: see `download-parameter-files`_
 * For column `_pdf` and `_zip`, the element sources `p:...`, `U:...`, `u:...`, `F:...` might repeated multiple times.
-* Example:
-
-.. code-block:: typoscript
+* Example::
 
     10.sql = SELECT "F:fileadmin/test.pdf" as _pdf,  "F:fileadmin/test.pdf" as _file,  "F:fileadmin/test.pdf" as _zip
     10.sql = SELECT "p:id=export&r=1" as _pdf,  "p:id=export&r=1" as _file,  "p:id=export&r=1" as _zip
@@ -6272,9 +6190,7 @@ Tips:
 * If the target file already exists it will be overwriten. To save individual files, choose a new filename,
   for example by adding a timestamp.
 
-Examples:
-
-.. code-block:: typoscript
+Example::
 
   SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf" AS _savePdf
   SELECT "d:fileadmin/result.pdf|F:fileadmin/_temp_/test.pdf|U:id=test&--orientation=landscape" AS _savePdf
@@ -6321,10 +6237,7 @@ The render mode '7' is useful, if the URL of the thumbnail have to be used in an
 tag. Something like `<body style="background-image:url(bgimage.jpg)">` could be solved with
 `SELECT "<body style="background-image:url(", 'T:fileadmin/file3.pdf' AS _thumbnail, ')">'`
 
-Example:
-
-
-.. code-block:: typoscript
+Example::
 
   # SIP protected, IMG tag, thumbnail width 150px
   10.sql = SELECT 'T:fileadmin/file3.pdf' AS _thumbnail
@@ -6393,9 +6306,7 @@ Column: _monitor
 
 Detailed explanation: monitor_
 
-**Syntax**
-
-.. code-block:: typoscript
+**Syntax** ::
 
     10.sql = SELECT 'file:<filename>|tail:<number of last lines>|append:<0 or 1>|interval:<time in ms>|htmlId:<id>' AS _monitor
 
@@ -6424,9 +6335,7 @@ Copy to clipboard
 | F:<pathFileName>  | F:fileadmin/protected/data.R   | pathFileName in DocumentRoot                                               |
 +-------------------+--------------------------------+----------------------------------------------------------------------------+
 
-Example:
-
-.. code-block:: typoscript
+Example::
 
     10.sql = SELECT 'y:hello world (yank)|t:content direct (yank)' AS _yank,
                     'y:hello world (link)|t:content direct (link)' AS _link,
@@ -6655,9 +6564,7 @@ Best practice:
 #. Create a) a link (Report) to the PDF letter or b) attach the PDF (on the fly rendered) to a mail. Both will call the
    `wkhtml` via the `download` mode and forwards the necessary parameter.
 
-Use in `report`:
-
-.. code-block:: typoscript
+Use in `report`::
 
   sql = SELECT CONCAT('d:Letter.pdf|t:',p.firstName, ' ', p.name,
                        '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&',
@@ -6671,9 +6578,7 @@ Sendmail. Parameter: ::
 
   sendMailAttachment={{SELECT 'd:Letter.pdf|t:', p.firstName, ' ', p.name, '|p:id=letterbody&pId=', p.id, '&_sip=1&--margin-top=50mm&--margin-bottom=20mm&--header-html={{BASE_URL_PRINT:Y}}?id=letterheader&--footer-right="Seite: [page]/[toPage]"&--footer-font-size=8&--footer-spacing=10' FROM Person AS p WHERE p.id={{id:S}} }}
 
-Replace the static content elements from 2. and 3. by QFQ Content elements as needed:
-
-.. code-block:: typoscript
+Replace the static content elements from 2. and 3. by QFQ Content elements as needed::
 
   10.sql = SELECT '<div class="letter-receiver"><p>', p.name AS '_+br', p.street AS '_+br', p.city AS '_+br', '</p>'
             FROM Person AS p WHERE p.id={{pId:S}}
@@ -6775,9 +6680,7 @@ Create a output like this: ::
 
 This fills D11, E11, F11, D12
 
-In Report Syntax:
-
-.. code-block:: typoscript
+In Report Syntax::
 
     # With ... AS _XLS (token explicit given)
     10.sql = SELECT 'position=D10' AS _XLS,
@@ -6803,9 +6706,7 @@ In Report Syntax:
 
 .. _`excel-export-sample`:
 
-Excel export samples:
-
-.. code-block:: typoscript
+Excel export samples::
 
     # From scratch (both are the same, one with '_excel' the other with '_link')
     SELECT CONCAT('d:new.xlsx|t:Excel (new)|uid:54') AS _excel
@@ -6864,9 +6765,7 @@ A `<div>` example HTML output (HTML send to the browser): ::
     </div>
 
 
-A typical QFQ report which generates those `<div>` HTML:
-
-.. code-block:: typoscript
+A typical QFQ report which generates those `<div>` HTML::
 
     10 {
       sql = SELECT '<div id="anytag-', n.id,'" data-dnd-id="', n.id,'">' , n.note, '</div>'
@@ -6896,9 +6795,7 @@ which is the same column width as the outer table. ::
         </tbody>
     </table>
 
-A typical QFQ report which generates this HTML:
-
-.. code-block:: typoscript
+A typical QFQ report which generates this HTML::
 
     10 {
       sql = SELECT '<tr id="anytag-', n.id,'" data-dnd-id="', n.id,'" data-columns="3">' , n.id AS '_+td', n.note AS '_+td', n.ord AS '_+td', '</tr>'
@@ -6919,9 +6816,7 @@ predefined html id has to be assigned them. After an update, all changed order n
 be updated via AJAX.
 
 The html id per element is defined by `qfq-dnd-ord-id-<id>` where `<id>` is the record id. Same example as above, but
-with an updated `n.ord` column:
-
-.. code-block:: typoscript
+with an updated `n.ord` column::
 
     10 {
       sql = SELECT '<tr id="anytag-', n.id,'" data-dnd-id="', n.id,'" data-columns="3">' , n.id AS '_+td', n.note AS '_+td',
@@ -6994,16 +6889,14 @@ Bootstrap
 * Table > hover: `table-hover`
 * Table > condensed: `table-condensed`
 
-Example:
-
-.. code-block:: typoscript
+Example::
 
   10.sql = SELECT id, name, firstName, ...
   10.head = <table class='table table-condensed qfq-table-50'>
 
 * `qfq-100`, `qfq-left` - makes e.g. a button full width and aligns the text left.
 
-.. code-block:: typoscript
+Example::
 
     10.sql = SELECT "p:home&r=0|t:Home|c:qfq-100 qfq-left" AS _pagev
 
@@ -7043,9 +6936,7 @@ Customization:
   as well as your own `$(document).ready()` function with the desired config. In this case, it is recommended not to
   use the above *tablesorter* classes since the QFQ javascript code could interfere with your javascript code.
 
-Example:
-
-.. code-block:: typoscript
+Example::
 
     10 {
       sql = SELECT id, CONCAT('form&form=person&r=', id) AS _Pagee, lastName, title FROM person
@@ -7068,22 +6959,16 @@ Monitor
 Display a (log)file from the server, inside the browser, which updates automatically by a user defined interval. Access
 to the file is SIP protected. Any file on the server is possible.
 
-* On a Typo3 page, define a HTML element with a unique html-id. E.g.:
-
-.. code-block:: typoscript
+* On a Typo3 page, define a HTML element with a unique html-id. E.g.::
 
     10.head = <pre id="monitor-1">Please wait</pre>
 
-* On the same Typo3 page, define a SQL column '_monitor' with the necessary parameter:
-
-.. code-block:: typoscript
+* On the same Typo3 page, define a SQL column '_monitor' with the necessary parameter::
 
     10.sql = SELECT 'file:fileadmin/protected/log/sql.log|tail:50|append:1|refresh:1000|htmlId:monitor-1' AS _monitor
 
 
-* Short version with all defaults used to display system configured sql.log:
-
-.. code-block:: typoscript
+* Short version with all defaults used to display system configured sql.log::
 
     10.sql = SELECT 'file:{{sqlLog:Y}}' AS _monitor, '<pre id="monitor-1" style="white-space: pre-wrap;">Please wait</pre>'
 
@@ -7095,9 +6980,7 @@ The following section gives some examples of typical reports.
 Basic Queries
 ^^^^^^^^^^^^^
 
-One simple query
-
-.. code-block:: typoscript
+One simple query::
 
     10.sql = SELECT "Hello World"
 
@@ -7107,10 +6990,7 @@ Result::
     Hello World
 
 
-Two simple queries
-
-.. code-block:: typoscript
-
+Two simple queries::
 
     10.sql = SELECT "Hello World"
     20.sql = SELECT "Say hello"
@@ -7123,10 +7003,7 @@ Result::
 
 
 
-Two simple queries, with break
-
-.. code-block:: typoscript
-
+Two simple queries, with break::
 
     10.sql = SELECT "Hello World<br>"
     20.sql = SELECT "Say hello"
@@ -7141,9 +7018,7 @@ Result::
 Accessing the database
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Real data, one single column
-
-.. code-block:: typoscript
+Real data, one single column::
 
     10.sql = SELECT p.firstName FROM exp_person AS p
 
@@ -7153,9 +7028,7 @@ Result::
     BillieElvisLouisDiana
 
 
-Real data, two columns
-
-.. code-block:: typoscript
+Real data, two columns::
 
     10.sql = SELECT p.firstName, p.lastName FROM exp_person AS p
 
@@ -7178,9 +7051,7 @@ concat to concatenate data and formatting output in a single column.
 One can use 'level' keys to define formatting information that will be put before/after/between all rows/columns of the
 actual levels result.
 
-Two columns
-
-.. code-block:: typoscript
+Two columns::
 
     # Add the formatting information as a column
     10.sql = SELECT p.firstName, " " , p.lastName, "<br>" FROM exp_person AS p
@@ -7194,9 +7065,7 @@ Result::
     Diana Ross
 
 
-One column 'rend'
-
-.. code-block:: typoscript
+One column 'rend'::
 
     10.sql = SELECT p.firstName, " " , p.lastName FROM exp_person AS p
     10.rend = <br>
@@ -7209,9 +7078,7 @@ Result::
     Diana Ross
 
 
-More HTML
-
-.. code-block:: typoscript
+More HTML::
 
     10.sql = SELECT p.name FROM exp_person AS p
     10.head = <ul>
@@ -7226,9 +7093,7 @@ Result::
     o Louis Armstrong
     o Diana Ross
 
-The same as above, but with braces:
-
-.. code-block:: typoscript
+The same as above, but with braces::
 
   10 {
     sql = SELECT p.name FROM exp_person AS p
@@ -7238,18 +7103,14 @@ The same as above, but with braces:
     rend = </li>
   }
 
-Two queries:
-
-.. code-block:: typoscript
+Two queries::
 
     10.sql = SELECT p.name FROM exp_person AS p
     10.rend = <br>
     20.sql = SELECT a.street FROM exp_address AS a
     20.rend = <br>
 
-Two queries: nested
-
-.. code-block:: typoscript
+Two queries: nested::
 
     # outer query
     10.sql = SELECT p.name FROM exp_person AS p
@@ -7261,9 +7122,7 @@ Two queries: nested
 
 * For every record of '10', all records of 10.10 will be printed.
 
-Two queries: nested with variables
-
-.. code-block:: typoscript
+Two queries: nested with variables::
 
     # outer query
     10.sql = SELECT p.id, p.name FROM exp_person AS p
@@ -7275,9 +7134,7 @@ Two queries: nested with variables
 
 * For every record of '10', all assigned records of 10.10 will be printed.
 
-Two queries: nested with hidden variables in a table
-
-.. code-block:: typoscript
+Two queries: nested with hidden variables in a table::
 
     10.sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
     10.rend = <br>
@@ -7286,9 +7143,7 @@ Two queries: nested with hidden variables in a table
     10.10.sql = SELECT a.street FROM exp_address AS a WHERE a.pId='{{10.pId}}'
     10.10.rend = <br>
 
-Same as above, but written in the nested notation
-
-.. code-block:: typoscript
+Same as above, but written in the nested notation::
 
   10 {
     sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
@@ -7301,9 +7156,7 @@ Same as above, but written in the nested notation
     }
   }
 
-Best practice *recommendation* for using parameter - see `access-column-values`_
-
-.. code-block:: typoscript
+Best practice *recommendation* for using parameter - see `access-column-values`_::
 
   10 {
     sql = SELECT p.id AS _pId, p.name FROM exp_person AS p
@@ -7324,9 +7177,7 @@ Recent List
 ^^^^^^^^^^^
 
 A nice feature is to show a list with last changed records. The following will show the 10 last modified (Form or
-FormElement) forms:
-
-.. code-block:: typoscript
+FormElement) forms::
 
   10 {
     sql = SELECT CONCAT('p:{{pageAlias:T}}&form=form&r=', f.id, '|t:', f.name,'|o:', GREATEST(MAX(fe.modified), f.modified)) AS _page
@@ -7352,15 +7203,11 @@ Two pages (pass variable)
 Sometimes it's useful to have variables per user (=browser session). Set a variable on page 'A' and retrieve the value
 on page 'B'.
 
-Page 'A' - set the variable:
-
-.. code-block:: typoscript
+Page 'A' - set the variable::
 
     10.sql = SELECT 'hello' AS '_=greeting'
 
-Page 'B' - get the value:
-
-.. code-block:: typoscript
+Page 'B' - get the value::
 
     10.sql = SELECT '{{greeting:UE}}'
 
@@ -7370,9 +7217,7 @@ If page 'A' is called, page 'B' will print 'hello'.
 One page (collect variables)
 ''''''''''''''''''''''''''''
 
-A page will be called with several SIP variables, but not at all at the same time. To still get all variables at any time:
-
-.. code-block:: typoscript
+A page will be called with several SIP variables, but not at all at the same time. To still get all variables at any time::
 
     # Normalize
     10.sql = SELECT '{{order:USE:::sum}}' AS '_=order', '{{step:USE:::5}}' AS _step, '{{direction:USE:::ASC}}' AS _direction
@@ -7392,9 +7237,7 @@ Simulate/switch user: feUser
 
 Just set the STORE_USER variable 'feUser'.
 
-All places with `{{feUser:Y}}` has to be replaced by `{{feUser:UY}}`:
-
-.. code-block:: typoscript
+All places with `{{feUser:Y}}` has to be replaced by `{{feUser:UY}}`::
 
     # Normalize
     10.sql = SELECT '{{feUser:UT}}' AS '_=feUser'
@@ -7410,9 +7253,7 @@ Semester switch (remember last choice)
 A current semester is defined via configuration in STORE_SYSTEM '{{semId:Y}}'. The first column in 10.sql
 `'{{semId:SUY}}' AS '_=semId'` saves
 the semester to STORE_USER via '_=semId'. The priority 'SUY' takes either the latest choose (STORE_SIP) or reuse the
-last used (STORE_USER) or (first time call during browser session) takes the default from config (STORE_SYSTEM):
-
-.. code-block:: typoscript
+last used (STORE_USER) or (first time call during browser session) takes the default from config (STORE_SYSTEM)::
 
     # Semester switch
     10 {
@@ -7710,9 +7551,7 @@ Best Practice: For example all created tokens are saved in a table 'Auth' with a
   form.parameter.restToken={{SELECT a.token FROM Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' }}
 
 To restrict access to a subset of data, just save the limitations inside the Auth record and update the query
-to check it:
-
-.. code-block:: typoscript
+to check it::
 
   form.parameter.restToken={{SELECT a.token FROM Auth AS a WHERE a.token='{{Authorization:C:alnumx}}'}}
   form.parameter.restSqlList={{!SELECT p.id, p.name, p.email FROM Person AS p, Auth AS a WHERE a.token='{{Authorization:C:alnumx}}' AND a.attribute=p.attribute}}
@@ -7771,9 +7610,7 @@ Create / edit `AutoCron` jobs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create a T3 page with a QFQ record (similar to the formeditor). Such page should be access restricted and is only needed
-to edit `AutoCron` jobs:
-
-.. code-block:: typoscript
+to edit `AutoCron` jobs::
 
     dbIndex={{indexQfq:Y}}
     form={{form:S}}
@@ -7932,9 +7769,7 @@ Report
 ------
 
 Any HTML output can be extended by a tag - that's done by the webmaster. For QFQ generated links, an attribute like
-'data-reference' might be injected via token 'A' (attribute).
-
-.. code-block:: typoscript
+'data-reference' might be injected via token 'A' (attribute). ::
 
    SELECT 'p:personedit&form=person&r=1|b|s|A:data-reference="person-edit"|t:Edit person' AS _link
 
@@ -7996,9 +7831,7 @@ the content. For SQL statements, remove the outer token (e.g. only one curly bra
 
   FE.title: Person { SELECT ... WHERE id={{buggyVar:alnumx}} }
 
-Tip on Report: In case the query did not contain any double ticks, just wrap all but 'SELECT' in double ticks:
-
-.. code-block:: typoscript
+Tip on Report: In case the query did not contain any double ticks, just wrap all but 'SELECT' in double ticks::
 
  Buggy query:  10.sql = SELECT id, ... FROM myTable WHERE status={{myVar}} ORDER BY status
  Debug query:  10.sql = SELECT "id, ... FROM myTable WHERE status={{myVar}} ORDER BY status"
@@ -8013,9 +7846,7 @@ Output a text, substitute embedded QFQ variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The content will be copied to '_text'. In `10.tail` than the '{{text:R}}' will be substituted with all known variables.
-Note the '-' in '{{text:RE::-}}', this will prevent that QFQ escapes any character from the content.
-
-.. code-block:: typoscript
+Note the '-' in '{{text:RE::-}}', this will prevent that QFQ escapes any character from the content. ::
 
     10 {
       sql = SELECT no.text AS _text
@@ -8027,9 +7858,7 @@ Note the '-' in '{{text:RE::-}}', this will prevent that QFQ escapes any charact
 TypeAhead list with T3 page alias names - use of the T3 DB
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To define a typeahead list of T3 page alias names:
-
-.. code-block:: typoscript
+To define a typeahead list of T3 page alias names::
 
     FE.type = text
     FE.parameter.typeAheadSql = SELECT p.alias FROM {{dbNameT3:Y}}.pages AS p WHERE p.deleted=0 AND p.alias!='' AND p.alias LIKE ? ORDER BY p.alias LIMIT 20
