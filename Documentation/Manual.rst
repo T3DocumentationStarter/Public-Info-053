@@ -9,7 +9,7 @@
 ..
 .. --------------------------------------------------
 .. Best Practice T3 reST  https://docs.typo3.org/typo3cms/drafts/github/xperseguers/RstPrimer/
-.. Italic *italic*
+.. Italic *italic*are part of key or value
 .. Bold **bold**
 .. Code ``text``
 .. External Links: `Bootstrap <http://getbootstrap.com/>`_
@@ -487,11 +487,11 @@ Extension Manager: QFQ Configuration
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Form-Language                                                                                                                                                          |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formLanguage[ABCD]Id              | -  E.g.: 1                                            | In Typo3 configured pageLanguage id. The number after the 'L' parameter.   |
+| formLanguage[ABCD]Id              | E.g.: 1                                               | In Typo3 configured pageLanguage id. The number after the 'L' parameter.   |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| formLanguage[ABCD]Label           | -  E.G.: english                                      | Label shown in *Form editor*, on the 'basic' tab.                          |
+| formLanguage[ABCD]Label           | E.G.: english                                         | Label shown in *Form editor*, on the 'basic' tab.                          |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| saveButtonText                    | -                                                     | Text on the form save button. Typically none.                              |
+| saveButtonText                    |                                                       | Text on the form save button. Typically none.                              |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | saveButtonTooltip                 | Save                                                  | Tooltip on the form save button.                                           |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -501,7 +501,7 @@ Extension Manager: QFQ Configuration
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | saveButtonGlyphIcon               | glyphicon-ok                                          | Icon for the form save button.                                             |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| closeButtonText                   | -                                                     | Text on the form close button. Typically none.                             |
+| closeButtonText                   |                                                       | Text on the form close button. Typically none.                             |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | closeButtonTooltip                | close                                                 | Tooltip on the form close button.                                          |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -509,7 +509,7 @@ Extension Manager: QFQ Configuration
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | closeButtonGlyphIcon              | glyphicon-remove                                      | Icon for the form close button.                                            |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| deleteButtonText                  | -                                                     | Text on the form delete button. Typically none.                            |
+| deleteButtonText                  |                                                       | Text on the form delete button. Typically none.                            |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | deleteButtonTooltip               | delete                                                | Tooltip on the form delete button.                                         |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -517,7 +517,7 @@ Extension Manager: QFQ Configuration
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | deleteButtonGlyphIcon             | glyphicon-trash                                       | Icon for the form delete button.                                           |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| newButtonText                     | -                                                     | Text on the form new button. Typically none.                               |
+| newButtonText                     |                                                       | Text on the form new button. Typically none.                               |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | newButtonTooltip                  | new                                                   | Tooltip on the form new button.                                            |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -829,7 +829,7 @@ System tables
 
 See `mail-log-page`_ and `form-submit-log-page`_ for some Frontend views for these tables.
 
-* Check Bug #5459 - support of system tables in different DBs not supported.
+* Check Bug #5459 / support of system tables in different DBs not supported.
 
 .. _`multi-database`:
 
@@ -1875,13 +1875,13 @@ To decide which Parameter should be placed on *Form.parameter* and which on *For
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | ldapUseBindCredentials      | ldapUseBindCredentials=1         | Use LDAP_1_* credentials from config-qfq-php_ for ldap_bind() | x    | x           | TA, FSL  |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| typeAheadLdap               | -                                | Enable LDAP as 'Typeahead' data source                        |      | x           | TA       |
+| typeAheadLdap               |                                  | Enable LDAP as 'Typeahead' data source                        |      | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadLdapSearch         | `(|(cn=*?*)(mail=*?*))`          | Regular LDAP search expression, returns upto typeAheadLimit   | x    | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadLdapSearchPrefetch | `(mail=?)`                       | Regular LDAP search expression, typically return one record   | x    | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| typeAheadLdapSearchPerToken | -                                | Split search value in token and OR-combine every search with  | x    | x           | TA       |
+| typeAheadLdapSearchPerToken |                                  | Split search value in token and OR-combine every search with  | x    | x           | TA       |
 |                             |                                  |  the individual tokens                                        |      |             |          |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadLdapValuePrintf    | `'%s / %s', cn, mail`            | Custom format to display attributes, as `value`               | x    | x           | TA       |
@@ -1894,7 +1894,7 @@ To decide which Parameter should be placed on *Form.parameter* and which on *For
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 | typeAheadMinLength          | 2 (default)                      | Minimum number of characters before starting the search       | x    | x           | TA       |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
-| fillStoreLdap               | -                                | Activate `Fill STORE LDAP` with the first retrieved record    |      | x           | FSL      |
+| fillStoreLdap               |                                  | Activate `Fill STORE LDAP` with the first retrieved record    |      | x           | FSL      |
 +-----------------------------+----------------------------------+---------------------------------------------------------------+------+-------------+----------+
 
 * *typeAheadLimit*: there might be a hard limit on the server side (e.g. 100) - which can't be extended.
@@ -2392,7 +2392,7 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | ldapTimeLimit               | int    | Maximum time to wait for an answer of the LDAP Server.                                                   |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| typeAheadLdap               | -      | Enable LDAP as 'Typeahead' data source.                                                                  |
+| typeAheadLdap               |        | Enable LDAP as 'Typeahead' data source.                                                                  |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | typeAheadLdapSearch         | string | Regular LDAP search expresssion. E.g.:  `(|(cn=*?*)(mail=*?*))`                                          |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2400,7 +2400,7 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | typeAheadLdapIdPrintf       | string | Key formatting of LDAP result, per entry. E.g.: `'%s', mail`                                             |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| typeAheadLdapSearchPerToken | -      | Split search value in token and OR-combine every search with the individual tokens.                      |
+| typeAheadLdapSearchPerToken |        | Split search value in token and OR-combine every search with the individual tokens.                      |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | typeAheadLimit              | int    | Maximum number of entries. The limit is applied to the server (LDAP or SQL) and the Client.              |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
@@ -2413,7 +2413,7 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | submitButtonText            | string | Show a save button at the bottom of the form, with <submitButtonText> . See `submitButtonText`_.         |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
-| saveButtonActive            | -      | 0: off, 1: Make the 'save'-button active on *Form* load (instead of waiting for the first user change).  |
+| saveButtonActive            |        | 0: off, 1: Make the 'save'-button active on *Form* load (instead of waiting for the first user change).  |
 |                             |        | The save button is still 'gray' (record not dirty), but the user can click 'save'.                       |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | saveButtonText              | string | Overwrite default from configuration_                                                                    |
@@ -3070,7 +3070,7 @@ Checkboxes can be rendered in mode:
       * ``itemList=red,blue,orange``
       * ``itemList=1:red,2:blue,3:orange``
       * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
-        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange``
+      | E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange``
 
   * *FormElement.sql1* = ``{{!SELECT id, value FROM someTable}}``
   * *FormElement.maxlength* - vertical or horizontal alignment:
@@ -3327,7 +3327,7 @@ Type: radio
 
     * *itemList* = `<attribute>` E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue,3:orange*
     * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
-        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
+    | E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
 
   3. Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -3391,7 +3391,7 @@ Type: select
 
     * *itemList* = `<attribute>` - E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue:3:orange*
     * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
-        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
+    | E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
 
   * Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -5499,7 +5499,7 @@ Column: _link
 |x  |   |Copy to       |y:[some content]                   |y:this will be copied      |Click on it copies the value of 'y:' to the clipboard. Optional a file ('F:...') might be specified as source.                          |
 |   |   |clipboard     |                                   |                           |See `copyToClipboard`_.                                                                                                                 |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |   |Text          |t:<text>                           |t:Firstname Lastname       |-                                                                                                                                       |
+|   |   |Text          |t:<text>                           |t:Firstname Lastname       |                                                                                                                                        |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Render        |r:<mode>                           |r:3                        |See: `render-mode`_, Default: 0                                                                                                         |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
