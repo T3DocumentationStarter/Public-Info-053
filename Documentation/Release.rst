@@ -37,6 +37,37 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 19.3.0
+--------------
+
+Date: 05.03.2019
+
+Notes
+^^^^^
+
+* New FormElement 'datalist' for fe.type='select'.
+* FormElement 'annotate':
+
+  * Now supports 'ReadOnly'.
+  * 'grafic': Undo/Redo
+
+Features
+^^^^^^^^
+
+* #7729 / Select as datalist
+* #7783 / FormElement 'annotate' - ReadOnly mode is now supported for grafic/text.
+* FormElement 'annotate/grafic' History for undo / redo
+* FormEditor: by creating a new FormElement, the feIdContainer is now preselected based on the last choice.
+* Manual.rst: started to use more predefined Sphinx formatting styles.
+
+Bug Fixes
+^^^^^^^^^
+
+* #7978 / mail.log: not written in some cases - fixed
+* #7949 / Table MailLog: missing column 'cc,bcc'
+* Manual.rst: correct parameter 'mode' for special column name '_sendMail'
+
+
 Version 19.2.3
 --------------
 
@@ -62,7 +93,7 @@ Bug Fixes
 * #7925 / Change CWD during split reduced to splitting only.
 * #7925 / Fixed problem in mkDirParent() with absolute paths.
 * #7925 / Make logger independent of CWD.
-* #7925 / Fixed problem with `mktemp --tmpdir`(difference Ubuntu 16 / 18) by using PHP function again.
+* #7925 / Fixed problem with ``mktemp --tmpdir`` (difference Ubuntu 16 / 18) by using PHP function again.
 * #7925 / Fixed some 'undefined index' problems.
 
 Version 19.2.2

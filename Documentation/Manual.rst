@@ -3,7 +3,7 @@
 .. ==
 ..  --
 ..   ^^
-..    ''
+..    ""
 ..     ;;
 ..      ,,
 ..
@@ -17,6 +17,7 @@
 ..
 .. Admonitions (https://docs.typo3.org/typo3cms/drafts/github/xperseguers/RstPrimer/#admonitions)
 ..       .. note::    .. important::     .. tip::      .. warning::
+.. Color:   (grey)       (orange)           (green)      (red)
 ..
 .. Definition:
 .. some text becomes strong (only one line)
@@ -85,15 +86,15 @@ The program is not included in QFQ and has to be manually installed.
   * The current version 0.12.4 might have trouble with https connections. Version 0.12.5-dev (github master branch)
     seems more reliable. Please contact the QFQ authors if you need a compiled Ubuntu version of wkhtmltopdf.
 
-In `configuration`_ specify the::
+In configuration_ specify::
 
-    config.cmdWkhtmltopdf=/opt/wkhtmltox/bin/wkhtmltopdf`.
-    config.baseUrl=http://www.example.com/`.
+    config.cmdWkhtmltopdf:  /opt/wkhtmltox/bin/wkhtmltopdf
+    config.baseUrl: http://www.example.com/
 
 If wkhtml has been compiled with dedicated libraries (not part of LD_LIBRARY_PATH), specify the LD_LIBRARY_PATH together
-with the path-filename: ::
+with the path-filename::
 
-    cmdWkhtmltopdf=LD_LIBRARY_PATH=/opt/wkhtmltox/lib /opt/wkhtmltox/bin/wkhtmltopdf
+    config.cmdWkhtmltopdf: LD_LIBRARY_PATH=/opt/wkhtmltox/lib /opt/wkhtmltox/bin/wkhtmltopdf
 
 .. important::
 
@@ -120,12 +121,12 @@ If there are problems with converting/downloading FE_GROUP protected pages, chec
 
 
 HTML to PDF conversion
-''''''''''''''''''''''
+""""""""""""""""""""""
 
 `wkhtmltopdf` converts a website (local or remote) to a (multi)-page PDF file. It's mainly used in `download`_.
 
 Print
-'''''
+"""""
 
 Different browser prints the same page in different variations. To prevent this, QFQ implements a small PHP wrapper
 `print.php` with uses `wkhtmltopdf` to convert HTML to PDF.
@@ -587,7 +588,7 @@ error message: ::
 .. _`periodId`:
 
 periodId
-''''''''
+""""""""
 
 This is
 
@@ -837,14 +838,14 @@ Multi Database
 ^^^^^^^^^^^^^^
 
 Base: T3 & QFQ
-''''''''''''''
+""""""""""""""
 
 QFQ typically interacts with one database, the QFQ database. The database used by Typo3 is typically a separate one.
 Theoretically it might be the same (never tested), but it's strongly recommended to use a separated QFQ database to have
 no problems on Typo3 updates and to have a clean separation between Typo3 and QFQ.
 
 QFQ: System & Data
-''''''''''''''''''
+""""""""""""""""""
 
 QFQ itself can be separated in 'QFQ system' (see `system-tables`_) and 'QFQ data' databases (even more than one are
 possible). The 'QFQ system' stores the forms, record locking, log tables and so on - `QFQ data` is for the rest.
@@ -852,7 +853,7 @@ possible). The 'QFQ system' stores the forms, record locking, log tables and so 
 A `Multi Database` setup is given, if 'QFQ system' is different from 'QFQ data'.
 
 Data: Data1, Data2, ..., Data n
-'''''''''''''''''''''''''''''''
+"""""""""""""""""""""""""""""""
 
 Every database needs to be configured via `configuration`_ with it's own `index`.
 
@@ -1321,13 +1322,13 @@ SQL variables
 * The number of variables inside an input field or a SQL statement is not limited.
 
 Result: string
-''''''''''''''
+""""""""""""""
 
 A result of a SQL statement will be imploded over all: concat all columns of a row, concat all rows - there is no
 glue string.
 
 Result: row
-'''''''''''
+"""""""""""
 
 A few functions needs more than a returned string, instead separate columns are necessary. To indicate an array
 result, specify those with an '!': ::
@@ -1338,7 +1339,7 @@ This manual will specify the individual QFQ elements, who needs an array instead
 a string where an array is needed and vice versa.
 
 Database index
-''''''''''''''
+""""""""""""""
 
 To access different databases in a `multi-database`_  setup, the database index can be specified after the opening curly
 braces. ::
@@ -1354,7 +1355,7 @@ If no dbIndex is given, `{{indexData:Y}}` is used.
 
 
 Example
-'''''''
+"""""""
 
 ::
 
@@ -1368,7 +1369,7 @@ Example
 .. _`row-column-variables`:
 
 Row column variables
-^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""
 
 Syntax:  *{{<level>.<column>}}*
 
@@ -2285,7 +2286,7 @@ Forward: Save / Close
 ^^^^^^^^^^^^^^^^^^^^^
 
 Forward (=forwardMode)
-''''''''''''''''''''''
+""""""""""""""""""""""
 
 After the user presses *Save*, *Close*, *Delete* or *New*, different actions are possible where the browser redirects to.
 
@@ -2306,7 +2307,7 @@ After the user presses *Save*, *Close*, *Delete* or *New*, different actions are
 Only with `Forward` == `url` | `url-skip-history`, the definition of `Forward URL / Page` becomes active.
 
 Forward URL / Page (=forwardPage)
-'''''''''''''''''''''''''''''''''
+"""""""""""""""""""""""""""""""""
 
 Format: [<url>] or [<mode>|<url>]
 
@@ -2468,7 +2469,7 @@ Parameter
 .. _submitButtonText:
 
 submitButtonText
-''''''''''''''''
+""""""""""""""""
 
 If specified and non empty, display a regular submit button at the bottom of the page with the given text.
 This gives the form a ordinary HTML-form look'n' feel. With this option, the standard buttons on the top right border
@@ -2478,7 +2479,7 @@ should be hided to not confuse the user.
 * Default: Empty
 
 class
-'''''
+"""""
 
 * Optional.
 * Default: `container`
@@ -2490,7 +2491,7 @@ class
   * Expand the form over the whole area: `container-fluid`
 
 classPill
-'''''''''
+"""""""""
 
 * Optional.
 * Default: `qfq-color-grey-1`
@@ -2502,7 +2503,7 @@ classPill
 * `classPill` is only visible on forms with container elements of type 'Pill'.
 
 classBody
-'''''''''
+"""""""""
 
 * Optional.
 * Default: `qfq-color-grey-2`
@@ -2517,7 +2518,7 @@ classBody
   `qfq-color-blue-1` (dark), `qfq-color-blue-2`. (light)
 
 extraDeleteForm
-'''''''''''''''
+"""""""""""""""
 
 Depending on the database definition, it might be necessary to delete the primary record *and* corresponding slave records.
 To not repeat such 'slave record delete definition', an 'extraDeleteForm' can be specified. If the user opens a record
@@ -2533,7 +2534,7 @@ See also: `delete-record`_.
 .. _form-mode-global:
 
 Form mode global
-''''''''''''''''
+""""""""""""""""
 
 The Form global mode `mode` is given by default with `{{formModeGlobal:SE:alnumx}}`.
 
@@ -2678,14 +2679,14 @@ The placeholder `%d` can also be used in the *FormElement.label*
 Example of styling the Add/ Delete Button: :ref:`example_class_template_group`
 
 Column: primary record
-''''''''''''''''''''''
+""""""""""""""""""""""
 
 If the columns `<name>%d` are real columns on the primary table, saving and delete (=empty string) are done automatically.
 E.g. if there are up to five elements `grade1, ..., grade5` and the user inputs only the first three, the remaining will be set
 to an empty string.
 
 Column: non primary record
-''''''''''''''''''''''''''
+""""""""""""""""""""""""""
 
 Additional logic is required to load, update, insert and/or delete slave records.
 
@@ -2975,7 +2976,8 @@ See also at specific *FormElement* definitions.
  * `s/d/n`: string or date or number.
 
 Native *FormElements*
-'''''''''''''''''''''
+"""""""""""""""""""""
+
 * Like 'input', 'checkbox', ...
 
 .. _`input-option-autofocus`:
@@ -3070,7 +3072,7 @@ Checkboxes can be rendered in mode:
       * ``itemList=red,blue,orange``
       * ``itemList=1:red,2:blue,3:orange``
       * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
-      | E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange``
+        E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange``
 
   * *FormElement.sql1* = ``{{!SELECT id, value FROM someTable}}``
   * *FormElement.maxlength* - vertical or horizontal alignment:
@@ -3173,7 +3175,7 @@ Type: text
 .. _`input-typeahead`:
 
 Type Ahead
-''''''''''
+""""""""""
 
 Activating `typeahead` functionality offers an instant lookup of data and displaying them to the user, while the user is
 typing, a drop-down box offers the results. As datasource the regular SQL connection or a LDAP query can be used.
@@ -3264,22 +3266,71 @@ Type: editor
 Type: annotate
 ^^^^^^^^^^^^^^
 
-The `Formelement`.type=`annotate` is a simple grafic editor which, for example, can be used to annotate images. All modifications to
-an image are saved as a JSON fabric.js data string in the current FormElement column.
+Annotate image or text. Typically the image or text has been uploaded during a previous step. The annotation will be
+saved in *FormElement.name* column of the current record. The uploaded file itself will not be modified. The annotations
+can be shown in edit (and might be  modified) or in readonly mode.
 
-An image, specified by `FormElement.parameter`: imageSource={{pathFileName}}, will be displayed in the background. On
-form load, both, the image and an optional already given JSON fabric.js data string, will be displayed. The image is SIP
+Two modes are available:
+
+grafic
+    A simple grafic editor to paint on top of the image (best by a tablet with pen or grafic tablet). The uploaded image
+    is shown in the background. All drawings are saved as a JSON fabric.js data string. Supported file types:
+    **png, svg**. PDF files can be easily divided into per page SVG files during upload - see `split-pdf-upload`_
+
+text
+    Per code line, annotation(s) can be added. Different users can add individual annotations. A user can only edit the
+    own annotations. The annotations are saved as QFQ internal JSON string.
+
+
+.. note::
+
+    Drawing with fabric.js might produce a lot data. Take care the column type/size is big enough (>=64kB).
+
+
+Grafic
+""""""
+
+An image, specified by ``FormElement.parameter.imageSource={{pathFileName}}``, will be displayed in the background. On
+form load, both, the image and an optional already given grafical annotations, will be displayed. The image is SIP
 protected and will be loaded on demand.
 
-The original image file is not modified. The user drawings are stored in the fabric.js data string.
+**Form.parameter**
 
-* *FormElement.parameter*:
++-------------------+-----------------------+----------------------------------------------------------------------------------+
+| Attribute         | Value                 | Description                                                                      |
++===================+=======================+==================================================================================+
+| annotateType      | grafic                | *grafic|text*. Default is *grafic*. Select mode.                                 |
++-------------------+-----------------------+----------------------------------------------------------------------------------+
+| imageSource       | <path filename>       | Background image. E.g. `fileadmin/images/scan.png`                               |
++-------------------+-----------------------+----------------------------------------------------------------------------------+
+| defaultPenColor   | <rgb hex value>       | Pen default color, after loading the fabric element. Default is '0000FF' (blue). |
++-------------------+----------------------------------------------------------------------------------------------------------+
 
-  * *imageSource* ={{pathFileName2}} -  Background image. E.g. `fileadmin/images/scan.jpg`.
-  * *defaultPenColor* = <rgb hex value> -  Pen default color, after loading the fabric element. Default is '0000FF' (blue).
+.. note::
 
-By using the the `FormElement` `annotate`, the JS code `fabric.min.js` and `qfq.fabric.min.js` has to be included.
-See setup-css-js_.
+    By using the the `FormElement` `annotate`, the JS code `fabric.min.js` and `qfq.fabric.min.js` has to be included. See setup-css-js_.
+
+Code
+""""
+
+**Form.parameter**
+
++--------------------+-----------------------+----------------------------------------------------------------------------------+
+| Attribute          | Value                 | Description                                                                      |
++====================+=======================+==================================================================================+
+| annotateType       | text                  | *grafic|text*. Default is *grafic*. Select mode.                                 |
++--------------------+-----------------------+----------------------------------------------------------------------------------+
+| textSource         | <path filename>       | Text file to annotate.                                                           |
++--------------------+-----------------------+----------------------------------------------------------------------------------+
+| annotateUserName   | <john doe>            | Will be shown at annotation line.                                                |
++--------------------+-----------------------+----------------------------------------------------------------------------------+
+| annotateUserUid    | <123>                 | Will be shown at annotation line.                                                |
++--------------------+-----------------------+----------------------------------------------------------------------------------+
+| annotateUserAvatar | <https://gravatar...> | Will be shown at annotation line.                                                |
++--------------------+-----------------------+----------------------------------------------------------------------------------+
+| highlight          | auto                  | off,auto,javascript,qfq,python,matlab                                            |
++--------------------+-----------------------+----------------------------------------------------------------------------------+
+
 
 Type: imageCut
 ^^^^^^^^^^^^^^
@@ -3326,8 +3377,7 @@ Type: radio
   2. *FormElement.parameter*:
 
     * *itemList* = `<attribute>` E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue,3:orange*
-    * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
-    | E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
+    * If ':' or ',' are part of key or value, it needs to escaped by '\\'. E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
 
   3. Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -3390,8 +3440,7 @@ Type: select
   * *FormElement.parameter*:
 
     * *itemList* = `<attribute>` - E.g.: *itemList=red,blue,orange* or *itemList=1:red,2:blue:3:orange*
-    * If ':' or ',' are part of key or value, it needs to escaped by '\\'.
-    | E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
+    * If ':' or ',' are part of key or value, it needs to escaped by '\\'. E.g.: `itemList=1:red\\: (with colon),2:blue\\, (with comma),3:orange`
 
   * Definition of the *enum* or *set* field (only labels, ids are not possible).
 
@@ -3406,6 +3455,8 @@ Type: select
   * *emptyItemAtEnd*: Existence of this item inserts an empty entry at the end of the selectlist.
   * *emptyHide*: Existence of this item hides the empty entry. This is useful for e.g. Enums, which have an empty
     entry and the empty value should not be an option to be selected.
+  * *datalist*: Similar to 'typeAhead'. Enables the user to select a predefined option (sql1, itemList) or supply any
+     free text. Attention: Safari (and some other) browsers do not support this fully - https://caniuse.com/#search=datalist.
 
 .. _`subrecord-option`:
 
@@ -3701,7 +3752,7 @@ The maximum size is defined by the minimum of `upload_max_filesize`, `post_max_s
 In case of broken uploads, please also check `max_input_time` in php.ini.
 
 Deleting a record and the referenced file
-'''''''''''''''''''''''''''''''''''''''''
+"""""""""""""""""""""""""""""""""""""""""
 
 If the user deletes a record (e.g. pressing the delete button on a form) which contains reference(s) to files, such files
 are deleted too. Slave records, which might be also deleted through a 'delete'-form, are *not* checked for file references
@@ -3716,7 +3767,7 @@ have multiple references to a single file. Therefore this check is just a fallba
 .. _Upload simple mode:
 
 Upload simple mode
-''''''''''''''''''
+""""""""""""""""""
 
 Requires: *'upload'-FormElement.name = 'column name'* of an column in the primary table.
 
@@ -3734,7 +3785,7 @@ Multiple 'upload'-FormElements per form are possible. Each of it needs an own ta
 .. _Upload advanced mode:
 
 Upload advanced mode
-''''''''''''''''''''
+""""""""""""""""""""
 
 Requires: *'upload'-FormElement.name* is unknown as a column in the primary table.
 
@@ -3779,7 +3830,7 @@ A typical name for such an 'upload'-FormElement, to show that the name does not 
 .. _split-pdf-upload:
 
 Split PDF Upload
-''''''''''''''''
+""""""""""""""""
 
 Additional to the upload, it's possible to split the uploaded file (only PDF files) into several SVG or JPEG files, one
 file per PDF page. The split is done via http://www.cityinthesky.co.uk/opensource/pdf2svg/ or Image Magick `convert`.
@@ -3849,7 +3900,7 @@ Types:
 .. _sqlValidate:
 
 Parameter: sqlValidate
-''''''''''''''''''''''
+""""""""""""""""""""""
 
   Perform checks by fireing a SQL query and expecting a predefined number of selected records.
 
@@ -3875,7 +3926,7 @@ Parameter: sqlValidate
 .. _slave-id:
 
 Parameter: slaveId
-''''''''''''''''''
+""""""""""""""""""
 
 *FormElement.parameter*:
 
@@ -3896,7 +3947,7 @@ Note:
   * After an INSERT the `last_insert_id()` becomes the *slaveId*).
 
 Parameter: sqlBefore / sqlInsert / sqlUpdate / sqlDelete / sqlAfter
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
   * Save values of a form to different record(s), optionally on different table(s).
   * Typically useful on 'afterSave' - be careful when using it earlier, e.g. beforeLoad.
@@ -3925,7 +3976,7 @@ Parameter: sqlBefore / sqlInsert / sqlUpdate / sqlDelete / sqlAfter
 
 
 Example
-'''''''
+"""""""
 
 Situation 1: master.xId=slave.id (1:1)
 
@@ -4032,7 +4083,7 @@ from the www.example.com and ?export (with the attachment filename 'personal.pdf
   sendMailAttachmemt = F:fileadmin/file1.pdf|d:readme.pdf|C|u:http://www.example.com|p:?id=export&r=123&_sip=1|d:personal.pdf
 
 Type: paste
-'''''''''''
+"""""""""""
 
 See also `copy-form`_.
 
@@ -4222,7 +4273,7 @@ Examples
 * Master FormElement 'music' is a radio/enum of 'classic', 'jazz', 'pop'.
 
 Content of a select list
-''''''''''''''''''''''''
+""""""""""""""""""""""""
 
 * Slave FormElement 'interpret' is 'select'-list, depending of 'music'
 
@@ -4231,7 +4282,7 @@ Content of a select list
    sql={{!SELECT name FROM interpret WHERE music={{music:FE:alnumx}} ORDER BY name}}
 
 Show / Hide a *FormElement*
-'''''''''''''''''''''''''''
+"""""""""""""""""""""""""""
 
 * Slave 'interpret' is displayed only for 'pop'. Field 'modeSql':
 
@@ -4451,7 +4502,7 @@ Custom default value only for 'new records'
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Method 1
-''''''''
+""""""""
 
 On `Form.parameter` define a `fillStoreVar` query with a column name equal to a form field. That's all.
 
@@ -4464,7 +4515,8 @@ What we use here is the default STORE prio FSRVD. If the form loads with r=0, 'F
 If r>0, than 'F' and 'S' are empty and 'R' is filled.
 
 Method 2
-''''''''
+""""""""
+
 In the specific `FormElement` set `value={{columnName:RSE}}`. The link to the form should be rendered with
 '"...&columnName=<data>&..." AS _page'. The trick is that the STORE_RECORD is empty for new records, and therefore the
 corresponding value from STORE_SIP will be returned. Existing records will use the already saved value.
@@ -4530,7 +4582,7 @@ Requirement: new records should automatically get the highest number plus 10 for
 should not be altered.
 
 Version 1
-'''''''''
+"""""""""
 
 Compute the next 'ord' in advance in the subrecord field of the primary form. Submit that value to the new record
 via SIP parameter to the secondary form.
@@ -4551,7 +4603,7 @@ unchanged.
    `{{ord:RS0}}`.
 
 Version 2
-'''''''''
+"""""""""
 
 Compute the next 'ord' as default value direct inside the secondary form. No change is needed for the primary form.
 
@@ -4679,8 +4731,7 @@ Chart
   to circumvent this:
 
   * Don't nest the HTML & JavaScript code - bad workaround, this is not human readable.
-  * Select different nesting token, e.g. '<' (check the first line on the following example).
-::
+  * Select different nesting token, e.g. '<' (check the first line on the following example). ::
 
      # <
 
@@ -5196,7 +5247,7 @@ Example::
     20.tail = </h3>
 
 Join mode: SQL
-''''''''''''''
+""""""""""""""
 
 This is the default. All lines are joined with a *space* in between. E.g.::
 
@@ -5208,7 +5259,7 @@ Results to: ``10.sql = SELECT 'hello world' FROM mastertable``
 Notice the space between "...world'" and "FROM ...".
 
 Join mode: strip whitespace
-'''''''''''''''''''''''''''
+"""""""""""""""""""""""""""
 
 Ending a line with a '\\' strips all leading and trailing whitespaces of that line joins the line directly (no extra
 space in between). E.g.::
@@ -5783,7 +5834,7 @@ file is multiple times referenced, than the file is not deleted (it would break 
 references are not found, if they use different colummnnames or tablenames.
 
 Mode: table
-'''''''''''
+"""""""""""
 
 * `table=<table name>`
 * `r=<record id>`
@@ -5791,7 +5842,7 @@ Mode: table
 Deletes the record with id '<record id>' from table '<table name>'.
 
 Mode: form
-''''''''''
+""""""""""
 
 * `form=<form name>`
 * `r=<record id>`
@@ -5800,7 +5851,8 @@ Deletes the record with id '<record id>' from the table specified in form '<form
 Additional action *FormElement* of type *beforeDelete* or *afterDelete* will be fired too.
 
 Examples
-''''''''
+""""""""
+
 ::
 
     10.sql = SELECT 'U:table=Person&r=123|q:Do you want delete John Doe?' AS _paged
@@ -5989,7 +6041,7 @@ Send emails. Every mail will be logged in the table `mailLog`. Attachments are s
 +--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 | E            | encode|decode|none                     |**Body**: will be htmlspecialchar() encoded, decoded (default) or none (untouched).               |            |
 +--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
-| M            | html                                   |**Body**: will be send as a HTML mail.                                                            |            |
+| mode         | html                                   |**Body**: will be send as a HTML mail.                                                            |            |
 +--------------+----------------------------------------+--------------------------------------------------------------------------------------------------+------------+
 
 * **e|E**: By default, QFQ stores values 'htmlspecialchars()' encoded. If such values have to send by email, the html entities are
@@ -6024,7 +6076,7 @@ The subsequent contents will be interpreted as HTML and is rendered correctly by
 .. _attachment:
 
 Attachment
-''''''''''
+""""""""""
 
 The following options are provided to attach files to an email:
 
@@ -6253,13 +6305,13 @@ Example::
 
 
 Dimension
-'''''''''
+"""""""""
 
 ImageMagick support various settings to force the thumbnail size.
 See https://www.imagemagick.org/script/command-line-processing.php#geometry or http://www.graphicsmagick.org/GraphicsMagick.html#details-geometry.
 
 Cleaning
-''''''''
+""""""""
 
 By default, the thumbnail directories are never cleaned. It's a good idea to install a cronjob which purges all files
 older than 1 year: ::
@@ -6267,7 +6319,7 @@ older than 1 year: ::
   find /path/to/files -type f -mtime +365 -delete
 
 Render
-''''''
+""""""
 
 `Public` thumbnails are rendered at the time when the T3 QFQ record is executed. `Secure` thumbnails are rendered when the
 'download.php?s=...' is called. The difference is, that the 'public' thumbnails blocks the page load until all thumbnails
@@ -6278,7 +6330,7 @@ A way to *pre render* thumbnails, is a periodically called (hidden) T3 page, whi
 triggers the rendering via column `_thumbnail`.
 
 Thumbnail: secure
-'''''''''''''''''
+"""""""""""""""""
 
 Mode 'secure' is activated via enabling SIP (`s:1`, default). The thumbnail is saved under the path `thumbnailDirSecure`
 as configured in configuration_.
@@ -6290,7 +6342,7 @@ QFQ returns a HTML 'img'-tag: ::
   <img src="api/download.php?s=badcaffee1234">
 
 Thumbnail: public
-'''''''''''''''''
+"""""""""""""""""
 
 Mode 'public' has to be explicit activated by specifying `s:0`. The thumbnail is saved under the path `thumbnailDirPublic`
 as configured in configuration_.
@@ -6625,7 +6677,7 @@ If the export file has to be customized (colors, pictures, headlines, ...), the 
 It's much easier to do all customizations via Excel and creating a template than by coding in QFQ / Excel export notation.
 
 Setup
-'''''
+"""""
 
 * Create a special column name `_excel` (or `_link`) in QFQ/Report. As a source, define a T3 PageContent, which has to
   deliver the dynamic content (also `excel-export-sample`_). ::
@@ -6739,7 +6791,7 @@ Functionality divides into:
   access control via SIP. The form is automatically called via AJAX.
 
 Part 1: Display list
-''''''''''''''''''''
+""""""""""""""""""""
 
 Display the list of elements via a regular QFQ content record. All 'drag and drop' elements together have to be nested by a HTML
 element. Such HTML element:
@@ -6830,7 +6882,7 @@ with an updated `n.ord` column::
     }
 
 Part 2: Order records
-'''''''''''''''''''''
+"""""""""""""""""""""
 
 A dedicated `Form`, without any `FormElements`, is used to define the reorder logic (database update definition).
 
@@ -7198,7 +7250,7 @@ STORE_USER examples
 Keep variables per user session.
 
 Two pages (pass variable)
-'''''''''''''''''''''''''
+"""""""""""""""""""""""""
 
 Sometimes it's useful to have variables per user (=browser session). Set a variable on page 'A' and retrieve the value
 on page 'B'.
@@ -7215,7 +7267,7 @@ If page 'A' has never been opened with the current browser session, nothing is p
 If page 'A' is called, page 'B' will print 'hello'.
 
 One page (collect variables)
-''''''''''''''''''''''''''''
+""""""""""""""""""""""""""""
 
 A page will be called with several SIP variables, but not at all at the same time. To still get all variables at any time::
 
@@ -7233,7 +7285,7 @@ A page will be called with several SIP variables, but not at all at the same tim
     30.sql = SELECT * FROM items ORDER BY {{order:U}} {{direction:U}} LIMIT {{step:U}}
 
 Simulate/switch user: feUser
-''''''''''''''''''''''''''''
+""""""""""""""""""""""""""""
 
 Just set the STORE_USER variable 'feUser'.
 
@@ -7248,7 +7300,7 @@ All places with `{{feUser:Y}}` has to be replaced by `{{feUser:UY}}`::
 
 
 Semester switch (remember last choice)
-''''''''''''''''''''''''''''''''''''''
+""""""""""""""""""""""""""""""""""""""
 
 A current semester is defined via configuration in STORE_SYSTEM '{{semId:Y}}'. The first column in 10.sql
 `'{{semId:SUY}}' AS '_=semId'` saves
@@ -7369,7 +7421,7 @@ the second one and so on.
 
 GET Variables provided via URL are available via STORE_CLIENT as usual.
 
-Form:
+**Form**
 
 +-------------------+------------------------------------------------------------------------------+
 | Attribute         | Description                                                                  |
@@ -7382,7 +7434,7 @@ Form:
 +-------------------+------------------------------------------------------------------------------+
 
 
-Form.parameter:
+**Form.parameter**
 
 +-------------------+----------------------------------------------------------------------------------+
 | Attribute         | Description                                                                      |
@@ -7412,7 +7464,7 @@ Form.parameter:
 POST - Insert
 -------------
 
-Form:
+**Form**
 
 +-------------------+------------------------------------------------------------------------------+
 | Attribute         | Description                                                                  |
@@ -7426,7 +7478,7 @@ Form:
 | id                | Missing or '0'.                                                              |
 +-------------------+------------------------------------------------------------------------------+
 
-Form.parameter:
+**Form.parameter**
 
 +-------------------+----------------------------------------------------------------------------------+
 | Attribute         | Description                                                                      |
@@ -7445,7 +7497,7 @@ FormElement:
 PUT - Update
 ------------
 
-Form:
+**Form**
 
 +-------------------+------------------------------------------------------------------------------+
 | Attribute         | Description                                                                  |
@@ -7459,7 +7511,7 @@ Form:
 | id                | >0                                                                           |
 +-------------------+------------------------------------------------------------------------------+
 
-Form.parameter:
+**Form.parameter**
 
 +-------------------+----------------------------------------------------------------------------------+
 | Attribute         | Description                                                                      |
@@ -7477,7 +7529,7 @@ FormElement:
 DELETE - Delete
 ---------------
 
-Form:
+**Form**
 
 +-------------------+------------------------------------------------------------------------------+
 | Attribute         | Description                                                                  |
@@ -7491,7 +7543,7 @@ Form:
 | id                | >0                                                                           |
 +-------------------+------------------------------------------------------------------------------+
 
-Form.parameter:
+**Form.parameter**
 
 +-------------------+----------------------------------------------------------------------------------+
 | Attribute         | Description                                                                      |
@@ -7665,7 +7717,7 @@ Due to checking `inProgress`, jobs will never run in parallel, even if a job nee
 cron).
 
 Job: repeating
-''''''''''''''
+""""""""""""""
 
 * frequency: '1 MINUTE', '2 DAY', '3 MONTH', ....
 
@@ -7674,7 +7726,7 @@ increased by `frequency` again, until it points to the future.
 
 
 Job: asynchronous
-'''''''''''''''''
+"""""""""""""""""
 
 * frequency: <empty>
 
@@ -7691,7 +7743,7 @@ system cron run.
 
 
 Type: Mail
-''''''''''
+""""""""""
 
 At the moment there is a special sendmail notation - this will change in the future.
 
@@ -7704,7 +7756,7 @@ the mail text.
 
 
 Type: Website
-'''''''''''''
+"""""""""""""
 
 The page specified in `URL` will be opened.
 
@@ -7904,7 +7956,7 @@ Especially if you got a blank page (no rendering at all), this is typically an u
 and report the bug (https://qfq.io > Contact).
 
 Call to undefined function qfq\\mb_internal_encoding()
-''''''''''''''''''''''''''''''''''''''''''''''''''''''
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Check that all required php modules are installed. See `preparation`_.
 
