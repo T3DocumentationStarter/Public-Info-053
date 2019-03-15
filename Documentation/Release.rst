@@ -37,6 +37,18 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 19.3.1
+--------------
+
+Date: 15.03.2019
+
+Bug Fixes
+^^^^^^^^^
+
+ * 8058 / Form > fillStoreVar: broken for TemplateGroup - Form.fillStoreVar not available during fillStoreForm().
+ * 8048 / A retype FE should not be checked for 'required' during save.
+
+
 Version 19.3.0
 --------------
 

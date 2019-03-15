@@ -1297,11 +1297,12 @@ Default
 Type message violate
 --------------------
 
-If a value violates the sanitize class, instead of content on of the following texts will be set.
+If a value violates the sanitize class, the following actions are possible:
+
  * 'c' - The violated class will be set as content, surrounded by '!!'. E.g. '!!digit!!'. This is the default.
  * 'e' - Instead of the value an empty string will be set as content.
  * '0' - Instead of the value the string '0' will be set as content.
- * 'custom text ...' - Instead of the value the custom text will be set as content. If the text contains a ':', that one
+ * 'custom text ...' - Instead of the value, the custom text will be set as content. If the text contains a ':', that one
    needs to be escaped by '\'. Check `variable-escape`_ qualifier 'C' to let QFQ do the colon escaping.
 
 .. _`sql-variables`:
@@ -7564,7 +7565,7 @@ DELETE - Delete
 Authorization
 -------------
 
-A QFQ form is only acessible via REST API, if ``Form.permitRest`` enables on of the HTTP Method: **get, post, put, delete**
+A QFQ form is only acessible via REST API, if ``Form.permitRest`` enables one of the HTTP Methods: **get, post, put, delete**
 
 ``Permit New`` or ``Permit Edit`` don't apply to QFQ forms called via REST.
 
