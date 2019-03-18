@@ -37,6 +37,54 @@ Bug Fixes
 ^^^^^^^^^
 
 
+Version 19.3.2
+--------------
+
+Date: 18.03.2019
+
+Notes
+^^^^^
+
+* New Escape/Action Class:
+
+  * 'X': Throw an exception is a variable is not found. Custom message can be defined.
+  * 'S': Stop replacing nested variables.
+
+* Form forward:
+
+  * 'url-sip': Call a target page with SIP encoded parameter
+  * 'url-sip-skip-history': Call a target page with SIP encoded parameter, do not add current page to browser history.
+
+* Report: new token 'fskipwrap' - comma separated list of column indexes. Suche columns won't be rendered with 'fbeg, fend'.
+
+* Upload max file size:
+
+  * Default changed:
+
+    * old: 10MB
+    * new: System limit
+
+  * Definition via a) system configuration, b) qfq setup, c) per Form, d) per FormElement
+
+Features
+^^^^^^^^
+
+* #8043 / New Escape/Action Class "Exception" if variable is not found.
+* #8012 / New Escape/Action Class  "Stop replace" of nested variables.
+* #8067 / url-sip / url-sip-skip-history - Form forwarding can now be used with SIP encoded parameter.
+* #8072 / New token for Report: fskipwrap - wrapping of fields can be disabled per column.
+* #8041 / Upload: maxFileSize based on system maximum, qfq config, form config, formElement config
+* Manual.rst / Add more detailed description for '... AS _exec'. Add notes for 'fileSplit'.
+
+Bug Fixes
+^^^^^^^^^
+* #8035 / Missing sql.log: throws an error - fixed.
+* #8077 / PDF/fileSplit: uploaded PDF file with missing extension '.pdf' have not been recognized as PDF files - fixed.
+* #8076 / splitPdf: using 'fileSplit=jpeg' and uploading a PDF with only one page, results in filename 'split.jpg'
+  (missing index '-0'). New: split.jpg is renamed internally to split-0.jpg to provide a unified naming scheme.
+* #8075 / Catch exception on filesize() - fixed: now return '-' for non existing files.
+
+
 Version 19.3.1
 --------------
 

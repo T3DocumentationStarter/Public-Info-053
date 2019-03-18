@@ -351,10 +351,13 @@ Extension Manager: QFQ Configuration
 +===================================+=======================================================+============================================================================+
 | Config                                                                                                                                                                 |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| documentation                     | http://docs.typo3.org...                              | Link to the online documentation of QFQ. Every QFQ installation also       |
-|                                   |                                                       | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
-+-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | flagProduction                    | yes                                                   | yes|no: used to differentiate production and development site.             |
++-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| maxFileSize                       | 10M                                                   | If empty, take minimum of 'post_max_size' and 'upload_max_filesize'.       |
++-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| baseUrl                           | http://example.com                                    | URL where wkhtmltopdf will fetch the HTML (no parameter, those comes later)|
++-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
+| dateFormat                        | yyyy-mm-dd                                            | Possible options: yyyy-mm-dd, dd.mm.yyyy.                                  |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | thumbnailDirSecure                | fileadmin/protected/qfqThumbnail                      | Important: secure directory 'protected' (recursive) against direct access. |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -366,11 +369,10 @@ Extension Manager: QFQ Configuration
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | cmdWkhtmltopdf                    | /usr/bin/wkhtmltopdf                                  | PathFilename of wkhtmltopdf. Optional variables like LD_LIBRARY_PATH=...   |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| baseUrl                           | http://example.com                                    | URL where wkhtmltopdf will fetch the HTML (no parameter, those comes later)|
-+-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | sendEMailOptions                  | -o tls=yes                                            | General options. Check: http://caspian.dotconf.net/menu/Software/SendEmail |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| dateFormat                        | yyyy-mm-dd                                            | Possible options: yyyy-mm-dd, dd.mm.yyyy.                                  |
+| documentation                     | http://docs.typo3.org...                              | Link to the online documentation of QFQ. Every QFQ installation also       |
+|                                   |                                                       | contains a local copy: typo3conf/ext/qfq/Documentation/html/Manual.html    |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Dynamic                                                                                                                                                                |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -755,6 +757,10 @@ QFQ Keywords (Bodytext)
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.fend      | End token for every field (=column)                                             |
  +-------------------+---------------------------------------------------------------------------------+
+ | <level>.fsep      | Separator token between fields (=columns)                                       |
+ +-------------------+---------------------------------------------------------------------------------+
+ | <level>.fskipwrap | Comma separated list of column id's. Skip wrapping of indexed columns.          |
+ +-------------------+---------------------------------------------------------------------------------+
  | <level>.shead     | Static start token for whole <level>, independent if records are selected       |
  |                   | Shown before `head`.                                                            |
  +-------------------+---------------------------------------------------------------------------------+
@@ -774,8 +780,6 @@ QFQ Keywords (Bodytext)
  | <level>.renr      | End token for row. Will be rendered **after** subsequent levels are processed   |
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.rsep      | Seperator token between rows                                                    |
- +-------------------+---------------------------------------------------------------------------------+
- | <level>.fsep      | Seperator token between fields (=columns)                                       |
  +-------------------+---------------------------------------------------------------------------------+
  | <level>.sql       | SQL Query                                                                       |
  +-------------------+---------------------------------------------------------------------------------+
@@ -1242,8 +1246,54 @@ Rules for CheckType Auto (by priority):
 
 .. _`variable-escape`:
 
+Escape/Action class
+-------------------
+
+The following `escape` & `action` types are available:
+
+
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| Token | Description                                                                                                                      |
++=======+==================================================================================================================================+
+| m     | `real_escape_string() <http://php.net/manual/en/mysqli.real-escape-string.php>`_ (m = mysql)                                     |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| l     | LDAP search filter values: `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_FILTER).            |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| L     | LDAP DN values. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).                           |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| s     | Single ticks ' will be escaped against \\'.                                                                                      |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| d     | Double ticks " will be escaped against \\".                                                                                      |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| C     | Colon ':' will be escaped against \\:.                                                                                           |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| c     | Config - the escape type configured in `configuration`_.                                                                         |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| p     | Password hashing: depends on the hashing type in the Typo3 installation, includes salting if configured.                         |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| ''    | Nothing defined - the escape/action class type configured in `configuration`_.                                                   |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| -     | No escaping.                                                                                                                     |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| S     | Stop replace. If the replaced value contains nested variables, they won't be replaced.                                           |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+| X     | Throw exception if variable is not found in the given store(s). Outputs `variable-type-message-violate`_                         |
++-------+----------------------------------------------------------------------------------------------------------------------------------+
+
+
+* The ``escape/action`` class is defined by the fourth parameter of the variable. E.g.: ``{{name:FE:alnumx:m}}`` (m = mysql).
+* It's possible to combine multiple ``escape/action`` classes, they will be processed in the order given. E.g. ``{{name:FE:alnumx:Ls}}`` (L, s).
+* Escaping is typically necessary for all user supplied content, especially if they are processed via SQL or LDAP queries.
+* Be careful when escaping nested variables. Best is to escape **only** the most outer variable.
+* In configuration_ a global ``escapeTypeDefault`` can be defined. The configured ``escape/action`` class applies to all substituted
+  variables, who *do not* contain a *specific* ``escape/action`` class.
+* Additionally a ``defaultEscapeType`` can be defined per ``Form`` (separate field in the *Form editor*). This overwrites the
+  global definition of ``configuration``. By default, every ``Form.defaultEscapeType`` = 'c' (=config), which means the setting
+  in `configuration`_.
+* To suppress an escape type, define the ``escape type`` = '-' on the specific variable. E.g.: ``{{name:FE:alnumx:-}}``.
+
 Escape
-------
+^^^^^^
 
 To 'escape' a character typically means: a character, which have a special meaning/function, should not treated as a special
 character.
@@ -1254,33 +1304,18 @@ QFQ offers different ways of escaping. Which of them to use, depends on the situ
 
 Especially variables used in SQL Statements might cause trouble when using: NUL (ASCII 0), \\n, \\r, \\, ', ", or Control-Z.
 
-Additional there is the escape class 'p' (password hash) which is not 'escape' but hashing. It transforms the value of
-the variable into a hash. The hash function is the one used by Typo3 to encrypt and salt a password. This is useful to
-manipulate FE user passwords via QFQ. See `setFeUserPassword`_
+Action
+^^^^^^
 
-The following `escape` and `hashing` types are available:
+* *password* - 'p': transforms the value of the variable into a Typo3 salted password hash. The hash function is the one
+  used by Typo3 to encrypt and salt a password. This is useful to manipulate FE user passwords via QFQ. See `setFeUserPassword`_
 
-  * 'm' - `real_escape_string() <http://php.net/manual/en/mysqli.real-escape-string.php>`_ (m = mysql)
-  * 'l' - LDAP search filter values: `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_FILTER).
-  * 'L' - LDAP DN values. `ldap-escape() <http://php.net/manual/en/function.ldap-escape.php>`_ (LDAP_ESCAPE_DN).
-  * 's' - Single ticks ' will be escaped against \\'.
-  * 'd' - double ticks " will be escaped against \\".
-  * 'C' - colon ':' will be escaped against \\:.
-  * 'c' - config - the escape type configured in `configuration`_.
-  * 'p' - password hashing: depends on the hashing type in the Typo3 installation, includes salting if configured.
-  * ''  - the escape type configured in `configuration`_.
-  * '-' - no escaping.
+* *stop replace*  - 'S': typically QFQ will replace nested variables as long as there are variables to replace. This options
+   stops this
 
-* The `escape` type is defined by the fourth parameter of the variable. E.g.: `{{name:FE:alnumx:m}}` (m = mysql).
-* It's possible to combine different `escape` types, they will be processed in the order given. E.g. `{{name:FE:alnumx:Ls}}` (L, s).
-* Escaping is typically necessary for all user supplied content, especially if they are processed via SQL or LDAP queries.
-* Be careful when escaping nested variables. Best is to escape **only** the most outer variable.
-* In configuration_ a global `escapeTypeDefault` can be defined. The configured escape type applies to all substituted
-  variables, who *do not* contain a *specific* escape type.
-* Additionally a `defaultEscapeType` can be defined per `Form` (separate field in the *Form editor*). This overwrites the
-  global definition of `configuration`. By default, every `Form.defaultEscapeType` = 'c' (=config), which means the setting
-  in `configuration`_.
-* To suppress an escape type, define the `escape type` = '-' on the specific variable. E.g.: `{{name:FE:alnumx:-}}`.
+* *exception* - 'X': If a variable is not found in any given store, it's replace by a default value or an error message.
+  In special situation it might be useful to do a full stop on all current actions (no further procession). A custom
+  message can be defined via: `variable-type-message-violate`_.
 
 .. _`variable-default`:
 
@@ -2174,7 +2209,7 @@ Definition
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Show button              | 'new, delete, close, save' (Default: 'new,delete,close,save'): Shown named buttons in the upper right corner of the form.  See `form-showButton`_  |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
-|Forward Mode             | 'auto | close | no | url | url-skip-history' (Default: auto): See `form-forward`_.                                                                 |
+|Forward Mode             | 'auto | close | no | url | url-skip-history | url-sip | url-sip-skip-history' (Default: auto): See `form-forward`_.                                |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 |Forward (Mode) Page      | a) URL / Typo3 page id/alias or b) Forward Mode (via '{{...}}') or combination of a) & b). See `form-forward`_.                                    |
 +-------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -2304,6 +2339,9 @@ After the user presses *Save*, *Close*, *Delete* or *New*, different actions are
   there are modified data.
 * `url` - the browser redirects to the URL or T3 page named in `Forward URL / Page`. Independent if the user presses `save` or `close`.
 * `url-skip-history` - same as `url`, but the current location won't saved in the browser history.
+* `url-sip` - like `url`, but any given parameter will be SIP encoded. Only useful if `url` points to current web instance.
+* `url-sip-skip-history` - like `url-sip`, but skips the Browser history.
+
 
 Only with `Forward` == `url` | `url-skip-history`, the definition of `Forward URL / Page` becomes active.
 
@@ -2460,6 +2498,9 @@ Parameter
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
 | sessionTimeoutSeconds       | int    | Overwrite default from configuration_ . See sessionTimeoutSeconds_.                                      |
 +-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+| maxFileSize                 | int    | Overwrite default from configuration_ .                                                                  |
++-----------------------------+--------+----------------------------------------------------------------------------------------------------------+
+
 
 * Example:
 
@@ -3647,7 +3688,8 @@ See also `downloadButton`_ to offer a download of an uploaded file.
     * If for a specific filetype is no mime type available, the definition of file extension(s) is possible. This is **less
       secure**, cause there is no *content* check on the server after the upload.
 
-  * *maxFileSize* = `<size>` - max filesize in bytes (no unit), kilobytes (k/K) or megabytes (m/M) for an uploaded file. Default: 10M.
+  * *maxFileSize* = `<size>` - max filesize in bytes (no unit), kilobytes (k/K) or megabytes (m/M) for an uploaded file.
+    If empty or not given, take value from Form, System or System default.
 
   * *fileDestination* = `<pathFileName>` - Destination where to copy the file. A good practice is to specify a relative `fileDestination` -
     such an installation (filesystem and database) are moveable.
@@ -3834,7 +3876,12 @@ Split PDF Upload
 """"""""""""""""
 
 Additional to the upload, it's possible to split the uploaded file (only PDF files) into several SVG or JPEG files, one
-file per PDF page. The split is done via http://www.cityinthesky.co.uk/opensource/pdf2svg/ or Image Magick `convert`.
+file per PDF page. The split is done via a) http://www.cityinthesky.co.uk/opensource/pdf2svg/ or b) Image Magick `convert`.
+
+Currently, QFQ can only split PDF files.
+
+If the source file is not of type PDF, activating ``fileSplit`` has no impact: no split and NO complain about invalid
+file type.
 
  * *FormElement.parameter*:
 
@@ -5441,15 +5488,20 @@ Report Example 1::
 Wrapping rows and columns: Level
 --------------------------------
 
-Order and nesting of queries, will be defined with a typoscript-like syntax: level.sublevel1.subsublevel2. ...
-Each 'level' directive needs a final key, e.g: 20.30.10. **sql**. A key **sql** is necessary in order to process a level.
+Order and nesting of queries, will be defined with a TypoScript-alike syntax::
+
+    level.sublevel1.subsublevel2. ...
+
+* Each 'level' directive needs a final key, e.g: 20.30.10. **sql**.
+* A key **sql** is necessary in order to process a level.
+
 See all `QFQ Keywords (Bodytext)`_.
 
 Processing of columns in the SQL result
 ---------------------------------------
 
-* The content of all columns of all rows will be printed sequentially, without separator.
-* Rows with `special-column-names`_  will be processed in a special way.
+* The content of all columns of all rows will be printed sequentially, without separator (except one is defined).
+* Rows with `special-column-names`_  will be rendered first and the output is taken as content.
 
 .. _special-column-names:
 
@@ -6170,7 +6222,29 @@ Renders images. Allows to define an alternative text and a title attribute for t
 Column: _exec
 ^^^^^^^^^^^^^
 
-Runs batch files or executables on the webserver. In case of an error, returncode and errormessage will be returned.
+Run any command on the web server.
+
+ * The command is run via web server, so with the uid of the web server.
+ * The current working directory is the current web instance (e.g. ``/var/www/html``) .
+ * All text send to 'stdout' will be returned.
+ * Text send to 'stderr' is not returned at all.
+ * If 'stderr' should be shown, redirect the output::
+
+        SELECT 'touch /root 2>&1' AS _exec
+
+ * If 'stdout' / 'stderr' should not be displayed, redirect the output::
+
+        SELECT 'touch /tmp >/dev/null' AS _exec
+        SELECT 'touch /root 2>&1 >/dev/null' AS _exec
+
+ * Multiple commands can be concatenated by `;`::
+
+        SELECT 'date; date' AS _exec
+
+ * If the return code is not 0, the string '[<rc>] ', will be prepended.
+ * If it is not wished to see the return code, just add ``true`` to fake rc of 0 (only the last rc will be reported)::
+
+        SELECT 'touch /root; true' AS _exec
 
 **Syntax**
 
@@ -7117,18 +7191,31 @@ Result::
     Louis Armstrong
     Diana Ross
 
+One column 'rend' as linebreak - no extra column '<br>' needed::
 
-One column 'rend'::
-
-    10.sql = SELECT p.firstName, " " , p.lastName FROM exp_person AS p
+    10.sql = SELECT p.firstName, " " , p.lastName, " ", p.country FROM exp_person AS p
     10.rend = <br>
 
 Result::
 
-    Billie Holiday
-    Elvis Presley
-    Louis Armstrong
-    Diana Ross
+    Billie Holiday USA
+    Elvis Presley USA
+    Louis Armstrong USA
+    Diana Ross USA
+
+Same with 'fsep' (column " " removed):
+
+    10.sql = SELECT p.firstName, p.lastName, p.country FROM exp_person AS p
+    10.rend = <br>
+    10.fsep = " "
+
+Result::
+
+    Billie Holiday USA
+    Elvis Presley USA
+    Louis Armstrong USA
+    Diana Ross USA
+
 
 
 More HTML::
@@ -7220,6 +7307,55 @@ Best practice *recommendation* for using parameter - see `access-column-values`_
       sql = SELECT a.street FROM exp_address AS a WHERE a.pId='{{pId:R}}'
       rend = <br>
     }
+  }
+
+Create HTML tables::
+
+  10 {
+    sql = SELECT p.firstName, p.lastName, p.country FROM Person AS p
+    head = <table class="table">
+    tail = </table>
+    rbeg = <tr>
+    rend = </tr>
+    fbeg = <td>
+    fend = </td>
+  }
+
+Maybe a few columns belongs together and should be in one column.
+
+Joining columns, variant A: firstName and lastName in one column::
+
+  10 {
+    sql = SELECT CONCAT(p.firstName, ' ', p.lastName), p.country FROM Person AS p
+    head = <table class="table">
+    tail = </table>
+    rbeg = <tr>
+    rend = </tr>
+    fbeg = <td>
+    fend = </td>
+  }
+
+Joining columns, variant B: firstName and lastName in one column::
+
+  10 {
+    sql = SELECT '<td>', p.firstName, ' ', p.lastName, '</td><td>', p.country, '</td>' FROM Person AS p
+    head = <table class="table">
+    tail = </table>
+    rbeg = <tr>
+    rend = </tr>
+  }
+
+Joining columns, variant C: firstName and lastName in one column::
+
+  10 {
+    sql = SELECT '<td>', p.firstName, ' ', p.lastName, '</td>', p.country FROM Person AS p
+    head = <table class="table">
+    tail = </table>
+    rbeg = <tr>
+    rend = </tr>
+    fbeg = <td>
+    fend = </td>
+    fskipwrap = 1,2,3,4,5
   }
 
 
