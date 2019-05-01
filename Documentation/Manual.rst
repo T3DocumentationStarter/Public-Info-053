@@ -439,7 +439,7 @@ Extension Manager: QFQ Configuration
 | securityGetMaxLength              | 50                                                    | GET vars longer than 'x' chars triggers an `attack-recognized`.            |
 |                                   |                                                       | `ExceptionMaxLength`_.                                                     |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
-| securityFailedAuthDelay           | 3                                                     | If authorization fails, sleep 'x' seconds before answering the request.    |
+| securityFailedAuthDelay           | 3                                                     | If REST authorization fails, sleep 'x' seconds before answering.           |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
 | Form-Config                                                                                                                                                            |
 +-----------------------------------+-------------------------------------------------------+----------------------------------------------------------------------------+
@@ -1571,7 +1571,7 @@ File upload
 
 By default the mime type of every uploaded file is checked against a white list of allowed mime types. The mime type of
 a file can be (easily) faked by an attacker. This check is good to handle regular user file upload for specific file types
-but won't help to prevent attacks against uploading and executing malicous code.
+but won't help to prevent attacks against uploading and executing malicious code.
 
 Instead prohibit the execution of user contributed files by the webserver config (`SecureDirectFileAccess`_).
 
@@ -1825,7 +1825,7 @@ Store: *VARS* - V
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
  | fileSize                | Size of the uploaded file.                                                                                                                 |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
- | mimeType                | Mimetype of the uploaded file.                                                                                                             |
+ | mimeType                | Mime type of the uploaded file.                                                                                                             |
  +-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -2358,7 +2358,7 @@ Format: [<url>] or [<mode>|<url>]
   * `{{SELECT ...}}`
   * `<mode>|<url>`
 
-* `<mode>` - Valid keywords are as above: `auto|close|no|url|url-skip-history`
+* `<mode>` - Valid keywords are as above: `auto|close|no|url|url-skip-history|url-sip|url-sip-skip-history`
 
 Specifying the mode in `forwardPage` overwrites `formMode` (but only if `formMode` is `url...`).
 
@@ -2529,7 +2529,7 @@ class
 * Check `typo3conf/ext/qfq/Resources/Public/Css/qfq-bs.css` for predefined classes.
 * Typical use: adjust the floating rules of the form.
 
-  * See: http://getbootstrap.com/css/#overview-container
+  * See: http://getbootstrap.com/docs/3.4/css/#overview-container
   * Expand the form over the whole area: `container-fluid`
 
 classPill
@@ -2853,8 +2853,7 @@ FE: Value
 By default this field is empty: QFQ will fill it with the corresponding existing column value on form load.
 For a customized default value define: ::
 
-  {{SELECT IF('{{column:RE}}'='','custom default',{{column:R}}) }}
-
+  {{SELECT IF('{{column:RE}}'='','custom default', '{{column:R}}') }}
 
 For non primary records, this is the place to load an existing value. E.g. we're on a 'Person' detail form and would like
 to edit, on the same form, a corresponding person email address (which is in a separate table): ::
@@ -3129,8 +3128,8 @@ Checkboxes can be rendered in mode:
   * *emptyItemAtStart*: Existence of this item inserts an empty entry at the beginning of the selectlist.
   * *emptyItemAtEnd*: Existence of this item inserts an empty entry at the end of the selectlist.
   * *buttonClass*: Instead of the plain HTML  checkbox fields, Bootstrap
-    `buttons <http://getbootstrap.com/javascript/#buttons-checkbox-radio>`_. are rendered as `checkbox` elements. Use
-    one of the following `classes <http://getbootstrap.com/css/#buttons-options>`_:
+    `buttons <http://getbootstrap.com/docs/3.4/javascript/#buttons-checkbox-radio>`_. are rendered as `checkbox` elements. Use
+    one of the following `classes <http://getbootstrap.com/docs/3.4/css/#buttons-options>`_:
 
     * `btn-default` (default, grey),
     * `btn-primary` (blue),
@@ -3440,8 +3439,8 @@ Type: radio
   * *emptyItemAtStart*: Existence of this item inserts an empty entry at the beginning of the selectlist.
   * *emptyItemAtEnd*: Existence of this item inserts an empty entry at the end of the selectlist.
   * *buttonClass* = <class> - Instead of the plain radio fields, Bootstrap
-    `buttons <http://getbootstrap.com/javascript/#buttons-checkbox-radio>`_. are rendered as `radio` elements. Use
-    one of the following `classes <http://getbootstrap.com/css/#buttons-options>`_:
+    `buttons <http://getbootstrap.com/docs/3.4/javascript/#buttons-checkbox-radio>`_. are rendered as `radio` elements. Use
+    one of the following `classes <http://getbootstrap.com/docs/3.4/css/#buttons-options>`_:
 
     * `btn-default` (default, grey),
     * `btn-primary` (blue),
@@ -3546,8 +3545,8 @@ will be rendered inside the form as a HTML table.
       * The column itself is not rendered.
       * By using Bootstrap, the following predefined classes are available:
 
-        * Text color: *text-muted|text-primary|text-success|text-info|text-warning|text-danger* (http://getbootstrap.com/css/#helper-classes)
-        * Row background: *active|success|info|warning|danger* (http://getbootstrap.com/css/#tables-contextual-classes)
+        * Text color: *text-muted|text-primary|text-success|text-info|text-warning|text-danger* (http://getbootstrap.com/docs/3.4/css/#helper-classes)
+        * Row background: *active|success|info|warning|danger* (http://getbootstrap.com/docs/3.4/css/#tables-contextual-classes)
 
     * *_rowTooltip*
 
@@ -3677,15 +3676,16 @@ See also `downloadButton`_ to offer a download of an uploaded file.
   * *accept* = `<mime type>,image/*,video/*,audio/*,.doc,.docx,.pdf`
 
     * List of mime types (also known as 'media types'): http://www.iana.org/assignments/media-types/media-types.xhtml
-    * If none is specified, 'application/pdf' is set. This forces that always (!) one type is specified.
+    * If none mime type is specified, 'application/pdf' is set. This forces that always (!) one type is specified.
+    * To allow any type, specify ``*`` or ``*/*`` or ``*.*``.
     * One or more media types might be specified, separated by ','.
     * Different browser respect the given definitions in different ways. Typically the 'file choose' dialog offer:
 
       * the specified mime type (some browers only show 'custom', if more than one mime type is given),
-      * the option 'All files' (the user is always free to **try** to upload other filetypes) - but the server won't accept them,
+      * the option 'All files' (the user is always free to **try** to upload other file types) - but the server won't accept them,
       * the 'file choose' dialog only offers files of the selected (in the dialog) type.
 
-    * If for a specific filetype is no mime type available, the definition of file extension(s) is possible. This is **less
+    * If for a specific file type is no mime type available, the definition of file extension(s) is possible. This is **less
       secure**, cause there is no *content* check on the server after the upload.
 
   * *maxFileSize* = `<size>` - max filesize in bytes (no unit), kilobytes (k/K) or megabytes (m/M) for an uploaded file.
@@ -5623,7 +5623,7 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Show          |S                                  |S                          |Show 'show' icon as image                                                                                                               |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|   |x  |Glyph         |G:<glyphname>                      |G:glyphicon-envelope       |Show <glyphname>. Check: http://getbootstrap.com/components/                                                                            |
+|   |x  |Glyph         |G:<glyphname>                      |G:glyphicon-envelope       |Show <glyphname>. Check: https://getbootstrap.com/docs/3.4/components/                                                                  |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |x  |Bullet        |B:[<color>]                        |B:green                    |Show bullet with '<color>'. Colors: blue, gray, green, pink, red, yellow. Default Color: green.                                         |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
@@ -7426,7 +7426,7 @@ Simulate/switch user: feUser
 
 Just set the STORE_USER variable 'feUser'.
 
-All places with `{{feUser:Y}}` has to be replaced by `{{feUser:UY}}`::
+All places with `{{feUser:T}}` has to be replaced by `{{feUser:UT}}`::
 
     # Normalize
     10.sql = SELECT '{{feUser:UT}}' AS '_=feUser'
