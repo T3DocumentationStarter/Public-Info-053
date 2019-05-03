@@ -36,6 +36,33 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 19.5.0
+--------------
+
+Date: 03.05.2019
+
+Notes
+^^^^^
+
+* QFQ is now T3 V9.5 compatible.
+* Minimal required version increased to T3 V7.
+* QFQ description in ext_emconf.php updated > will be displayed on TER.
+
+Features
+^^^^^^^^
+
+* #5103. Upload any file type: * or *.*
+* Manual.rst: update all links to bootstrap to fixed version 3.4: https://getbootstrap.com/docs/3.4/...
+
+Bug Fixes
+^^^^^^^^^
+
+* Manual.rst: Update BS glyphicon URL
+* Manual.rst: replace '{{feUser:Y}}' by '{{feUser:T}}'
+* #8109 Change email pattern and disable sanitize for FORM_UPDATE
+* #8149 Excel Export cutoff at Column AA
+* #8113 Fehler in Dokumentation für Default value
+
 
 Version 19.3.2
 --------------
