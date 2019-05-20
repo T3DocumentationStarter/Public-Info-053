@@ -51,7 +51,7 @@ Notes
 Features
 ^^^^^^^^
 
-* #5103. Upload any file type: * or *.*
+* #5103 / Upload any file type: ``accept=*`` or ``accept=*/*`` or ``accept=*.*``.
 * Manual.rst: update all links to bootstrap to fixed version 3.4: https://getbootstrap.com/docs/3.4/...
 
 Bug Fixes
@@ -59,9 +59,9 @@ Bug Fixes
 
 * Manual.rst: Update BS glyphicon URL
 * Manual.rst: replace '{{feUser:Y}}' by '{{feUser:T}}'
-* #8109 Change email pattern and disable sanitize for FORM_UPDATE
-* #8149 Excel Export cutoff at Column AA
-* #8113 Fehler in Dokumentation für Default value
+* #8109 / Change email pattern and disable sanitize for FORM_UPDATE
+* #8149 / Excel Export cutoff at Column AA
+* #8113 / Fehler in Dokumentation für Default value
 
 
 Version 19.3.2

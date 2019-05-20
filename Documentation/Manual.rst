@@ -237,14 +237,14 @@ FormEditor
 Setup a *report* to manage all *forms*:
 
 * Create a Typo3 page.
-* Set the 'URL Alias' to `form` (default) or the individual defined value in parameter `editFormPage` (configuration_).
+* Set the 'URL Alias' to `form` (recommended) or the individual defined value in parameter `editFormPage` (configuration_).
 * Insert a content record of type *qfq*.
 * In the bodytext insert the following code::
 
     # If there is a form given by SIP: show
     form={{form:SE}}
 
-    # In case indexQfq is different from indexData, set indexQfq.
+    # In case indexQfq != indexData, set dbIndex=indexQfq.
     dbIndex = {{indexQfq:Y}}
 
     10 {
@@ -5603,6 +5603,8 @@ Column: _link
 |x  |   |Copy to       |y:[some content]                   |y:this will be copied      |Click on it copies the value of 'y:' to the clipboard. Optional a file ('F:...') might be specified as source.                          |
 |   |   |clipboard     |                                   |                           |See `copyToClipboard`_.                                                                                                                 |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
+|   |   |Dropdown menu |z                                  |z||p:home|t:Home           |Creates a dropdown menu. SEe `dropdownMenu`_.                                                                                           |
++---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Text          |t:<text>                           |t:Firstname Lastname       |                                                                                                                                        |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Render        |r:<mode>                           |r:3                        |See: `render-mode`_, Default: 0                                                                                                         |
@@ -6714,12 +6716,16 @@ Replace the static content elements from 2. and 3. by QFQ Content elements as ne
 Export area
 ^^^^^^^^^^^
 
-To offer protected pages, e.g. referenced in download links, the regular FE_GROUPs can't be used, cause the download does
-not have the current user privileges (it's a separate process, started as the webserver user).
+This description might be interesting if a page can't be protected by SIP.
+
+To offer protected pages, e.g. directly referenced files (remember: this is not recommended) in download links, the
+regular FE_GROUPs can't be used, cause the download does not have the current user privileges (it's a separate process,
+started as the webserver user).
 
 Create a separated export tree in Typo3 Backend, which is IP access restricted. Only localhost or the FE_GROUP 'admin'
 is allowed to access: ::
 
+   tmp.restrictedIPRange = 127.0.0.1,::1
    [IP = {$tmp.restrictedIPRange} ][usergroup = admin]
       page.10 < styles.content.get
    [else]
@@ -6732,10 +6738,10 @@ is allowed to access: ::
 Excel export
 ^^^^^^^^^^^^
 
-Hint: For up/downloading of excel files (no modification), check the generic Form
-`input-upload`_ element and the report 'download' (`column_pdf`_) function.
-
 This chapter explains how to create Excel files on the fly.
+
+Hint: For up/downloading of excel files (without modification), check the generic Form
+`input-upload`_ element and the report 'download' (`column_pdf`_) function.
 
 The Excel file is build in the moment when the user request it by clicking on a
 download link.
@@ -6845,6 +6851,65 @@ Excel export samples::
     # With parameter (via SIP) - get the Parameter on page 'exceldata' with '{{arg1:S}}' and '{{arg2:S}}'
     SELECT CONCAT('d:final.xlsx|t:Excel (parameter)|uid:32&arg1=hello&arg2=world') AS _excel
 
+.. _dropdownMenu:
+
+Dropdown Menu
+-------------
+
+Creates a menu with custom links. The same notation and options are used as with regular QFQ links.
+
+Format String::
+
+  <dropdown menu symbol options>||<menu entry 1>||<menu entry 2>||...
+
+Each menu entry is separated by two bars! A menu entry itself might contain multiple single bars.
+
+Example 1::
+
+  SELECT 'z||p:home|t:Home|o:Jump to home||p:person&form=person&r=123|t:Edit: John Doe|s' AS _link
+
+This defines a menu (three vertical buttons) - a click on it shows two menu entries: 'Home' and 'Edit: John Doe'
+
+Format the dropdown menu symbol:
+
+  * *Glyph*: Via `G:<glyphicon name>` any glyphicon can be defined. To hide the default glyph, specify: `G:0`.
+  * *Text*: Via `t:Menu` an additional text will be displayed for the menu symbol.
+  * *Tooltip*: Via `o:Detail menu` a tooltip is defined.
+  * *Render mode*: Via `r:3` the menu is disabled. No menu entries / links / sip are rendered.
+  * *Button*: Via `b` the dropdown meny symbol will be rendered with a button. Also `b:<style>` might set the BS color.
+
+Format a menu entry:
+
+ * *qfq link*: All options as with a regular QFQ link.
+ * *header*: If a text starts with '===', it becomes a header in the dropdown menu. Multiple headers are possible. Headers can't be a link. An additional `r:1` is necessary.
+ * *separator*: If a text is exactly '---', it becomes a separator line between two menu entries. An additional `r:1` is necessary.
+ * *disabled menu entry*: If a text starts with '---' (like separator), the following text becomes a disable menu entry. An additional `r:1` is necessary.
+
+Example 2::
+
+    SELECT CONCAT('z|t:Menu|G:0|o:Please select an option',
+                  '||p:home|t:Home|o:Jump to home|G:glyphicon-home|b:0',
+                  '||r:1|t:---',
+                  '||p:person&form=person&r=123|t:Edit: John Doe|s|q:Really edit?|G:glyphicon-user|b:0',
+                  '||t:===Header|r:1',
+                  '||d|p:form&form=person&r=',p.id,'|s|t:Download Person|b:0',
+                  '||r:1|t:---Disabled entry') AS _link
+
+Line 1: The dropdown menu symbol definition, with a text 'Menu' `t:Menu`, but without the three vertical bullets `G:0`
+  and a tooltip for the menu `o:Please select an option`.
+
+Line 2: First menu entry. Directs to T3 page 'home' `p:home`. `t:Home` sets the menu entry text. `G:glyphicon-home` set's
+  glyphicon symbol in the menu entry. `b:0` switches off the button, which has been implicit activated by the use of `G:...`.
+
+Line 3: A separator line.
+
+Line 4: A SIP encoded edit record link, with a question dialog.
+
+Line 5: A header line.
+
+Line 6: A PDF download.
+
+Line 7: A disabled menu entry.
 
 .. _drag_and_drop:
 
@@ -7500,7 +7565,7 @@ Endpoint
 
 .. tip::
 
-    The basic REST API endpoint: ``<domain>/typo3conf/ext/qfq/Source/api/rest.ph``
+    The basic REST API endpoint: ``<domain>/typo3conf/ext/qfq/Source/api/rest.php``
 
     ``<domain>/typo3conf/ext/qfq/Source/api/rest.php/<level1>/<id1>/<level2>/<id2>/.../?<var1>=<value1>&...``
 
