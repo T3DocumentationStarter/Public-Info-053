@@ -36,6 +36,38 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
+Version 19.5.1
+--------------
+
+Date: 22.5.19
+
+Notes
+^^^^^
+
+* New dropdown menu, fully dynamic via '... AS _link' incl. SIP generation.
+* New SQL stored procedure for use directly in SQL queries:
+
+  * QMORE(text, length) - limits a text to 'length' characters, click on 'more' shows complete text.
+  * QBAR(text) - escapes the character '|'. That one is heavily used in format strings for '... AS _link'.
+
+Features
+^^^^^^^^
+
+* #8391 / Show 'Website: ...' in sendmail redirect all.
+* #8270 / More button for columns with long text.
+* #8270 / SQL Stored procedure QBAR(): escape '|'.
+* #8348 / Dropdown menu via '... AS _link'
+
+Bug Fixes
+^^^^^^^^^
+
+* #8116 / Error-Dialog - Button for FE element is broken. First problem: replacing '\n' with '<br>' failed for FE link. Second problem: FormEditor fixed in case missing {{formId:S}}.
+* #8315 / FE Datetime: 'd.m.yy hh:mm' thows an error
+* #8278: Too long GET var crashes QFQ - Bug 1 - check GET Vars but try to report problem from POST var. Bug 2: writing log message crashed due to not initialized QFQ-config.
+* Html2Pdf.php: Change logfile from sql.log to qfq.log
+* formEditor.sql: Add specific pattern message for Form.name allowed characters
+* Config.php: more precise error message
+
 Version 19.5.0
 --------------
 

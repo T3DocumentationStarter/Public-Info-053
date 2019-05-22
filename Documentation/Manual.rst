@@ -5573,9 +5573,9 @@ Special column names
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | _XLSn                  |Used for Excel export. Prepend 'n=' and append a `newline` character around the string. See `excel-export`_.                                                                                 |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _+html-tag attributes  |The content will be wrapped with '<html-tag attributes>'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                    |
+| _+<html-tag attributes>|The content will be wrapped with '<html-tag attributes>'. Example: SELECT 'example' AS '_+a href="http://example.com"' creates '<a href="http://example.com">example</a>'                    |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| _=varname              |The content will be saved in store 'user' under 'varname'. Retrieve it later via {{varname:U}}. See `STORE_USER`_, `store_user_examples`_                                                    |
+| _=<varname>            |The content will be saved in store 'user' under 'varname'. Retrieve it later via {{varname:U}}. Example: 'SELECT "Hello world" AS _=text'. See `STORE_USER`_, `store_user_examples`_         |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |_<nonReservedName>      |Suppress output. Column names with leading underscore are used to select data from the database and make it available in other parts of the report without generating any output.            |
 +------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -5588,6 +5588,7 @@ Column: _link
 * Most URLs will be rendered via class link.
 * Column names like `_pagee`, `_mailto`, ... are wrapper to class link.
 * The parameters for link contains a prefix to make them position-independent.
+* Parameter have to be separated with '|'. If '|' is part of the value, it needs to be escaped '\\|'. This can be done via QFQ SQL function `QBAR()` - see `qbar-qscape-qfq-delimiter`_.
 
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |URL|IMG|Meaning       |Qualifier                          |Example                    |Description                                                                                                                             |
@@ -5661,6 +5662,8 @@ Column: _link
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 |   |   |Delete record | x[:a|r|c]                         |x, x:r, x:c                |a: ajax (only QFQ internal used), r: report (default), c: close (current page, open last page)                                          |
 +---+---+--------------+-----------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
+
+
 
 .. _render-mode:
 
@@ -6471,6 +6474,43 @@ Example::
                     CONCAT('F:', p.pathFileName,'|t:File (yank)|o:', p.pathFileName) AS _yank,
                     CONCAT('y|F:', p.pathFileName,'|t:File (link)|o:', p.pathFileName) AS _link
                 FROM Person AS p  
+
+
+.. _special-sql-functions:
+
+Special SQL Functions
+---------------------
+
+.. _qbar-qscape-qfq-delimiter:
+
+QBAR: Escape QFQ Delimiter
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The SQL function QBAR(text) replaces "|" with "\\|" in `text` to prevent conflicts with the QFQ special column notation.
+In general this function should be used when there is a chance that unplanned '|'-characters occur.
+
+Example::
+
+    10.sql = SELECT CONCAT('p:notes|t:Information: ', QBAR(Note.title), '|b') AS _link FROM Note  
+
+In case 'Note.title' contains a '|' (like 'fruit | numbers'), it will confuse the '... AS _link' class. Therefore it's
+necessary to 'escape' (adding a '\' in front of the problematic character) the bar which is done by using `QBAR()`.
+
+.. _qmore-truncate-long-text:
+
+QMORE: Truncate Long Text - more/less
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The SQL function QMORE(text, n) truncates `text` if it is longer than `n` characters and adds a "more.." button. If the "more..."
+button is clicked, the whole text is displayed. The stored procedure QMORE() will inject some HTML/CSS code.
+
+Example::
+
+    10.sql = SELECT QMORE("This is a text which is longer than 10 characters", 10)
+
+Output:
+
+This is a `more..`
 
 .. _download:
 
@@ -7512,9 +7552,9 @@ last used (STORE_USER) or (first time call during browser session) takes the def
     # Semester switch
     10 {
       sql = SELECT '{{semId:SUY}}' AS '_=semId',
-                   CONCAT('p:{{pageAlias:T}}&semId=', sp.id, '|t:', sp.name, '|s|b|G:glyphicon-chevron-left') AS _link,
+                   CONCAT('p:{{pageAlias:T}}&semId=', sp.id, '|t:', QBAR(sp.name), '|s|b|G:glyphicon-chevron-left') AS _link,
                            ' <button class="btn disabled ',   IF({{semId:Y0}}=sc.id, 'btn-success', 'btn-default'), '">',sc.name, '</button> ',
-                           CONCAT('p:{{pageAlias:T}}&semId=', sn.id, '|t:', sn.name, '|s|b|G:glyphicon-chevron-right|R') AS _link
+                           CONCAT('p:{{pageAlias:T}}&semId=', sn.id, '|t:', QBAR(sn.name), '|s|b|G:glyphicon-chevron-right|R') AS _link
                        FROM semester AS sc
                        LEFT JOIN semester AS sp ON sp.id=sc.id-1
                        LEFT JOIN semester AS sn ON sc.id+1=sn.id AND sn.show_semester_from<=CURDATE()
